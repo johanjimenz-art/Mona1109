@@ -179,6 +179,7 @@ export default function Inventory() {
       });
       toast.success('Producto eliminado');
       fetchProducts();
+      fetchGroupedProducts();
     } catch (error) {
       toast.error('Error al eliminar producto');
     }
@@ -192,6 +193,7 @@ export default function Inventory() {
       });
       toast.success('Producto aprobado');
       fetchProducts();
+      fetchGroupedProducts();
     } catch (error) {
       toast.error('Error al aprobar producto');
     }
