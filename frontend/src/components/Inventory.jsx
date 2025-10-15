@@ -37,6 +37,7 @@ export default function Inventory() {
 
   useEffect(() => {
     fetchProducts();
+    fetchGroupedProducts();
   }, []);
 
   const fetchProducts = async () => {
@@ -48,6 +49,18 @@ export default function Inventory() {
       setProducts(response.data);
     } catch (error) {
       toast.error('Error al cargar productos');
+    }
+  };
+
+  const fetchGroupedProducts = async () => {
+    try {
+      const token = localStorage.getItem('token');
+      const response = await axios.get(`${API}/products/grouped`, {
+        headers: { Authorization: `Bearer ${token}` }
+      });
+      setGroupedProducts(response.data);
+    } catch (error) {
+      toast.error('Error al cargar productos agrupados');
     }
   };
 
