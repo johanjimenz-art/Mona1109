@@ -222,7 +222,15 @@ export default function Dispatch() {
                         </div>
                       </div>
 
-                      <h3 className="font-bold mb-4 text-lg">Productos en el Pedido</h3>
+                      {/* Mostrar observaciones existentes */}
+                      {sale.observaciones && (
+                        <div className="mt-4 p-4 border-2 border-green-600 bg-green-50">
+                          <h4 className="font-bold text-sm text-green-900 mb-2">📝 Observaciones Guardadas:</h4>
+                          <p className="text-gray-800">{sale.observaciones}</p>
+                        </div>
+                      )}
+
+                      <h3 className="font-bold mb-4 text-lg mt-6">Productos en el Pedido</h3>
                       <div className="space-y-3">
                         {sale.items.map((item, itemIndex) => (
                           <div key={itemIndex} className="bg-white border-2 border-black p-4">
