@@ -1,140 +1,255 @@
-# Cloth ON-OF - Sistema de Gestión de Inventario
+# Cloth ON-OF - Guía de Instalación Simplificada para Mac
 
-## Instalación en Mac
+## 📋 ¿Qué necesitas antes de empezar?
 
-### Requisitos Previos
+Esta aplicación necesita 3 programas instalados en tu Mac:
+1. **Homebrew** - Para instalar otros programas fácilmente
+2. **Python** - Para el servidor de la aplicación
+3. **Node.js** - Para la interfaz visual
+4. **MongoDB** - Para guardar los datos
 
-1. **Python 3.9 o superior**
-   ```bash
-   # Verificar versión de Python
-   python3 --version
-   ```
+---
 
-2. **Node.js 16 o superior y Yarn**
-   ```bash
-   # Verificar versión de Node.js
-   node --version
-   
-   # Instalar Yarn si no lo tienes
-   npm install -g yarn
-   ```
+## 🚀 PASO 1: Instalar Homebrew (si no lo tienes)
 
-3. **MongoDB**
-   ```bash
-   # Instalar MongoDB usando Homebrew
-   brew tap mongodb/brew
-   brew install mongodb-community
-   
-   # Iniciar MongoDB
-   brew services start mongodb-community
-   ```
+1. Abre la aplicación **Terminal** en tu Mac:
+   - Ve a: **Aplicaciones → Utilidades → Terminal**
+   - O busca "Terminal" en Spotlight (Cmd + Espacio)
 
-### Pasos de Instalación
+2. Copia y pega este comando en la Terminal y presiona Enter:
+```bash
+/bin/bash -c "$(curl -fsSL https://raw.githubusercontent.com/Homebrew/install/HEAD/install.sh)"
+```
 
-#### 1. Descargar el Proyecto
+3. Sigue las instrucciones que aparecen en pantalla (puede pedirte tu contraseña de Mac)
 
-Descarga o clona el proyecto en tu Mac.
+4. Espera a que termine la instalación (puede tomar varios minutos)
 
-#### 2. Configurar el Backend
+---
+
+## 🐍 PASO 2: Instalar Python
+
+1. En la Terminal, escribe:
+```bash
+brew install python@3.11
+```
+
+2. Presiona Enter y espera a que termine
+
+3. Verifica que se instaló correctamente escribiendo:
+```bash
+python3 --version
+```
+
+Deberías ver algo como: `Python 3.11.x`
+
+---
+
+## 📦 PASO 3: Instalar Node.js y Yarn
+
+1. En la Terminal, escribe:
+```bash
+brew install node
+```
+
+2. Presiona Enter y espera
+
+3. Luego instala Yarn escribiendo:
+```bash
+npm install -g yarn
+```
+
+4. Verifica escribiendo:
+```bash
+node --version
+yarn --version
+```
+
+---
+
+## 💾 PASO 4: Instalar MongoDB (Base de datos)
+
+1. En la Terminal, escribe estos comandos UNO POR UNO:
 
 ```bash
-# Ir al directorio backend
-cd backend
+brew tap mongodb/brew
+```
+Presiona Enter, espera a que termine.
 
-# Crear entorno virtual de Python
+```bash
+brew install mongodb-community
+```
+Presiona Enter, espera a que termine.
+
+```bash
+brew services start mongodb-community
+```
+Presiona Enter. ¡MongoDB ya está corriendo!
+
+---
+
+## 📁 PASO 5: Preparar la Aplicación
+
+1. **Descarga** la carpeta de la aplicación en tu Mac (donde quieras, por ejemplo en Documentos)
+
+2. En Terminal, ve a esa carpeta. Por ejemplo, si la pusiste en Documentos:
+```bash
+cd ~/Documents/cloth-onof
+```
+(Reemplaza "cloth-onof" con el nombre de tu carpeta)
+
+---
+
+## ⚙️ PASO 6: Configurar el Backend (Servidor)
+
+1. Ve a la carpeta backend:
+```bash
+cd backend
+```
+
+2. Crea un entorno para Python:
+```bash
 python3 -m venv venv
+```
 
-# Activar entorno virtual
+3. Actívalo:
+```bash
 source venv/bin/activate
+```
+Verás `(venv)` al inicio de tu línea en Terminal
 
-# Instalar dependencias
+4. Instala las dependencias:
+```bash
 pip install -r requirements.txt
+```
+Espera a que termine (puede tomar varios minutos)
 
-# Verificar archivo .env
-# Asegúrate que backend/.env contenga:
-# MONGO_URL="mongodb://localhost:27017"
-# DB_NAME="cloth_onof_db"
-# CORS_ORIGINS="http://localhost:3000"
-# JWT_SECRET_KEY="tu-clave-secreta-segura"
+5. Edita el archivo de configuración:
+```bash
+nano .env
 ```
 
-#### 3. Configurar el Frontend
+6. Asegúrate que tenga esto (usa las flechas para moverte, edita lo necesario):
+```
+MONGO_URL="mongodb://localhost:27017"
+DB_NAME="cloth_onof_db"
+CORS_ORIGINS="http://localhost:3000"
+JWT_SECRET_KEY="miClaveSecreta123"
+```
 
+7. Guarda y sal: presiona `Ctrl + X`, luego `Y`, luego `Enter`
+
+---
+
+## 🎨 PASO 7: Configurar el Frontend (Interfaz)
+
+1. Sal de la carpeta backend y ve a frontend:
 ```bash
-# Ir al directorio frontend
 cd ../frontend
-
-# Instalar dependencias
-yarn install
-
-# Actualizar archivo .env
-# Asegúrate que frontend/.env contenga:
-# REACT_APP_BACKEND_URL=http://localhost:8001
 ```
 
-### Ejecutar la Aplicación
-
-#### Opción 1: Ejecutar Backend y Frontend por separado
-
-**Terminal 1 - Backend:**
+2. Instala las dependencias:
 ```bash
-cd backend
+yarn install
+```
+Espera a que termine (puede tomar varios minutos)
+
+3. Edita el archivo de configuración:
+```bash
+nano .env
+```
+
+4. Asegúrate que tenga:
+```
+REACT_APP_BACKEND_URL=http://localhost:8001
+```
+
+5. Guarda y sal: `Ctrl + X`, luego `Y`, luego `Enter`
+
+---
+
+## ▶️ PASO 8: Iniciar la Aplicación
+
+**Necesitarás abrir 2 ventanas de Terminal:**
+
+### Terminal 1 - Iniciar el Backend:
+
+1. Ve a la carpeta backend:
+```bash
+cd ~/Documents/cloth-onof/backend
+```
+(Ajusta la ruta según donde pusiste la aplicación)
+
+2. Activa el entorno:
+```bash
 source venv/bin/activate
+```
+
+3. Inicia el servidor:
+```bash
 uvicorn server:app --host 0.0.0.0 --port 8001 --reload
 ```
 
-**Terminal 2 - Frontend:**
+Verás mensajes que indican que el servidor está corriendo. **NO CIERRES ESTA VENTANA**
+
+### Terminal 2 - Iniciar el Frontend:
+
+1. Abre una NUEVA ventana de Terminal (Cmd + N)
+
+2. Ve a la carpeta frontend:
 ```bash
-cd frontend
+cd ~/Documents/cloth-onof/frontend
+```
+
+3. Inicia la interfaz:
+```bash
 yarn start
 ```
 
-La aplicación estará disponible en: **http://localhost:3000**
+En unos segundos se abrirá automáticamente tu navegador con la aplicación en:
+**http://localhost:3000**
 
-#### Opción 2: Script de Inicio Automático
+**NO CIERRES ESTA VENTANA**
 
-Crea un archivo `start.sh` en la raíz del proyecto:
+---
 
+## 🎉 ¡Listo! Ya puedes usar la aplicación
+
+- Se abrirá en tu navegador automáticamente
+- Crea tu primera cuenta con usuario y contraseña
+- Empieza a gestionar tu inventario
+
+---
+
+## 🛑 Para CERRAR la aplicación
+
+1. En cada ventana de Terminal presiona: `Ctrl + C`
+2. Cierra las ventanas de Terminal
+
+---
+
+## 🔄 Para usar la aplicación OTRO DÍA
+
+Solo necesitas repetir el PASO 8:
+- Abrir 2 Terminales
+- Iniciar Backend en una
+- Iniciar Frontend en otra
+- ¡Listo!
+
+---
+
+## ❓ ¿Problemas?
+
+### "No se puede conectar a la base de datos"
 ```bash
-#!/bin/bash
-
-# Iniciar MongoDB si no está corriendo
-brew services start mongodb-community
-
-# Iniciar Backend
-cd backend
-source venv/bin/activate
-uvicorn server:app --host 0.0.0.0 --port 8001 --reload &
-BACKEND_PID=$!
-
-# Iniciar Frontend
-cd ../frontend
-yarn start &
-FRONTEND_PID=$!
-
-echo "Backend PID: $BACKEND_PID"
-echo "Frontend PID: $FRONTEND_PID"
-echo "Aplicación iniciada en http://localhost:3000"
-
-# Esperar a que el usuario presione Ctrl+C
-trap "kill $BACKEND_PID $FRONTEND_PID; exit" INT
-wait
+brew services restart mongodb-community
 ```
 
-Hacer el script ejecutable:
-```bash
-chmod +x start.sh
-./start.sh
-```
+### "Puerto ya en uso"
+Cierra todas las ventanas de Terminal y vuelve a intentar
 
-### Detener la Aplicación
-
-Presiona `Ctrl+C` en cada terminal donde se ejecutan los servicios.
-
-Para detener MongoDB:
-```bash
-brew services stop mongodb-community
-```
+### "Comando no encontrado"
+Verifica que instalaste todo en los PASOS 1-4
 
 ## Uso de la Aplicación
 
