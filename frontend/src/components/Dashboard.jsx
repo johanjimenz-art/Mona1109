@@ -22,6 +22,9 @@ export default function Dashboard() {
   const username = localStorage.getItem('username');
   const role = localStorage.getItem('role');
   const isAdmin = role === 'admin';
+  
+  // Get permissions
+  const permissions = JSON.parse(localStorage.getItem('permissions') || '{}');
 
   useEffect(() => {
     fetchStats();
