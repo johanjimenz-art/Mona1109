@@ -414,17 +414,17 @@ export default function Inventory() {
                     </td>
                     <td className="px-6 py-4">
                       <div className="flex gap-2">
-                        <Button
-                          data-testid={`edit-product-btn-${index}`}
-                          onClick={() => handleEdit(product)}
-                          variant="outline"
-                          size="sm"
-                          className="border-2 border-black rounded-none hover:bg-black hover:text-white"
-                        >
-                          <Pencil className="w-4 h-4" />
-                        </Button>
-                        {isAdmin && (
+                        {canModify && (
                           <>
+                            <Button
+                              data-testid={`edit-product-btn-${index}`}
+                              onClick={() => handleEdit(product)}
+                              variant="outline"
+                              size="sm"
+                              className="border-2 border-black rounded-none hover:bg-black hover:text-white"
+                            >
+                              <Pencil className="w-4 h-4" />
+                            </Button>
                             {!product.aprobado && (
                               <Button
                                 data-testid={`approve-product-btn-${index}`}
@@ -446,6 +446,9 @@ export default function Inventory() {
                               <Trash2 className="w-4 h-4" />
                             </Button>
                           </>
+                        )}
+                        {!canModify && (
+                          <span className="text-sm text-gray-500">Solo lectura</span>
                         )}
                       </div>
                     </td>
