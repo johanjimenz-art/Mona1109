@@ -313,6 +313,25 @@ async def get_users(current_user: dict = Depends(get_admin_user)):
             user['created_at'] = datetime.fromisoformat(user['created_at'])
     return users
 
+@api_router.put("/users/{user_id}/permissions")
+async def update_user_permissions(
+    user_id: str,
+    permissions_data: UserUpdate,
+    current_user: dict = Depends(get_admin_user)
+):
+    if not permissions_data.permissions:
+        raise HTTPException(status_code=400, detail="No permissions provided")
+    
+    result = await db.users.update_one(
+        {"id": user_id},
+        {"$set": {"permissions": permissions_data.permissions.model_dump()}}
+    )
+    
+    if result.matched_count == 0:
+        raise HTTPException(status_code=404, detail="User not found")
+    
+    return {"message": "Permissions updated successfully"}
+
 # ============ Product Routes ============
 
 @api_router.post("/products", response_model=Product)
