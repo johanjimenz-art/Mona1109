@@ -195,6 +195,22 @@ async def get_admin_user(current_user: dict = Depends(get_current_user)):
         raise HTTPException(status_code=403, detail="Admin access required")
     return current_user
 
+async def check_permission(permission_name: str):
+    async def permission_checker(current_user: dict = Depends(get_current_user)):
+        # Admin always has all permissions
+        if current_user["role"] == "admin":
+            return current_user
+        
+        # Check specific permission
+        permissions = current_user["permissions"]
+        if not getattr(permissions, permission_name, False):
+            raise HTTPException(
+                status_code=403, 
+                detail=f"You don't have permission to access {permission_name}"
+            )
+        return current_user
+    return permission_checker
+
 # ============ Auth Routes ============
 
 @api_router.post("/auth/register", response_model=Token)
