@@ -204,19 +204,34 @@ async def register(user_data: UserCreate, current_user: dict = Depends(get_admin
     if existing_user:
         raise HTTPException(status_code=400, detail="Username already registered")
     
+    # Set permissions
+    permissions = user_data.permissions or UserPermissions()
+    
     user = User(
         username=user_data.username,
         password_hash=hash_password(user_data.password),
         role=user_data.role,
+        permissions=permissions,
         created_by=current_user["username"]
     )
     
     doc = user.model_dump()
     doc['created_at'] = doc['created_at'].isoformat()
+    doc['permissions'] = doc['permissions'].model_dump()
     await db.users.insert_one(doc)
     
-    access_token = create_access_token(data={"sub": user.username, "role": user.role})
-    return Token(access_token=access_token, token_type="bearer", username=user.username, role=user.role)
+    access_token = create_access_token(data={
+        "sub": user.username, 
+        "role": user.role,
+        "permissions": permissions.model_dump()
+    })
+    return Token(
+        access_token=access_token, 
+        token_type="bearer", 
+        username=user.username, 
+        role=user.role,
+        permissions=permissions
+    )
 
 @api_router.post("/auth/setup-admin", response_model=Token)
 async def setup_admin(user_data: UserCreate):
