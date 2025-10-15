@@ -359,9 +359,3 @@ export default function UserManagement() {
     </div>
   );
 }
-          </div>
-        </div>
-      </div>
-    </div>
-  );
-}
