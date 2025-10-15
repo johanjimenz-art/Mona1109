@@ -613,12 +613,17 @@ async def update_sale_status(
     if status_data.estado_despacho not in ["pendiente", "en_camino", "despachado"]:
         raise HTTPException(status_code=400, detail="Invalid status")
     
+    update_dict = {
+        "estado_despacho": status_data.estado_despacho,
+        "updated_at": datetime.now(timezone.utc).isoformat()
+    }
+    
+    if status_data.observaciones is not None:
+        update_dict["observaciones"] = status_data.observaciones
+    
     result = await db.sales.update_one(
         {"id": sale_id},
-        {"$set": {
-            "estado_despacho": status_data.estado_despacho,
-            "updated_at": datetime.now(timezone.utc).isoformat()
-        }}
+        {"$set": update_dict}
     )
     
     if result.matched_count == 0:
