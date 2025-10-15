@@ -168,6 +168,11 @@ def create_access_token(data: dict):
     to_encode = data.copy()
     expire = datetime.now(timezone.utc) + timedelta(minutes=ACCESS_TOKEN_EXPIRE_MINUTES)
     to_encode.update({"exp": expire})
+    
+    # Ensure permissions are serialized properly
+    if "permissions" in to_encode and isinstance(to_encode["permissions"], UserPermissions):
+        to_encode["permissions"] = to_encode["permissions"].model_dump()
+    
     encoded_jwt = jwt.encode(to_encode, SECRET_KEY, algorithm=ALGORITHM)
     return encoded_jwt
 
