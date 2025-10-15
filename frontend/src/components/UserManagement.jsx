@@ -5,7 +5,7 @@ import { Button } from './ui/button';
 import { Input } from './ui/input';
 import { Label } from './ui/label';
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from './ui/dialog';
-import { ArrowLeft, Plus, UserPlus } from 'lucide-react';
+import { ArrowLeft, Plus, UserPlus, Edit } from 'lucide-react';
 import { toast } from 'sonner';
 
 const BACKEND_URL = process.env.REACT_APP_BACKEND_URL;
@@ -15,10 +15,22 @@ export default function UserManagement() {
   const navigate = useNavigate();
   const [users, setUsers] = useState([]);
   const [isDialogOpen, setIsDialogOpen] = useState(false);
+  const [isEditingPermissions, setIsEditingPermissions] = useState(false);
+  const [selectedUser, setSelectedUser] = useState(null);
   const [formData, setFormData] = useState({
     username: '',
     password: '',
-    role: 'user'
+    role: 'user',
+    permissions: {
+      inventario: false,
+      venta: false,
+      despacho: false
+    }
+  });
+  const [permissionsToEdit, setPermissionsToEdit] = useState({
+    inventario: false,
+    venta: false,
+    despacho: false
   });
 
   useEffect(() => {
@@ -47,15 +59,67 @@ export default function UserManagement() {
       });
       toast.success('Usuario creado exitosamente');
       setIsDialogOpen(false);
-      setFormData({ username: '', password: '', role: 'user' });
+      setFormData({ 
+        username: '', 
+        password: '', 
+        role: 'user',
+        permissions: {
+          inventario: false,
+          venta: false,
+          despacho: false
+        }
+      });
       fetchUsers();
     } catch (error) {
       toast.error(error.response?.data?.detail || 'Error al crear usuario');
     }
   };
 
+  const handleEditPermissions = (user) => {
+    setSelectedUser(user);
+    setPermissionsToEdit(user.permissions || {
+      inventario: false,
+      venta: false,
+      despacho: false
+    });
+    setIsEditingPermissions(true);
+  };
+
+  const handleUpdatePermissions = async () => {
+    try {
+      const token = localStorage.getItem('token');
+      await axios.put(
+        `${API}/users/${selectedUser.id}/permissions`,
+        { permissions: permissionsToEdit },
+        { headers: { Authorization: `Bearer ${token}` } }
+      );
+      toast.success('Permisos actualizados');
+      setIsEditingPermissions(false);
+      fetchUsers();
+    } catch (error) {
+      toast.error('Error al actualizar permisos');
+    }
+  };
+
   const handleChange = (e) => {
     setFormData({ ...formData, [e.target.name]: e.target.value });
+  };
+
+  const handlePermissionChange = (permission) => {
+    setFormData({
+      ...formData,
+      permissions: {
+        ...formData.permissions,
+        [permission]: !formData.permissions[permission]
+      }
+    });
+  };
+
+  const handleEditPermissionChange = (permission) => {
+    setPermissionsToEdit({
+      ...permissionsToEdit,
+      [permission]: !permissionsToEdit[permission]
+    });
   };
 
   return (
@@ -72,14 +136,23 @@ export default function UserManagement() {
               <ArrowLeft className="w-4 h-4" />
             </Button>
             <h1 className="text-3xl font-bold text-black" style={{ fontFamily: 'Space Grotesk, sans-serif' }}>
-              Gestión de Usuarios
+              Gestión de Usuarios y Permisos
             </h1>
           </div>
 
           <Dialog open={isDialogOpen} onOpenChange={(open) => {
             setIsDialogOpen(open);
             if (!open) {
-              setFormData({ username: '', password: '', role: 'user' });
+              setFormData({ 
+                username: '', 
+                password: '', 
+                role: 'user',
+                permissions: {
+                  inventario: false,
+                  venta: false,
+                  despacho: false
+                }
+              });
             }
           }}>
             <DialogTrigger asChild>
@@ -124,20 +197,40 @@ export default function UserManagement() {
                     className="rounded-none border-2 border-black"
                   />
                 </div>
+                
                 <div>
-                  <Label htmlFor="role" className="text-black font-medium mb-2 block">Rol</Label>
-                  <select
-                    id="role"
-                    data-testid="role-select"
-                    name="role"
-                    value={formData.role}
-                    onChange={handleChange}
-                    className="w-full h-10 rounded-none border-2 border-black px-3"
-                  >
-                    <option value="user">Usuario Normal</option>
-                    <option value="admin">Administrador</option>
-                  </select>
+                  <Label className="text-black font-medium mb-3 block">Permisos de Acceso</Label>
+                  <div className="space-y-2 border-2 border-black p-4">
+                    <label className="flex items-center gap-2 cursor-pointer">
+                      <input
+                        type="checkbox"
+                        checked={formData.permissions.inventario}
+                        onChange={() => handlePermissionChange('inventario')}
+                        className="w-5 h-5 border-2 border-black"
+                      />
+                      <span>Inventario - Gestionar productos</span>
+                    </label>
+                    <label className="flex items-center gap-2 cursor-pointer">
+                      <input
+                        type="checkbox"
+                        checked={formData.permissions.venta}
+                        onChange={() => handlePermissionChange('venta')}
+                        className="w-5 h-5 border-2 border-black"
+                      />
+                      <span>Venta - Realizar ventas</span>
+                    </label>
+                    <label className="flex items-center gap-2 cursor-pointer">
+                      <input
+                        type="checkbox"
+                        checked={formData.permissions.despacho}
+                        onChange={() => handlePermissionChange('despacho')}
+                        className="w-5 h-5 border-2 border-black"
+                      />
+                      <span>Despacho - Gestionar envíos</span>
+                    </label>
+                  </div>
                 </div>
+
                 <Button
                   data-testid="save-user-btn"
                   type="submit"
@@ -151,6 +244,54 @@ export default function UserManagement() {
         </div>
       </div>
 
+      {/* Edit Permissions Dialog */}
+      <Dialog open={isEditingPermissions} onOpenChange={setIsEditingPermissions}>
+        <DialogContent className="max-w-md border-4 border-black rounded-none shadow-[12px_12px_0px_0px_rgba(0,0,0,1)]">
+          <DialogHeader>
+            <DialogTitle className="text-2xl font-bold" style={{ fontFamily: 'Space Grotesk, sans-serif' }}>
+              Editar Permisos de {selectedUser?.username}
+            </DialogTitle>
+          </DialogHeader>
+          <div className="space-y-4">
+            <div className="space-y-2 border-2 border-black p-4">
+              <label className="flex items-center gap-2 cursor-pointer">
+                <input
+                  type="checkbox"
+                  checked={permissionsToEdit.inventario}
+                  onChange={() => handleEditPermissionChange('inventario')}
+                  className="w-5 h-5 border-2 border-black"
+                />
+                <span>Inventario - Gestionar productos</span>
+              </label>
+              <label className="flex items-center gap-2 cursor-pointer">
+                <input
+                  type="checkbox"
+                  checked={permissionsToEdit.venta}
+                  onChange={() => handleEditPermissionChange('venta')}
+                  className="w-5 h-5 border-2 border-black"
+                />
+                <span>Venta - Realizar ventas</span>
+              </label>
+              <label className="flex items-center gap-2 cursor-pointer">
+                <input
+                  type="checkbox"
+                  checked={permissionsToEdit.despacho}
+                  onChange={() => handleEditPermissionChange('despacho')}
+                  className="w-5 h-5 border-2 border-black"
+                />
+                <span>Despacho - Gestionar envíos</span>
+              </label>
+            </div>
+            <Button
+              onClick={handleUpdatePermissions}
+              className="w-full bg-black text-white hover:bg-gray-800 rounded-none h-12"
+            >
+              Guardar Cambios
+            </Button>
+          </div>
+        </DialogContent>
+      </Dialog>
+
       <div className="max-w-7xl mx-auto px-8 py-8">
         <div className="bg-white border-4 border-black">
           <div className="overflow-x-auto">
@@ -159,8 +300,9 @@ export default function UserManagement() {
                 <tr className="border-b-4 border-black bg-black text-white">
                   <th className="px-6 py-4 text-left font-bold">Usuario</th>
                   <th className="px-6 py-4 text-left font-bold">Rol</th>
+                  <th className="px-6 py-4 text-left font-bold">Permisos</th>
                   <th className="px-6 py-4 text-left font-bold">Creado Por</th>
-                  <th className="px-6 py-4 text-left font-bold">Fecha Creación</th>
+                  <th className="px-6 py-4 text-left font-bold">Acciones</th>
                 </tr>
               </thead>
               <tbody>
@@ -174,8 +316,34 @@ export default function UserManagement() {
                         {user.role === 'admin' ? 'Admin' : 'Usuario'}
                       </span>
                     </td>
+                    <td className="px-6 py-4">
+                      {user.role === 'admin' ? (
+                        <span className="text-sm">Todos los permisos</span>
+                      ) : (
+                        <div className="flex gap-2 flex-wrap">
+                          {user.permissions?.inventario && <span className="px-2 py-1 bg-blue-100 border border-blue-600 text-xs">Inventario</span>}
+                          {user.permissions?.venta && <span className="px-2 py-1 bg-green-100 border border-green-600 text-xs">Venta</span>}
+                          {user.permissions?.despacho && <span className="px-2 py-1 bg-yellow-100 border border-yellow-600 text-xs">Despacho</span>}
+                          {!user.permissions?.inventario && !user.permissions?.venta && !user.permissions?.despacho && (
+                            <span className="text-sm text-gray-500">Sin permisos</span>
+                          )}
+                        </div>
+                      )}
+                    </td>
                     <td className="px-6 py-4">{user.created_by || 'Sistema'}</td>
-                    <td className="px-6 py-4">{new Date(user.created_at).toLocaleDateString('es')}</td>
+                    <td className="px-6 py-4">
+                      {user.role !== 'admin' && (
+                        <Button
+                          onClick={() => handleEditPermissions(user)}
+                          variant="outline"
+                          size="sm"
+                          className="border-2 border-black rounded-none hover:bg-black hover:text-white"
+                        >
+                          <Edit className="w-4 h-4 mr-1" />
+                          Editar Permisos
+                        </Button>
+                      )}
+                    </td>
                   </tr>
                 ))}
               </tbody>
