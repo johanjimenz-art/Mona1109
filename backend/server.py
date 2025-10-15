@@ -43,12 +43,18 @@ api_router = APIRouter(prefix="/api")
 
 # ============ Models ============
 
+class UserPermissions(BaseModel):
+    inventario: bool = False
+    venta: bool = False
+    despacho: bool = False
+
 class User(BaseModel):
     model_config = ConfigDict(extra="ignore")
     id: str = Field(default_factory=lambda: str(uuid.uuid4()))
     username: str
     password_hash: str
     role: str = "user"  # "admin" or "user"
+    permissions: UserPermissions = Field(default_factory=UserPermissions)
     created_by: Optional[str] = None
     created_at: datetime = Field(default_factory=lambda: datetime.now(timezone.utc))
 
@@ -56,6 +62,10 @@ class UserCreate(BaseModel):
     username: str
     password: str
     role: str = "user"
+    permissions: Optional[UserPermissions] = None
+
+class UserUpdate(BaseModel):
+    permissions: Optional[UserPermissions] = None
 
 class UserLogin(BaseModel):
     username: str
