@@ -432,6 +432,49 @@ async def get_products(current_user: dict = Depends(get_current_user)):
     
     return products
 
+@api_router.get("/products/grouped")
+async def get_products_grouped(current_user: dict = Depends(get_current_user)):
+    # Admin or users with inventario or venta permission can see products
+    if current_user["role"] != "admin":
+        permissions = current_user["permissions"]
+        if not (permissions.inventario or permissions.venta):
+            raise HTTPException(status_code=403, detail="You don't have permission to view products")
+    
+    products = await db.products.find({}, {"_id": 0}).to_list(1000)
+    
+    # Group by referencia
+    grouped = {}
+    for product in products:
+        if isinstance(product['created_at'], str):
+            product['created_at'] = datetime.fromisoformat(product['created_at'])
+        
+        # Hide costo_fabricacion for non-admin users
+        if current_user["role"] != "admin":
+            product['costo_fabricacion'] = None
+        
+        ref = product['referencia']
+        if ref not in grouped:
+            grouped[ref] = {
+                "referencia": ref,
+                "descripcion": product['descripcion'],
+                "color": product['color'],
+                "precio_venta": product['precio_venta'],
+                "costo_fabricacion": product.get('costo_fabricacion'),
+                "imagen_url": product.get('imagen_url'),
+                "tallas": [],
+                "stock_total": 0
+            }
+        
+        grouped[ref]["tallas"].append({
+            "id": product['id'],
+            "talla": product['talla'],
+            "cantidad_stock": product['cantidad_stock'],
+            "aprobado": product.get('aprobado', False)
+        })
+        grouped[ref]["stock_total"] += product['cantidad_stock']
+    
+    return list(grouped.values())
+
 @api_router.get("/products/search")
 async def search_products(referencia: str, talla: str, color: str, current_user: dict = Depends(get_current_user)):
     product = await db.products.find_one({
