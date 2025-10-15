@@ -1,0 +1,108 @@
+{
+  "timestamp": "2025-10-15T19:43:02.065826",
+  "total_tests": 20,
+  "passed_tests": 18,
+  "success_rate": 90.0,
+  "detailed_results": [
+    {
+      "test": "User Registration",
+      "success": true,
+      "details": ""
+    },
+    {
+      "test": "User Login",
+      "success": true,
+      "details": ""
+    },
+    {
+      "test": "Get Current User",
+      "success": true,
+      "details": ""
+    },
+    {
+      "test": "Create Product",
+      "success": true,
+      "details": ""
+    },
+    {
+      "test": "Get All Products",
+      "success": true,
+      "details": ""
+    },
+    {
+      "test": "Search Product",
+      "success": true,
+      "details": ""
+    },
+    {
+      "test": "Update Product",
+      "success": true,
+      "details": ""
+    },
+    {
+      "test": "Delete Product",
+      "success": true,
+      "details": ""
+    },
+    {
+      "test": "Create Product for Sale",
+      "success": true,
+      "details": ""
+    },
+    {
+      "test": "Create Sale",
+      "success": true,
+      "details": ""
+    },
+    {
+      "test": "Get All Sales",
+      "success": true,
+      "details": ""
+    },
+    {
+      "test": "Get Specific Sale",
+      "success": true,
+      "details": ""
+    },
+    {
+      "test": "Get Statistics",
+      "success": true,
+      "details": ""
+    },
+    {
+      "test": "Stats Field total_products",
+      "success": true,
+      "details": ""
+    },
+    {
+      "test": "Stats Field total_sales",
+      "success": true,
+      "details": ""
+    },
+    {
+      "test": "Stats Field total_revenue",
+      "success": true,
+      "details": ""
+    },
+    {
+      "test": "Stats Field total_stock_value",
+      "success": true,
+      "details": ""
+    },
+    {
+      "test": "Unauthorized Access",
+      "success": false,
+      "details": "Expected 401, got 403. Response: {\"detail\":\"Not authenticated\"}"
+    },
+    {
+      "test": "Invalid Product Search",
+      "success": true,
+      "details": ""
+    },
+    {
+      "test": "Duplicate User Registration",
+      "success": false,
+      "details": "Expected 400, got 200. Response: {\"access_token\":\"eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOiJ0ZXN0dXNlcl8xOTQzMDEiLCJleHAiOjE3NjA2NDM3ODJ9.TS-z4LbR2QIM-XP55BnwWf6IrYMJ_bOvklJTNTdT5tU\",\"token_type\":\"bearer\",\"username\":\"testuser_1"
+    }
+  ]
+}
