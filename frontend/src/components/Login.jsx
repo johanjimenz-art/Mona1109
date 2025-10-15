@@ -50,8 +50,8 @@ export default function Login({ setIsAuthenticated }) {
           <div className="inline-flex items-center justify-center w-16 h-16 bg-black rounded-full mb-6">
             <Lock className="w-8 h-8 text-white" />
           </div>
-          <h1 className="text-4xl font-bold text-black mb-2" style={{ fontFamily: 'Space Grotesk, sans-serif' }}>
-            ClothTrack
+          <h1 className="text-4xl text-black mb-2 brand-name">
+            Cloth <span className="brand-bold">ON-OF</span>
           </h1>
           <p className="text-gray-600">Sistema de Gestión de Inventario</p>
         </div>
