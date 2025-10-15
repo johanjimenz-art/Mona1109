@@ -14,6 +14,7 @@ export default function Dispatch() {
   const navigate = useNavigate();
   const [pendingSales, setPendingSales] = useState([]);
   const [expandedSale, setExpandedSale] = useState(null);
+  const [observaciones, setObservaciones] = useState({});
 
   useEffect(() => {
     fetchPendingSales();
