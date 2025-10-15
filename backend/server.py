@@ -240,20 +240,34 @@ async def setup_admin(user_data: UserCreate):
     if existing_admin:
         raise HTTPException(status_code=400, detail="Admin already exists. Contact your administrator.")
     
-    # Create first admin
+    # Create first admin with all permissions
+    admin_permissions = UserPermissions(inventario=True, venta=True, despacho=True)
+    
     user = User(
         username=user_data.username,
         password_hash=hash_password(user_data.password),
         role="admin",
+        permissions=admin_permissions,
         created_by="system"
     )
     
     doc = user.model_dump()
     doc['created_at'] = doc['created_at'].isoformat()
+    doc['permissions'] = doc['permissions'].model_dump()
     await db.users.insert_one(doc)
     
-    access_token = create_access_token(data={"sub": user.username, "role": "admin"})
-    return Token(access_token=access_token, token_type="bearer", username=user.username, role="admin")
+    access_token = create_access_token(data={
+        "sub": user.username, 
+        "role": "admin",
+        "permissions": admin_permissions.model_dump()
+    })
+    return Token(
+        access_token=access_token, 
+        token_type="bearer", 
+        username=user.username, 
+        role="admin",
+        permissions=admin_permissions
+    )
 
 @api_router.post("/auth/login", response_model=Token)
 async def login(user_data: UserLogin):
@@ -261,12 +275,28 @@ async def login(user_data: UserLogin):
     if not user or not verify_password(user_data.password, user['password_hash']):
         raise HTTPException(status_code=401, detail="Invalid username or password")
     
-    access_token = create_access_token(data={"sub": user['username'], "role": user['role']})
-    return Token(access_token=access_token, token_type="bearer", username=user['username'], role=user['role'])
+    permissions = UserPermissions(**user.get('permissions', {}))
+    
+    access_token = create_access_token(data={
+        "sub": user['username'], 
+        "role": user['role'],
+        "permissions": permissions.model_dump()
+    })
+    return Token(
+        access_token=access_token, 
+        token_type="bearer", 
+        username=user['username'], 
+        role=user['role'],
+        permissions=permissions
+    )
 
 @api_router.get("/auth/me")
 async def get_me(current_user: dict = Depends(get_current_user)):
-    return current_user
+    return {
+        "username": current_user["username"],
+        "role": current_user["role"],
+        "permissions": current_user["permissions"].model_dump()
+    }
 
 @api_router.get("/auth/check-admin")
 async def check_admin():
