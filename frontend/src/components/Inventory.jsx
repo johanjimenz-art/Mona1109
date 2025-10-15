@@ -356,6 +356,7 @@ export default function Inventory() {
               </form>
             </DialogContent>
           </Dialog>
+          )}
         </div>
       </div>
 
