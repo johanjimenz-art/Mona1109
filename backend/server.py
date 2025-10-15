@@ -133,6 +133,7 @@ class Sale(BaseModel):
     items: List[SaleItem]
     total: float
     estado_despacho: str = "pendiente"  # pendiente, en_camino, despachado
+    observaciones: Optional[str] = None  # Campo para observaciones
     created_by: Optional[str] = None  # Hacer opcional para ventas viejas
     created_at: datetime = Field(default_factory=lambda: datetime.now(timezone.utc))
     updated_at: datetime = Field(default_factory=lambda: datetime.now(timezone.utc))
