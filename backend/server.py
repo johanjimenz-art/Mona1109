@@ -353,16 +353,12 @@ async def update_user_permissions(
 @api_router.post("/products", response_model=Product)
 async def create_product(
     product_data: ProductCreate, 
-    current_user: dict = Depends(check_permission("inventario"))
+    current_user: dict = Depends(get_admin_user)  # SOLO ADMIN
 ):
-    # Users can create products but without costo_fabricacion
-    if current_user["role"] != "admin" and product_data.costo_fabricacion is not None:
-        raise HTTPException(status_code=403, detail="Only admins can set manufacturing cost")
-    
     product = Product(
         **product_data.model_dump(),
         created_by=current_user["username"],
-        aprobado=(current_user["role"] == "admin")  # Auto-approve if admin
+        aprobado=True  # Admin products are auto-approved
     )
     
     doc = product.model_dump()
