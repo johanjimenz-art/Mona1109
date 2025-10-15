@@ -199,11 +199,12 @@ export default function Inventory() {
               <ArrowLeft className="w-4 h-4" />
             </Button>
             <h1 className="text-3xl font-bold text-black" style={{ fontFamily: 'Space Grotesk, sans-serif' }}>
-              Gestión de Inventario
+              {canModify ? 'Gestión de Inventario' : 'Consultar Inventario'}
             </h1>
           </div>
 
-          <Dialog open={isDialogOpen} onOpenChange={(open) => {
+          {canModify && (
+            <Dialog open={isDialogOpen} onOpenChange={(open) => {
             setIsDialogOpen(open);
             if (!open) {
               setEditingProduct(null);
