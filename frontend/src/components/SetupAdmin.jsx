@@ -39,6 +39,7 @@ export default function SetupAdmin({ onSetupComplete }) {
       localStorage.setItem('token', response.data.access_token);
       localStorage.setItem('username', response.data.username);
       localStorage.setItem('role', response.data.role);
+      localStorage.setItem('permissions', JSON.stringify(response.data.permissions));
       
       toast.success('Administrador creado exitosamente');
       onSetupComplete();
