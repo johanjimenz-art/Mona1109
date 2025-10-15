@@ -407,6 +407,12 @@ async def get_product_image(product_id: str):
 
 @api_router.get("/products", response_model=List[Product])
 async def get_products(current_user: dict = Depends(get_current_user)):
+    # Admin or users with inventario or venta permission can see products
+    if current_user["role"] != "admin":
+        permissions = current_user["permissions"]
+        if not (permissions.inventario or permissions.venta):
+            raise HTTPException(status_code=403, detail="You don't have permission to view products")
+    
     products = await db.products.find({}, {"_id": 0}).to_list(1000)
     
     for product in products:
