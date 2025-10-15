@@ -464,10 +464,10 @@ export default function Inventory() {
           </div>
         </div>
 
-        {!isAdmin && (
-          <div className="mt-4 p-4 border-2 border-yellow-500 bg-yellow-50">
+        {!canModify && (
+          <div className="mt-4 p-4 border-2 border-blue-500 bg-blue-50">
             <p className="text-sm text-gray-700">
-              ⚠️ Los productos que crees necesitan ser aprobados por un administrador antes de aparecer en ventas.
+              ℹ️ Estás viendo el inventario en modo consulta. Solo puedes ver los productos disponibles y sus cantidades.
             </p>
           </div>
         )}
