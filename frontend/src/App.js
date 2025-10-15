@@ -100,6 +100,14 @@ function App() {
             }
           />
           <Route
+            path="/dispatch"
+            element={
+              <ProtectedRoute>
+                <Dispatch />
+              </ProtectedRoute>
+            }
+          />
+          <Route
             path="/sales-history"
             element={
               <ProtectedRoute>
