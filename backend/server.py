@@ -76,6 +76,7 @@ class Token(BaseModel):
     token_type: str
     username: str
     role: str
+    permissions: UserPermissions
 
 class Product(BaseModel):
     model_config = ConfigDict(extra="ignore")
