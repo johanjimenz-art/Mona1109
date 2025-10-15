@@ -45,10 +45,14 @@ export default function Dispatch() {
       const token = localStorage.getItem('token');
       await axios.put(
         `${API}/sales/${saleId}/status`,
-        { estado_despacho: newStatus },
+        { 
+          estado_despacho: newStatus,
+          observaciones: observaciones[saleId] || null
+        },
         { headers: { Authorization: `Bearer ${token}` } }
       );
       toast.success('Estado actualizado');
+      setObservaciones(prev => ({ ...prev, [saleId]: '' })); // Limpiar observaciones
       fetchPendingSales();
     } catch (error) {
       toast.error('Error al actualizar estado');
