@@ -90,7 +90,7 @@ class Product(BaseModel):
     cantidad_stock: int
     imagen_url: Optional[str] = None
     aprobado: bool = False
-    created_by: str
+    created_by: Optional[str] = None  # Hacer opcional para productos viejos
     created_at: datetime = Field(default_factory=lambda: datetime.now(timezone.utc))
 
 class ProductCreate(BaseModel):
