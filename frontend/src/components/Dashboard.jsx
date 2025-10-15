@@ -42,8 +42,8 @@ export default function Dashboard() {
       <div className="border-b-4 border-black bg-white">
         <div className="max-w-7xl mx-auto px-8 py-6 flex justify-between items-center">
           <div>
-            <h1 className="text-3xl font-bold text-black" style={{ fontFamily: 'Space Grotesk, sans-serif' }}>
-              ClothTrack
+            <h1 className="text-3xl text-black brand-name">
+              Cloth <span className="brand-bold">ON-OF</span>
             </h1>
             <p className="text-gray-600 mt-1">Bienvenido, {username}</p>
           </div>
