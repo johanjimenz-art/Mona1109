@@ -20,3 +20,12 @@ h1, h2, h3, h4, h5, h6 {
   min-height: 100vh;
   background: #ffffff;
 }
+
+/* Brand styling */
+.brand-name {
+  font-family: Arial, 'Helvetica Neue', sans-serif;
+}
+
+.brand-bold {
+  font-weight: 700;
+}
