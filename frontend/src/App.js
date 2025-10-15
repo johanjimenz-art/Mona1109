@@ -6,6 +6,7 @@ import Login from './components/Login';
 import Dashboard from './components/Dashboard';
 import Inventory from './components/Inventory';
 import Sales from './components/Sales';
+import Dispatch from './components/Dispatch';
 import SalesHistory from './components/SalesHistory';
 import UserManagement from './components/UserManagement';
 import { Toaster } from './components/ui/sonner';
