@@ -109,6 +109,7 @@ export default function Inventory() {
         cantidad_stock: ''
       });
       fetchProducts();
+      fetchGroupedProducts();
     } catch (error) {
       toast.error(error.response?.data?.detail || 'Error al guardar producto');
     }
