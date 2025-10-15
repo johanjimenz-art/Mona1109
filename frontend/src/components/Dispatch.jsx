@@ -158,6 +158,27 @@ export default function Dispatch() {
                     <div className="border-t-4 border-black p-6 bg-gray-50">
                       <div className="mb-6">
                         <h3 className="font-bold mb-3 text-lg">Actualizar Estado</h3>
+                        
+                        {/* Campo de observaciones */}
+                        <div className="mb-4">
+                          <label className="block text-sm font-medium text-gray-700 mb-2">
+                            Observaciones / Notas del Despacho
+                          </label>
+                          <textarea
+                            data-testid={`observaciones-textarea-${index}`}
+                            value={observaciones[sale.id] || ''}
+                            onChange={(e) => setObservaciones(prev => ({ ...prev, [sale.id]: e.target.value }))}
+                            placeholder="Ej: Cliente solicita entrega en horario de la tarde, Paquete frágil, etc."
+                            className="w-full p-3 border-2 border-black rounded-none min-h-[80px] focus:outline-none focus:ring-2 focus:ring-black"
+                          />
+                          {sale.observaciones && (
+                            <div className="mt-2 p-2 bg-yellow-50 border border-yellow-200">
+                              <p className="text-xs font-medium text-yellow-800">Última observación:</p>
+                              <p className="text-sm text-gray-700">{sale.observaciones}</p>
+                            </div>
+                          )}
+                        </div>
+                        
                         <div className="flex gap-3 flex-wrap">
                           <Button
                             data-testid={`status-pendiente-btn-${index}`}
