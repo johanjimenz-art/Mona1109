@@ -214,43 +214,71 @@ export default function Dashboard() {
           </div>
         )}
 
+        {/* Navigation Cards */}
         <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
-          <button
-            data-testid="inventory-nav-btn"
-            onClick={() => navigate('/inventory')}
-            className="bg-white border-4 border-black p-8 hover:translate-x-1 hover:translate-y-1 hover:shadow-none shadow-[12px_12px_0px_0px_rgba(0,0,0,1)] transition-all"
-          >
-            <Package className="w-16 h-16 text-black mx-auto mb-4" />
-            <h3 className="text-2xl font-bold text-black mb-2" style={{ fontFamily: 'Space Grotesk, sans-serif' }}>
-              Inventario
-            </h3>
-            <p className="text-gray-600">Gestiona tus productos y stock</p>
-          </button>
+          {/* Inventario - Admin o usuarios con permisos de inventario o venta */}
+          {(isAdmin || permissions.inventario || permissions.venta) && (
+            <button
+              data-testid="inventory-nav-btn"
+              onClick={() => navigate('/inventory')}
+              className="bg-white border-4 border-black p-8 hover:translate-x-1 hover:translate-y-1 hover:shadow-none shadow-[12px_12px_0px_0px_rgba(0,0,0,1)] transition-all"
+            >
+              <Package className="w-16 h-16 text-black mx-auto mb-4" />
+              <h3 className="text-2xl font-bold text-black mb-2" style={{ fontFamily: 'Space Grotesk, sans-serif' }}>
+                Inventario
+              </h3>
+              <p className="text-gray-600">
+                {isAdmin ? 'Gestiona tus productos y stock' : 'Ver productos disponibles'}
+              </p>
+            </button>
+          )}
 
-          <button
-            data-testid="sales-nav-btn"
-            onClick={() => navigate('/sales')}
-            className="bg-white border-4 border-black p-8 hover:translate-x-1 hover:translate-y-1 hover:shadow-none shadow-[12px_12px_0px_0px_rgba(0,0,0,1)] transition-all"
-          >
-            <ShoppingCart className="w-16 h-16 text-black mx-auto mb-4" />
-            <h3 className="text-2xl font-bold text-black mb-2" style={{ fontFamily: 'Space Grotesk, sans-serif' }}>
-              Ventas
-            </h3>
-            <p className="text-gray-600">Realiza nuevas ventas</p>
-          </button>
+          {/* Ventas - Admin o usuarios con permiso de venta */}
+          {(isAdmin || permissions.venta) && (
+            <button
+              data-testid="sales-nav-btn"
+              onClick={() => navigate('/sales')}
+              className="bg-white border-4 border-black p-8 hover:translate-x-1 hover:translate-y-1 hover:shadow-none shadow-[12px_12px_0px_0px_rgba(0,0,0,1)] transition-all"
+            >
+              <ShoppingCart className="w-16 h-16 text-black mx-auto mb-4" />
+              <h3 className="text-2xl font-bold text-black mb-2" style={{ fontFamily: 'Space Grotesk, sans-serif' }}>
+                Ventas
+              </h3>
+              <p className="text-gray-600">Realiza nuevas ventas</p>
+            </button>
+          )}
 
-          <button
-            data-testid="history-nav-btn"
-            onClick={() => navigate('/sales-history')}
-            className="bg-white border-4 border-black p-8 hover:translate-x-1 hover:translate-y-1 hover:shadow-none shadow-[12px_12px_0px_0px_rgba(0,0,0,1)] transition-all"
-          >
-            <History className="w-16 h-16 text-black mx-auto mb-4" />
-            <h3 className="text-2xl font-bold text-black mb-2" style={{ fontFamily: 'Space Grotesk, sans-serif' }}>
-              Historial
-            </h3>
-            <p className="text-gray-600">Revisa ventas y despachos</p>
-          </button>
+          {/* Despacho - Admin o usuarios con permiso de despacho */}
+          {(isAdmin || permissions.despacho) && (
+            <button
+              data-testid="dispatch-nav-btn"
+              onClick={() => navigate('/dispatch')}
+              className="bg-white border-4 border-black p-8 hover:translate-x-1 hover:translate-y-1 hover:shadow-none shadow-[12px_12px_0px_0px_rgba(0,0,0,1)] transition-all"
+            >
+              <History className="w-16 h-16 text-black mx-auto mb-4" />
+              <h3 className="text-2xl font-bold text-black mb-2" style={{ fontFamily: 'Space Grotesk, sans-serif' }}>
+                Despacho
+              </h3>
+              <p className="text-gray-600">Gestiona envíos pendientes</p>
+            </button>
+          )}
 
+          {/* Historial completo - Solo admin */}
+          {isAdmin && (
+            <button
+              data-testid="history-nav-btn"
+              onClick={() => navigate('/sales-history')}
+              className="bg-white border-4 border-black p-8 hover:translate-x-1 hover:translate-y-1 hover:shadow-none shadow-[12px_12px_0px_0px_rgba(0,0,0,1)] transition-all"
+            >
+              <History className="w-16 h-16 text-black mx-auto mb-4" />
+              <h3 className="text-2xl font-bold text-black mb-2" style={{ fontFamily: 'Space Grotesk, sans-serif' }}>
+                Historial Completo
+              </h3>
+              <p className="text-gray-600">Todas las ventas realizadas</p>
+            </button>
+          )}
+
+          {/* Usuarios - Solo admin */}
           {isAdmin && (
             <button
               data-testid="users-nav-btn"
