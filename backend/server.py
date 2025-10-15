@@ -147,6 +147,7 @@ class SaleCreate(BaseModel):
 
 class SaleUpdateStatus(BaseModel):
     estado_despacho: str
+    observaciones: Optional[str] = None
 
 class Notification(BaseModel):
     model_config = ConfigDict(extra="ignore")
