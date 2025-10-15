@@ -168,6 +168,14 @@ export default function SalesHistory() {
                       </div>
                     </div>
 
+                    {/* Mostrar observaciones si existen */}
+                    {sale.observaciones && (
+                      <div className="mb-6 p-4 border-2 border-blue-500 bg-blue-50">
+                        <h4 className="font-bold text-sm text-blue-900 mb-2">📝 Observaciones del Despacho:</h4>
+                        <p className="text-gray-800">{sale.observaciones}</p>
+                      </div>
+                    )}
+
                     <h3 className="font-bold mb-4 text-lg">Detalles de la Venta</h3>
                     <div className="mb-4">
                       <p className="text-sm"><span className="font-medium">Dirección:</span> {sale.direccion_cliente}</p>
