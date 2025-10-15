@@ -20,6 +20,8 @@ export default function Inventory() {
   const [uploadingImage, setUploadingImage] = useState(false);
   const role = localStorage.getItem('role');
   const isAdmin = role === 'admin';
+  const permissions = JSON.parse(localStorage.getItem('permissions') || '{}');
+  const canModify = isAdmin; // Solo admin puede modificar
   
   const [formData, setFormData] = useState({
     descripcion: '',
