@@ -563,6 +563,26 @@ async def get_sales(current_user: dict = Depends(get_current_user)):
     
     return sales
 
+@api_router.get("/sales/pending", response_model=List[Sale])
+async def get_pending_sales(current_user: dict = Depends(get_current_user)):
+    # Users with despacho permission or admin can see pending sales
+    if current_user["role"] != "admin":
+        if not current_user["permissions"].despacho:
+            raise HTTPException(status_code=403, detail="You don't have permission to view dispatch")
+    
+    sales = await db.sales.find(
+        {"estado_despacho": {"$in": ["pendiente", "en_camino"]}}, 
+        {"_id": 0}
+    ).sort("created_at", -1).to_list(1000)
+    
+    for sale in sales:
+        if isinstance(sale['created_at'], str):
+            sale['created_at'] = datetime.fromisoformat(sale['created_at'])
+        if isinstance(sale.get('updated_at'), str):
+            sale['updated_at'] = datetime.fromisoformat(sale['updated_at'])
+    
+    return sales
+
 @api_router.get("/sales/{sale_id}", response_model=Sale)
 async def get_sale(sale_id: str, current_user: dict = Depends(get_current_user)):
     sale = await db.sales.find_one({"id": sale_id}, {"_id": 0})
