@@ -401,39 +401,39 @@ export default function Sales() {
 
               <div className="space-y-4 mb-6 max-h-96 overflow-y-auto">
                 {cart.map((item, index) => (
-                  <div key={index} className="border-2 border-black p-4" data-testid={`cart-item-${index}`}>
-                    <div className="flex gap-4">
+                  <div key={index} className="border-2 border-black p-3" data-testid={`cart-item-${index}`}>
+                    <div className="flex gap-3">
                       {item.imagen_url ? (
                         <img 
                           src={`${BACKEND_URL}${item.imagen_url}`} 
                           alt={item.descripcion}
-                          className="w-16 h-16 object-cover border-2 border-black"
+                          className="w-12 h-12 object-cover border-2 border-black flex-shrink-0"
                         />
                       ) : (
-                        <div className="w-16 h-16 border-2 border-black flex items-center justify-center bg-gray-200">
-                          <ImageIcon className="w-8 h-8 text-gray-400" />
+                        <div className="w-12 h-12 border-2 border-black flex items-center justify-center bg-gray-200 flex-shrink-0">
+                          <ImageIcon className="w-6 h-6 text-gray-400" />
                         </div>
                       )}
-                      <div className="flex-1">
+                      <div className="flex-1 min-w-0">
                         <div className="flex justify-between items-start mb-2">
-                          <div>
-                            <p className="font-bold">{item.referencia}</p>
-                            <p className="text-sm text-gray-600">{item.descripcion}</p>
-                            <p className="text-sm">Talla: {item.talla} | Color: {item.color}</p>
+                          <div className="flex-1 min-w-0 pr-2">
+                            <p className="font-bold text-sm truncate">{item.referencia}</p>
+                            <p className="text-xs text-gray-600 truncate">{item.descripcion}</p>
+                            <p className="text-xs">Talla: {item.talla} | Color: {item.color}</p>
                           </div>
                           <Button
                             data-testid={`remove-cart-item-btn-${index}`}
                             onClick={() => removeFromCart(index)}
                             variant="outline"
                             size="sm"
-                            className="border-2 border-black rounded-none hover:bg-red-600 hover:text-white hover:border-red-600"
+                            className="border-2 border-black rounded-none hover:bg-red-600 hover:text-white hover:border-red-600 flex-shrink-0 h-8 w-8 p-0"
                           >
                             <Trash2 className="w-4 h-4" />
                           </Button>
                         </div>
                         <div className="flex justify-between items-center mt-2 pt-2 border-t-2 border-black">
-                          <span className="text-sm">Cantidad: {item.cantidad}</span>
-                          <span className="font-bold">${item.subtotal.toLocaleString()}</span>
+                          <span className="text-xs">Cantidad: {item.cantidad}</span>
+                          <span className="font-bold text-sm">${item.subtotal.toLocaleString()}</span>
                         </div>
                       </div>
                     </div>
