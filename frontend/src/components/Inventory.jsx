@@ -221,24 +221,26 @@ export default function Inventory() {
 
   return (
     <div className="min-h-screen bg-white">
+      {/* Header */}
       <div className="border-b-4 border-black bg-white">
-        <div className="max-w-7xl mx-auto px-8 py-6 flex justify-between items-center">
-          <div className="flex items-center gap-4">
-            <Button
-              data-testid="back-btn"
-              onClick={() => navigate('/')}
-              variant="outline"
-              className="border-2 border-black rounded-none hover:bg-black hover:text-white"
-            >
-              <ArrowLeft className="w-4 h-4" />
-            </Button>
-            <h1 className="text-3xl font-bold text-black" style={{ fontFamily: 'Space Grotesk, sans-serif' }}>
-              {canModify ? 'Gestión de Inventario' : 'Consultar Inventario'}
-            </h1>
-          </div>
+        <div className="max-w-7xl mx-auto px-8 py-6">
+          <div className="flex justify-between items-center mb-4">
+            <div className="flex items-center gap-4">
+              <Button
+                data-testid="back-btn"
+                onClick={() => navigate('/')}
+                variant="outline"
+                className="border-2 border-black rounded-none hover:bg-black hover:text-white"
+              >
+                <ArrowLeft className="w-4 h-4" />
+              </Button>
+              <h1 className="text-3xl font-bold text-black" style={{ fontFamily: 'Space Grotesk, sans-serif' }}>
+                {canModify ? 'Gestión de Inventario' : 'Consultar Inventario'}
+              </h1>
+            </div>
 
-          {canModify && (
-            <Dialog open={isDialogOpen} onOpenChange={(open) => {
+            {canModify && (
+              <Dialog open={isDialogOpen} onOpenChange={(open) => {
             setIsDialogOpen(open);
             if (!open) {
               setEditingProduct(null);
