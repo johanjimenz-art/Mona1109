@@ -32,6 +32,10 @@ export default function Sales() {
     color: ''
   });
   const [cantidad, setCantidad] = useState(1);
+  const [products, setProducts] = useState([]);
+  const [uniqueReferencias, setUniqueReferencias] = useState([]);
+  const [availableTallas, setAvailableTallas] = useState([]);
+  const [availableColors, setAvailableColors] = useState([]);
 
   const handleClientChange = (e) => {
     setClientData({ ...clientData, [e.target.name]: e.target.value });
