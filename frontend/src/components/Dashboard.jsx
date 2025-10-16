@@ -10,6 +10,14 @@ import {
   DropdownMenuItem,
   DropdownMenuTrigger,
 } from './ui/dropdown-menu';
+import {
+  Dialog,
+  DialogContent,
+  DialogDescription,
+  DialogHeader,
+  DialogTitle,
+  DialogTrigger,
+} from './ui/dialog';
 
 const BACKEND_URL = process.env.REACT_APP_BACKEND_URL;
 const API = `${BACKEND_URL}/api`;
@@ -19,6 +27,9 @@ export default function Dashboard() {
   const [stats, setStats] = useState(null);
   const [notifications, setNotifications] = useState([]);
   const [unreadCount, setUnreadCount] = useState(0);
+  const [todaySales, setTodaySales] = useState([]);
+  const [showSalesModal, setShowSalesModal] = useState(false);
+  const [loadingSales, setLoadingSales] = useState(false);
   const username = localStorage.getItem('username');
   const role = localStorage.getItem('role');
   const isAdmin = role === 'admin';
@@ -75,6 +86,26 @@ export default function Dashboard() {
     }
   };
 
+  const fetchTodaySales = async () => {
+    setLoadingSales(true);
+    try {
+      const token = localStorage.getItem('token');
+      const response = await axios.get(`${API}/sales/today/detail`, {
+        headers: { Authorization: `Bearer ${token}` }
+      });
+      setTodaySales(response.data);
+    } catch (error) {
+      toast.error('Error al cargar ventas del día');
+    } finally {
+      setLoadingSales(false);
+    }
+  };
+
+  const handleOpenSalesModal = () => {
+    setShowSalesModal(true);
+    fetchTodaySales();
+  };
+
   const handleLogout = () => {
     localStorage.removeItem('token');
     localStorage.removeItem('username');
@@ -100,11 +131,18 @@ export default function Dashboard() {
     <div className="min-h-screen bg-white">
       <div className="border-b-4 border-black bg-white">
         <div className="max-w-7xl mx-auto px-8 py-6 flex justify-between items-center">
-          <div>
-            <h1 className="text-3xl text-black brand-name">
-              Cloth <span className="brand-bold">ON-OF</span>
-            </h1>
-            <p className="text-gray-600 mt-1">Bienvenido, {username} {isAdmin && '(Admin)'}</p>
+          <div className="flex items-center gap-4">
+            <img 
+              src="/logo.png" 
+              alt="Control ON-OF" 
+              className="h-12 object-contain"
+            />
+            <div>
+              <h1 className="text-3xl text-black brand-name">
+                Cloth <span className="brand-bold">ON-OF</span>
+              </h1>
+              <p className="text-gray-600 mt-1">Bienvenido, {username} {isAdmin && '(Admin)'}</p>
+            </div>
           </div>
           <div className="flex items-center gap-4">
             <DropdownMenu>
@@ -179,16 +217,104 @@ export default function Dashboard() {
               </div>
             </div>
 
-            <div className="bg-white border-4 border-black p-6 shadow-[8px_8px_0px_0px_rgba(0,0,0,1)]">
-              <div className="flex items-center justify-between">
-                <div>
-                  <p className="text-gray-600 text-sm font-medium">Unidades Vendidas Hoy</p>
-                  <p className="text-3xl font-bold text-black mt-2" data-testid="total-sales">{stats.today_units_sold}</p>
-                  <p className="text-xs text-gray-500 mt-1">{new Date().toLocaleDateString('es')}</p>
-                </div>
-                <ShoppingCart className="w-10 h-10 text-black" />
-              </div>
-            </div>
+            <Dialog open={showSalesModal} onOpenChange={setShowSalesModal}>
+              <DialogTrigger asChild>
+                <button 
+                  onClick={handleOpenSalesModal}
+                  className="bg-white border-4 border-black p-6 shadow-[8px_8px_0px_0px_rgba(0,0,0,1)] hover:translate-x-1 hover:translate-y-1 hover:shadow-none transition-all text-left"
+                  data-testid="units-sold-today-btn"
+                >
+                  <div className="flex items-center justify-between">
+                    <div>
+                      <p className="text-gray-600 text-sm font-medium">Unidades Vendidas Hoy</p>
+                      <p className="text-3xl font-bold text-black mt-2" data-testid="total-sales">{stats.today_units_sold}</p>
+                      <p className="text-xs text-blue-600 mt-1 font-medium">Click para ver detalle</p>
+                    </div>
+                    <ShoppingCart className="w-10 h-10 text-black" />
+                  </div>
+                </button>
+              </DialogTrigger>
+              <DialogContent className="max-w-4xl max-h-[80vh] overflow-y-auto border-4 border-black rounded-none">
+                <DialogHeader>
+                  <DialogTitle className="text-2xl font-bold">Resumen de Ventas de Hoy</DialogTitle>
+                  <DialogDescription>
+                    {new Date().toLocaleDateString('es', { weekday: 'long', year: 'numeric', month: 'long', day: 'numeric' })}
+                  </DialogDescription>
+                </DialogHeader>
+                
+                {loadingSales ? (
+                  <div className="py-8 text-center text-gray-500">Cargando ventas...</div>
+                ) : todaySales.length === 0 ? (
+                  <div className="py-8 text-center text-gray-500">No hay ventas registradas hoy</div>
+                ) : (
+                  <div className="space-y-4">
+                    {todaySales.map((sale) => (
+                      <div key={sale.id} className="border-2 border-black p-4 bg-gray-50">
+                        <div className="flex justify-between items-start mb-3">
+                          <div>
+                            <h3 className="font-bold text-lg">{sale.nombre_cliente}</h3>
+                            <p className="text-sm text-gray-600">{new Date(sale.created_at).toLocaleTimeString('es', { hour: '2-digit', minute: '2-digit' })}</p>
+                          </div>
+                          <div className="text-right">
+                            <p className="text-sm text-gray-600">Total</p>
+                            <p className="text-xl font-bold">${sale.total.toLocaleString()}</p>
+                          </div>
+                        </div>
+                        
+                        <div className="space-y-2">
+                          <h4 className="font-semibold text-sm text-gray-700 border-b border-gray-300 pb-1">Productos vendidos:</h4>
+                          {sale.items.map((item, idx) => (
+                            <div key={idx} className="flex justify-between items-center py-2 border-b border-gray-200 last:border-0">
+                              <div className="flex items-center gap-3 flex-1">
+                                {item.imagen_url && (
+                                  <img 
+                                    src={`${BACKEND_URL}${item.imagen_url}`}
+                                    alt={item.descripcion}
+                                    className="w-12 h-12 object-cover border border-black"
+                                  />
+                                )}
+                                <div>
+                                  <p className="font-medium">{item.referencia}</p>
+                                  <p className="text-xs text-gray-600">{item.descripcion}</p>
+                                </div>
+                              </div>
+                              <div className="text-sm text-gray-700">
+                                <span className="font-medium">Color:</span> {item.color}
+                              </div>
+                              <div className="text-sm text-gray-700">
+                                <span className="font-medium">Talla:</span> {item.talla}
+                              </div>
+                              <div className="text-sm text-gray-700">
+                                <span className="font-medium">Cant:</span> {item.cantidad}
+                              </div>
+                              <div className="text-right">
+                                <p className="font-bold">${item.subtotal.toLocaleString()}</p>
+                                <p className="text-xs text-gray-500">${item.precio_venta.toLocaleString()} c/u</p>
+                              </div>
+                            </div>
+                          ))}
+                        </div>
+                      </div>
+                    ))}
+                    
+                    <div className="border-t-4 border-black pt-4 mt-4">
+                      <div className="flex justify-between items-center">
+                        <div>
+                          <p className="text-gray-600">Total de ventas: {todaySales.length}</p>
+                          <p className="text-gray-600">Total unidades: {stats.today_units_sold}</p>
+                        </div>
+                        {isAdmin && (
+                          <div className="text-right">
+                            <p className="text-gray-600">Ingresos totales</p>
+                            <p className="text-2xl font-bold">${todaySales.reduce((sum, sale) => sum + sale.total, 0).toLocaleString()}</p>
+                          </div>
+                        )}
+                      </div>
+                    </div>
+                  </div>
+                )}
+              </DialogContent>
+            </Dialog>
 
             {isAdmin && (
               <>

@@ -46,8 +46,12 @@ export default function Login({ setIsAuthenticated }) {
     <div className="min-h-screen flex items-center justify-center bg-white">
       <div className="w-full max-w-md px-8">
         <div className="text-center mb-12">
-          <div className="inline-flex items-center justify-center w-16 h-16 bg-black rounded-full mb-6">
-            <Lock className="w-8 h-8 text-white" />
+          <div className="flex justify-center mb-6">
+            <img 
+              src="/logo.png" 
+              alt="Control ON-OF" 
+              className="h-20 object-contain"
+            />
           </div>
           <h1 className="text-4xl text-black mb-2 brand-name">
             Cloth <span className="brand-bold">ON-OF</span>
