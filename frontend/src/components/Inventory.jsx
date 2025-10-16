@@ -393,6 +393,20 @@ export default function Inventory() {
             </DialogContent>
           </Dialog>
           )}
+          </div>
+          
+          {/* Búsqueda */}
+          <div className="relative mt-4">
+            <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 w-5 h-5 text-gray-400" />
+            <Input
+              data-testid="search-input"
+              type="text"
+              placeholder="Buscar por referencia o descripción..."
+              value={searchTerm}
+              onChange={(e) => setSearchTerm(e.target.value)}
+              className="pl-10 rounded-none border-2 border-black h-12"
+            />
+          </div>
         </div>
       </div>
 
