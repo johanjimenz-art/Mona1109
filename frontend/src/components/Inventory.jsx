@@ -61,10 +61,24 @@ export default function Inventory() {
         headers: { Authorization: `Bearer ${token}` }
       });
       setGroupedProducts(response.data);
+      setFilteredGroupedProducts(response.data);
     } catch (error) {
       toast.error('Error al cargar productos agrupados');
     }
   };
+
+  // Filtrar productos cuando cambia el término de búsqueda
+  useEffect(() => {
+    if (searchTerm.trim() === '') {
+      setFilteredGroupedProducts(groupedProducts);
+    } else {
+      const filtered = groupedProducts.filter(group =>
+        group.referencia.toLowerCase().includes(searchTerm.toLowerCase()) ||
+        group.descripcion.toLowerCase().includes(searchTerm.toLowerCase())
+      );
+      setFilteredGroupedProducts(filtered);
+    }
+  }, [searchTerm, groupedProducts]);
 
   const handleSubmit = async (e) => {
     e.preventDefault();
