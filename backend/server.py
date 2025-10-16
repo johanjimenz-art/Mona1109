@@ -726,6 +726,85 @@ async def get_unread_count(current_user: dict = Depends(get_current_user)):
     count = await db.notifications.count_documents({"leido": False})
     return {"count": count}
 
+# ============ Export Routes ============
+
+@api_router.get("/sales/export/excel")
+async def export_sales_excel(current_user: dict = Depends(get_admin_user)):
+    try:
+        # Obtener todas las ventas
+        sales = await db.sales.find({}, {"_id": 0}).sort("created_at", -1).to_list(10000)
+        
+        # Crear workbook
+        wb = Workbook()
+        ws = wb.active
+        ws.title = "Ventas"
+        
+        # Estilos
+        header_fill = PatternFill(start_color="000000", end_color="000000", fill_type="solid")
+        header_font = Font(color="FFFFFF", bold=True)
+        
+        # Headers
+        headers = ["Fecha", "Hora", "Cliente", "Documento", "Dirección", "Teléfono", 
+                   "Referencia", "Descripción", "Talla", "Color", "Cantidad", "Precio Unit.", 
+                   "Subtotal", "Total Venta", "Estado Despacho", "Observaciones", "Vendido Por"]
+        
+        for col, header in enumerate(headers, 1):
+            cell = ws.cell(row=1, column=col, value=header)
+            cell.fill = header_fill
+            cell.font = header_font
+            cell.alignment = Alignment(horizontal="center", vertical="center")
+        
+        # Datos
+        row = 2
+        for sale in sales:
+            created_at = sale.get('created_at')
+            if isinstance(created_at, str):
+                created_at = datetime.fromisoformat(created_at)
+            
+            fecha = created_at.strftime("%d/%m/%Y")
+            hora = created_at.strftime("%H:%M")
+            
+            # Una fila por cada item
+            for item in sale.get('items', []):
+                ws.cell(row=row, column=1, value=fecha)
+                ws.cell(row=row, column=2, value=hora)
+                ws.cell(row=row, column=3, value=sale.get('nombre_cliente', ''))
+                ws.cell(row=row, column=4, value=sale.get('documento_cliente', ''))
+                ws.cell(row=row, column=5, value=sale.get('direccion_cliente', ''))
+                ws.cell(row=row, column=6, value=sale.get('celular_cliente', ''))
+                ws.cell(row=row, column=7, value=item.get('referencia', ''))
+                ws.cell(row=row, column=8, value=item.get('descripcion', ''))
+                ws.cell(row=row, column=9, value=item.get('talla', ''))
+                ws.cell(row=row, column=10, value=item.get('color', ''))
+                ws.cell(row=row, column=11, value=item.get('cantidad', 0))
+                ws.cell(row=row, column=12, value=item.get('precio_venta', 0))
+                ws.cell(row=row, column=13, value=item.get('subtotal', 0))
+                ws.cell(row=row, column=14, value=sale.get('total', 0))
+                ws.cell(row=row, column=15, value=sale.get('estado_despacho', ''))
+                ws.cell(row=row, column=16, value=sale.get('observaciones', ''))
+                ws.cell(row=row, column=17, value=sale.get('created_by', ''))
+                row += 1
+        
+        # Ajustar ancho de columnas
+        for col in range(1, len(headers) + 1):
+            ws.column_dimensions[chr(64 + col)].width = 15
+        
+        # Guardar en memoria
+        excel_file = io.BytesIO()
+        wb.save(excel_file)
+        excel_file.seek(0)
+        
+        # Nombre del archivo con fecha
+        filename = f"ventas_{datetime.now().strftime('%Y%m%d_%H%M%S')}.xlsx"
+        
+        return StreamingResponse(
+            excel_file,
+            media_type="application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",
+            headers={"Content-Disposition": f"attachment; filename={filename}"}
+        )
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=f"Error al generar Excel: {str(e)}")
+
 # ============ Stats Route ============
 
 @api_router.get("/stats")
