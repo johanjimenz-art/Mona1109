@@ -15,6 +15,8 @@ export default function Inventory() {
   const navigate = useNavigate();
   const [products, setProducts] = useState([]);
   const [groupedProducts, setGroupedProducts] = useState([]);
+  const [filteredGroupedProducts, setFilteredGroupedProducts] = useState([]);
+  const [searchTerm, setSearchTerm] = useState('');
   const [expandedRef, setExpandedRef] = useState(null);
   const [isDialogOpen, setIsDialogOpen] = useState(false);
   const [editingProduct, setEditingProduct] = useState(null);
