@@ -384,97 +384,120 @@ export default function Inventory() {
             <table className="w-full">
               <thead>
                 <tr className="border-b-4 border-black bg-black text-white">
+                  <th className="px-6 py-4 text-left font-bold w-12"></th>
                   <th className="px-6 py-4 text-left font-bold">Imagen</th>
                   <th className="px-6 py-4 text-left font-bold">Referencia</th>
                   <th className="px-6 py-4 text-left font-bold">Descripción</th>
-                  <th className="px-6 py-4 text-left font-bold">Talla</th>
                   <th className="px-6 py-4 text-left font-bold">Color</th>
                   {isAdmin && <th className="px-6 py-4 text-left font-bold">Costo Fab.</th>}
                   <th className="px-6 py-4 text-left font-bold">Precio Venta</th>
-                  <th className="px-6 py-4 text-left font-bold">Stock</th>
-                  <th className="px-6 py-4 text-left font-bold">Estado</th>
-                  <th className="px-6 py-4 text-left font-bold">Acciones</th>
+                  <th className="px-6 py-4 text-left font-bold">Stock Total</th>
                 </tr>
               </thead>
               <tbody>
-                {products.map((product, index) => (
-                  <tr key={product.id} className={index % 2 === 0 ? 'bg-gray-50' : 'bg-white'} data-testid={`product-row-${index}`}>
-                    <td className="px-6 py-4">
-                      {product.imagen_url ? (
-                        <img 
-                          src={`${BACKEND_URL}${product.imagen_url}`} 
-                          alt={product.descripcion}
-                          className="w-12 h-12 object-cover border-2 border-black"
-                        />
-                      ) : (
-                        <div className="w-12 h-12 border-2 border-black flex items-center justify-center bg-gray-200">
-                          <ImageIcon className="w-6 h-6 text-gray-400" />
-                        </div>
-                      )}
-                    </td>
-                    <td className="px-6 py-4 font-medium">{product.referencia}</td>
-                    <td className="px-6 py-4">{product.descripcion}</td>
-                    <td className="px-6 py-4">{product.talla}</td>
-                    <td className="px-6 py-4">{product.color}</td>
-                    {isAdmin && <td className="px-6 py-4">${product.costo_fabricacion?.toLocaleString() || 'N/A'}</td>}
-                    <td className="px-6 py-4">${product.precio_venta.toLocaleString()}</td>
-                    <td className="px-6 py-4">
-                      <span className={`font-bold ${product.cantidad_stock < 5 ? 'text-red-600' : 'text-black'}`}>
-                        {product.cantidad_stock}
-                      </span>
-                    </td>
-                    <td className="px-6 py-4">
-                      {product.aprobado ? (
-                        <CheckCircle className="w-5 h-5 text-green-600" />
-                      ) : (
-                        <XCircle className="w-5 h-5 text-red-600" />
-                      )}
-                    </td>
-                    <td className="px-6 py-4">
-                      <div className="flex gap-2">
-                        {canModify && (
-                          <>
-                            <Button
-                              data-testid={`edit-product-btn-${index}`}
-                              onClick={() => handleEdit(product)}
-                              variant="outline"
-                              size="sm"
-                              className="border-2 border-black rounded-none hover:bg-black hover:text-white"
-                            >
-                              <Pencil className="w-4 h-4" />
-                            </Button>
-                            {!product.aprobado && (
-                              <Button
-                                data-testid={`approve-product-btn-${index}`}
-                                onClick={() => handleApprove(product.id)}
-                                variant="outline"
-                                size="sm"
-                                className="border-2 border-green-600 text-green-600 rounded-none hover:bg-green-600 hover:text-white"
-                              >
-                                <CheckCircle className="w-4 h-4" />
-                              </Button>
-                            )}
-                            <Button
-                              data-testid={`delete-product-btn-${index}`}
-                              onClick={() => handleDelete(product.id)}
-                              variant="outline"
-                              size="sm"
-                              className="border-2 border-black rounded-none hover:bg-red-600 hover:text-white hover:border-red-600"
-                            >
-                              <Trash2 className="w-4 h-4" />
-                            </Button>
-                          </>
+                {groupedProducts.map((group, index) => (
+                  <>
+                    <tr 
+                      key={group.referencia} 
+                      className={`cursor-pointer hover:bg-gray-100 ${index % 2 === 0 ? 'bg-gray-50' : 'bg-white'}`}
+                      onClick={() => setExpandedRef(expandedRef === group.referencia ? null : group.referencia)}
+                      data-testid={`product-group-${index}`}
+                    >
+                      <td className="px-6 py-4">
+                        <button className="text-2xl font-bold">
+                          {expandedRef === group.referencia ? '−' : '+'}
+                        </button>
+                      </td>
+                      <td className="px-6 py-4">
+                        {group.imagen_url ? (
+                          <img 
+                            src={`${BACKEND_URL}${group.imagen_url}`} 
+                            alt={group.descripcion}
+                            className="w-16 h-16 object-cover border-2 border-black"
+                          />
+                        ) : (
+                          <div className="w-16 h-16 border-2 border-black flex items-center justify-center bg-gray-200">
+                            <ImageIcon className="w-8 h-8 text-gray-400" />
+                          </div>
                         )}
-                        {!canModify && (
-                          <span className="text-sm text-gray-500">Solo lectura</span>
-                        )}
-                      </div>
-                    </td>
-                  </tr>
+                      </td>
+                      <td className="px-6 py-4 font-bold text-lg">{group.referencia}</td>
+                      <td className="px-6 py-4">{group.descripcion}</td>
+                      <td className="px-6 py-4">{group.color}</td>
+                      {isAdmin && <td className="px-6 py-4">${group.costo_fabricacion?.toLocaleString() || 'N/A'}</td>}
+                      <td className="px-6 py-4 font-medium">${group.precio_venta.toLocaleString()}</td>
+                      <td className="px-6 py-4">
+                        <span className={`font-bold text-lg ${group.stock_total < 10 ? 'text-red-600' : 'text-black'}`}>
+                          {group.stock_total} unidades
+                        </span>
+                      </td>
+                    </tr>
+                    
+                    {/* Expandir tallas */}
+                    {expandedRef === group.referencia && (
+                      <tr>
+                        <td colSpan={isAdmin ? 8 : 7} className="p-0">
+                          <div className="bg-blue-50 border-t-2 border-b-2 border-blue-200">
+                            <div className="p-4">
+                              <h4 className="font-bold text-sm text-blue-900 mb-3">📏 Desglose por Tallas:</h4>
+                              <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-3">
+                                {group.tallas.map((talla, tallaIndex) => {
+                                  const product = products.find(p => p.id === talla.id);
+                                  return (
+                                    <div key={talla.id} className="bg-white border-2 border-black p-4">
+                                      <div className="flex justify-between items-start mb-2">
+                                        <div>
+                                          <span className="font-bold text-xl">Talla {talla.talla}</span>
+                                          {!talla.aprobado && (
+                                            <span className="ml-2 text-xs bg-yellow-200 border border-yellow-600 px-2 py-1">Pendiente</span>
+                                          )}
+                                        </div>
+                                        <span className={`text-2xl font-bold ${talla.cantidad_stock < 3 ? 'text-red-600' : 'text-green-600'}`}>
+                                          {talla.cantidad_stock}
+                                        </span>
+                                      </div>
+                                      {canModify && product && (
+                                        <div className="flex gap-2 mt-3">
+                                          <Button
+                                            data-testid={`edit-size-btn-${index}-${tallaIndex}`}
+                                            onClick={(e) => {
+                                              e.stopPropagation();
+                                              handleEdit(product);
+                                            }}
+                                            size="sm"
+                                            className="flex-1 bg-black text-white hover:bg-gray-800 rounded-none"
+                                          >
+                                            <Pencil className="w-3 h-3 mr-1" />
+                                            Editar
+                                          </Button>
+                                          <Button
+                                            data-testid={`delete-size-btn-${index}-${tallaIndex}`}
+                                            onClick={(e) => {
+                                              e.stopPropagation();
+                                              handleDelete(product.id);
+                                            }}
+                                            size="sm"
+                                            variant="outline"
+                                            className="border-2 border-red-600 text-red-600 rounded-none hover:bg-red-600 hover:text-white"
+                                          >
+                                            <Trash2 className="w-3 h-3" />
+                                          </Button>
+                                        </div>
+                                      )}
+                                    </div>
+                                  );
+                                })}
+                              </div>
+                            </div>
+                          </div>
+                        </td>
+                      </tr>
+                    )}
+                  </>
                 ))}
               </tbody>
             </table>
-            {products.length === 0 && (
+            {groupedProducts.length === 0 && (
               <div className="text-center py-12 text-gray-500" data-testid="no-products">
                 No hay productos en el inventario
               </div>
