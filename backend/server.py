@@ -606,6 +606,30 @@ async def create_sale(sale_data: SaleCreate, current_user: dict = Depends(get_cu
     
     return sale
 
+@api_router.get("/sales/today/detail")
+async def get_today_sales_detail(current_user: dict = Depends(get_current_user)):
+    # Obtener ventas de hoy
+    today_start = datetime.now(timezone.utc).replace(hour=0, minute=0, second=0, microsecond=0)
+    today_end = datetime.now(timezone.utc).replace(hour=23, minute=59, second=59, microsecond=999999)
+    
+    sales = await db.sales.find({
+        "created_at": {
+            "$gte": today_start.isoformat(),
+            "$lte": today_end.isoformat()
+        }
+    }, {"_id": 0}).sort("created_at", -1).to_list(1000)
+    
+    # Procesar ventas
+    detailed_sales = []
+    for sale in sales:
+        if isinstance(sale['created_at'], str):
+            sale['created_at'] = datetime.fromisoformat(sale['created_at'])
+        if isinstance(sale.get('updated_at'), str):
+            sale['updated_at'] = datetime.fromisoformat(sale['updated_at'])
+        detailed_sales.append(sale)
+    
+    return detailed_sales
+
 @api_router.get("/sales", response_model=List[Sale])
 async def get_sales(current_user: dict = Depends(get_current_user)):
     sales = await db.sales.find({}, {"_id": 0}).sort("created_at", -1).to_list(1000)
