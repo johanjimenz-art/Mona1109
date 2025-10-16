@@ -240,13 +240,15 @@ async def register(user_data: UserCreate, current_user: dict = Depends(get_admin
     
     doc = user.model_dump()
     doc['created_at'] = doc['created_at'].isoformat()
-    doc['permissions'] = doc['permissions'].model_dump()
+    # Convert permissions to dict if it's not already
+    if isinstance(doc['permissions'], UserPermissions):
+        doc['permissions'] = doc['permissions'].model_dump()
     await db.users.insert_one(doc)
     
     access_token = create_access_token(data={
         "sub": user.username, 
         "role": user.role,
-        "permissions": permissions.model_dump()
+        "permissions": permissions.model_dump() if isinstance(permissions, UserPermissions) else permissions
     })
     return Token(
         access_token=access_token, 
