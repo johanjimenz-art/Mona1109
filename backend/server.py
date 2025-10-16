@@ -809,27 +809,46 @@ async def export_sales_excel(current_user: dict = Depends(get_admin_user)):
 
 @api_router.get("/stats")
 async def get_stats(current_user: dict = Depends(get_current_user)):
-    total_products = await db.products.count_documents({"aprobado": True})
-    total_sales = await db.sales.count_documents({})
+    # Total unidades en stock (suma de cantidad_stock de todos los productos aprobados)
+    products = await db.products.find(
+        {"aprobado": True},
+        {"_id": 0, "cantidad_stock": 1, "precio_venta": 1}
+    ).to_list(10000)
+    
+    total_units_in_stock = sum(p['cantidad_stock'] for p in products)
+    
+    # Valor del stock usando precio de venta
+    total_stock_value = sum(p['cantidad_stock'] * p['precio_venta'] for p in products)
+    
+    # Obtener ventas de hoy
+    today_start = datetime.now(timezone.utc).replace(hour=0, minute=0, second=0, microsecond=0)
+    today_end = datetime.now(timezone.utc).replace(hour=23, minute=59, second=59, microsecond=999999)
+    
+    today_sales = await db.sales.find({
+        "created_at": {
+            "$gte": today_start.isoformat(),
+            "$lte": today_end.isoformat()
+        }
+    }, {"_id": 0, "items": 1, "total": 1}).to_list(10000)
+    
+    # Calcular unidades vendidas hoy
+    today_units_sold = 0
+    today_revenue = 0
+    
+    for sale in today_sales:
+        today_revenue += sale.get('total', 0)
+        for item in sale.get('items', []):
+            today_units_sold += item.get('cantidad', 0)
     
     stats = {
-        "total_products": total_products,
-        "total_sales": total_sales
+        "total_units_in_stock": total_units_in_stock,
+        "today_units_sold": today_units_sold,
+        "total_stock_value": total_stock_value
     }
     
-    # Only admins see financial data
+    # Only admins see revenue
     if current_user["role"] == "admin":
-        sales = await db.sales.find({}, {"_id": 0, "total": 1}).to_list(10000)
-        total_revenue = sum(sale['total'] for sale in sales)
-        
-        products = await db.products.find(
-            {"aprobado": True},
-            {"_id": 0, "cantidad_stock": 1, "precio_venta": 1}
-        ).to_list(10000)
-        total_stock_value = sum(p['cantidad_stock'] * p['precio_venta'] for p in products)
-        
-        stats["total_revenue"] = total_revenue
-        stats["total_stock_value"] = total_stock_value
+        stats["today_revenue"] = today_revenue
     
     return stats
 
