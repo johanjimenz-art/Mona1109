@@ -94,19 +94,33 @@ export default function SalesHistory() {
 
   return (
     <div className="min-h-screen bg-white">
+      {/* Header */}
       <div className="border-b-4 border-black bg-white">
-        <div className="max-w-7xl mx-auto px-8 py-6 flex items-center gap-4">
-          <Button
-            data-testid="back-btn"
-            onClick={() => navigate('/')}
-            variant="outline"
-            className="border-2 border-black rounded-none hover:bg-black hover:text-white"
-          >
-            <ArrowLeft className="w-4 h-4" />
-          </Button>
-          <h1 className="text-3xl font-bold text-black" style={{ fontFamily: 'Space Grotesk, sans-serif' }}>
-            Historial de Ventas y Despachos
-          </h1>
+        <div className="max-w-7xl mx-auto px-8 py-6 flex items-center justify-between">
+          <div className="flex items-center gap-4">
+            <Button
+              data-testid="back-btn"
+              onClick={() => navigate('/')}
+              variant="outline"
+              className="border-2 border-black rounded-none hover:bg-black hover:text-white"
+            >
+              <ArrowLeft className="w-4 h-4" />
+            </Button>
+            <h1 className="text-3xl font-bold text-black" style={{ fontFamily: 'Space Grotesk, sans-serif' }}>
+              Historial de Ventas y Despachos
+            </h1>
+          </div>
+          
+          {isAdmin && (
+            <Button
+              data-testid="export-excel-btn"
+              onClick={handleExportExcel}
+              className="bg-green-600 text-white hover:bg-green-700 rounded-none border-2 border-black"
+            >
+              <Download className="w-4 h-4 mr-2" />
+              Exportar a Excel
+            </Button>
+          )}
         </div>
       </div>
 
