@@ -50,12 +50,9 @@ export default function Login({ setIsAuthenticated }) {
             <img 
               src="/logo.png" 
               alt="Control ON-OF" 
-              className="h-20 object-contain"
+              className="h-24 object-contain"
             />
           </div>
-          <h1 className="text-4xl text-black mb-2 brand-name">
-            Cloth <span className="brand-bold">ON-OF</span>
-          </h1>
           <p className="text-gray-600">Sistema de Gestión de Inventario</p>
         </div>
 
