@@ -286,52 +286,96 @@ export default function Sales() {
                 Buscar Producto
               </h2>
               <div className="space-y-4">
+                <div>
+                  <Label htmlFor="referencia" className="text-black font-medium mb-2 block">Referencia</Label>
+                  <Select 
+                    value={searchData.referencia} 
+                    onValueChange={(value) => setSearchData({ ...searchData, referencia: value })}
+                  >
+                    <SelectTrigger className="rounded-none border-2 border-black h-10" data-testid="referencia-select">
+                      <SelectValue placeholder="Selecciona una referencia" />
+                    </SelectTrigger>
+                    <SelectContent className="max-h-60 border-2 border-black rounded-none">
+                      {uniqueReferencias.map((ref) => {
+                        const productInfo = products.find(p => p.referencia === ref);
+                        const imageUrl = getProductImage(ref);
+                        return (
+                          <SelectItem key={ref} value={ref} className="py-2">
+                            <div className="flex items-center gap-2">
+                              {imageUrl ? (
+                                <img 
+                                  src={`${BACKEND_URL}${imageUrl}`}
+                                  alt={ref}
+                                  className="w-8 h-8 object-cover border border-black"
+                                />
+                              ) : (
+                                <div className="w-8 h-8 border border-black flex items-center justify-center bg-gray-200">
+                                  <ImageIcon className="w-4 h-4 text-gray-400" />
+                                </div>
+                              )}
+                              <div className="text-sm">
+                                <p className="font-medium">{ref}</p>
+                                {productInfo && (
+                                  <p className="text-xs text-gray-600">{productInfo.descripcion}</p>
+                                )}
+                              </div>
+                            </div>
+                          </SelectItem>
+                        );
+                      })}
+                    </SelectContent>
+                  </Select>
+                </div>
+
                 <div className="grid grid-cols-2 gap-4">
                   <div>
-                    <Label htmlFor="referencia" className="text-black font-medium mb-2 block">Referencia</Label>
-                    <Input
-                      id="referencia"
-                      data-testid="referencia-search-input"
-                      name="referencia"
-                      value={searchData.referencia}
-                      onChange={handleSearchChange}
-                      className="rounded-none border-2 border-black"
-                    />
-                  </div>
-                  <div>
                     <Label htmlFor="talla" className="text-black font-medium mb-2 block">Talla</Label>
-                    <Input
-                      id="talla"
-                      data-testid="talla-search-input"
-                      name="talla"
-                      value={searchData.talla}
-                      onChange={handleSearchChange}
-                      className="rounded-none border-2 border-black"
-                    />
+                    <Select 
+                      value={searchData.talla} 
+                      onValueChange={(value) => setSearchData({ ...searchData, talla: value })}
+                      disabled={!searchData.referencia}
+                    >
+                      <SelectTrigger className="rounded-none border-2 border-black h-10" data-testid="talla-select">
+                        <SelectValue placeholder="Selecciona talla" />
+                      </SelectTrigger>
+                      <SelectContent className="border-2 border-black rounded-none">
+                        {availableTallas.map((talla) => (
+                          <SelectItem key={talla} value={talla}>{talla}</SelectItem>
+                        ))}
+                      </SelectContent>
+                    </Select>
                   </div>
+
                   <div>
                     <Label htmlFor="color" className="text-black font-medium mb-2 block">Color</Label>
-                    <Input
-                      id="color"
-                      data-testid="color-search-input"
-                      name="color"
-                      value={searchData.color}
-                      onChange={handleSearchChange}
-                      className="rounded-none border-2 border-black"
-                    />
+                    <Select 
+                      value={searchData.color} 
+                      onValueChange={(value) => setSearchData({ ...searchData, color: value })}
+                      disabled={!searchData.referencia}
+                    >
+                      <SelectTrigger className="rounded-none border-2 border-black h-10" data-testid="color-select">
+                        <SelectValue placeholder="Selecciona color" />
+                      </SelectTrigger>
+                      <SelectContent className="border-2 border-black rounded-none">
+                        {availableColors.map((color) => (
+                          <SelectItem key={color} value={color}>{color}</SelectItem>
+                        ))}
+                      </SelectContent>
+                    </Select>
                   </div>
-                  <div>
-                    <Label htmlFor="cantidad" className="text-black font-medium mb-2 block">Cantidad</Label>
-                    <Input
-                      id="cantidad"
-                      data-testid="cantidad-search-input"
-                      type="number"
-                      min="1"
-                      value={cantidad}
-                      onChange={(e) => setCantidad(parseInt(e.target.value) || 1)}
-                      className="rounded-none border-2 border-black"
-                    />
-                  </div>
+                </div>
+
+                <div>
+                  <Label htmlFor="cantidad" className="text-black font-medium mb-2 block">Cantidad</Label>
+                  <Input
+                    id="cantidad"
+                    data-testid="cantidad-search-input"
+                    type="number"
+                    min="1"
+                    value={cantidad}
+                    onChange={(e) => setCantidad(parseInt(e.target.value) || 1)}
+                    className="rounded-none border-2 border-black h-10"
+                  />
                 </div>
                 <Button
                   data-testid="add-to-cart-btn"
