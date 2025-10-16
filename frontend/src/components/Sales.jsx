@@ -4,8 +4,15 @@ import axios from 'axios';
 import { Button } from './ui/button';
 import { Input } from './ui/input';
 import { Label } from './ui/label';
-import { ArrowLeft, Plus, Trash2, ShoppingCart, Image as ImageIcon } from 'lucide-react';
+import { ArrowLeft, Plus, Trash2, ShoppingCart, Image as ImageIcon, ChevronDown } from 'lucide-react';
 import { toast } from 'sonner';
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from './ui/select';
 
 const BACKEND_URL = process.env.REACT_APP_BACKEND_URL;
 const API = `${BACKEND_URL}/api`;
