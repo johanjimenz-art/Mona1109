@@ -14,6 +14,8 @@ export default function SalesHistory() {
   const navigate = useNavigate();
   const [sales, setSales] = useState([]);
   const [expandedSale, setExpandedSale] = useState(null);
+  const role = localStorage.getItem('role');
+  const isAdmin = role === 'admin';
 
   useEffect(() => {
     fetchSales();
