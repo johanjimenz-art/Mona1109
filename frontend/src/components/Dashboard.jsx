@@ -138,9 +138,6 @@ export default function Dashboard() {
               className="h-12 object-contain"
             />
             <div>
-              <h1 className="text-3xl text-black brand-name">
-                Cloth <span className="brand-bold">ON-OF</span>
-              </h1>
               <p className="text-gray-600 mt-1">Bienvenido, {username} {isAdmin && '(Admin)'}</p>
             </div>
           </div>
