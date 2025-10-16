@@ -427,7 +427,7 @@ export default function Inventory() {
                 </tr>
               </thead>
               <tbody>
-                {groupedProducts.map((group, index) => (
+                {filteredGroupedProducts.map((group, index) => (
                   <>
                     <tr 
                       key={group.referencia} 
