@@ -116,53 +116,48 @@ export default function Sales() {
       return;
     }
 
-    try {
-      const token = localStorage.getItem('token');
-      const response = await axios.get(
-        `${API}/products/search?referencia=${searchData.referencia}&talla=${searchData.talla}&color=${searchData.color}`,
-        { headers: { Authorization: `Bearer ${token}` } }
-      );
+    const product = getProductBySelection();
+    
+    if (!product) {
+      toast.error('Producto no encontrado o no aprobado');
+      return;
+    }
 
-      const product = response.data;
+    if (product.cantidad_stock < cantidad) {
+      toast.error(`Stock insuficiente. Disponible: ${product.cantidad_stock}`);
+      return;
+    }
 
-      if (product.cantidad_stock < cantidad) {
+    // Check if product already in cart
+    const existingIndex = cart.findIndex(item => item.product_id === product.id);
+    if (existingIndex >= 0) {
+      const newCart = [...cart];
+      const newCantidad = newCart[existingIndex].cantidad + cantidad;
+      if (newCantidad > product.cantidad_stock) {
         toast.error(`Stock insuficiente. Disponible: ${product.cantidad_stock}`);
         return;
       }
-
-      // Check if product already in cart
-      const existingIndex = cart.findIndex(item => item.product_id === product.id);
-      if (existingIndex >= 0) {
-        const newCart = [...cart];
-        const newCantidad = newCart[existingIndex].cantidad + cantidad;
-        if (newCantidad > product.cantidad_stock) {
-          toast.error(`Stock insuficiente. Disponible: ${product.cantidad_stock}`);
-          return;
-        }
-        newCart[existingIndex].cantidad = newCantidad;
-        newCart[existingIndex].subtotal = newCantidad * product.precio_venta;
-        setCart(newCart);
-      } else {
-        const item = {
-          product_id: product.id,
-          referencia: product.referencia,
-          descripcion: product.descripcion,
-          talla: product.talla,
-          color: product.color,
-          precio_venta: product.precio_venta,
-          cantidad: cantidad,
-          subtotal: cantidad * product.precio_venta,
-          imagen_url: product.imagen_url
-        };
-        setCart([...cart, item]);
-      }
-
-      setSearchData({ referencia: '', talla: '', color: '' });
-      setCantidad(1);
-      toast.success('Producto agregado al carrito');
-    } catch (error) {
-      toast.error(error.response?.data?.detail || 'Producto no encontrado');
+      newCart[existingIndex].cantidad = newCantidad;
+      newCart[existingIndex].subtotal = newCantidad * product.precio_venta;
+      setCart(newCart);
+    } else {
+      const item = {
+        product_id: product.id,
+        referencia: product.referencia,
+        descripcion: product.descripcion,
+        talla: product.talla,
+        color: product.color,
+        precio_venta: product.precio_venta,
+        cantidad: cantidad,
+        subtotal: cantidad * product.precio_venta,
+        imagen_url: product.imagen_url
+      };
+      setCart([...cart, item]);
     }
+
+    setSearchData({ referencia: '', talla: '', color: '' });
+    setCantidad(1);
+    toast.success('Producto agregado al carrito');
   };
 
   const removeFromCart = (index) => {
