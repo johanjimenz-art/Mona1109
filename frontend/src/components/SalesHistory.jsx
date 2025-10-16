@@ -2,7 +2,7 @@ import { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import axios from 'axios';
 import { Button } from './ui/button';
-import { ArrowLeft, Package, Truck, CheckCircle, Image as ImageIcon } from 'lucide-react';
+import { ArrowLeft, Package, Truck, CheckCircle, Image as ImageIcon, Download } from 'lucide-react';
 import { toast } from 'sonner';
 import { format } from 'date-fns';
 import { es } from 'date-fns/locale';
