@@ -135,7 +135,7 @@ export default function Dashboard() {
             <img 
               src="/logo.png" 
               alt="Control ON-OF" 
-              className="h-20 object-contain"
+              className="h-36 object-contain"
             />
             <div>
               <p className="text-gray-600 mt-1">Bienvenido, {username} {isAdmin && '(Admin)'}</p>
