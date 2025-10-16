@@ -171,8 +171,9 @@ export default function Dashboard() {
             <div className="bg-white border-4 border-black p-6 shadow-[8px_8px_0px_0px_rgba(0,0,0,1)]">
               <div className="flex items-center justify-between">
                 <div>
-                  <p className="text-gray-600 text-sm font-medium">Total Productos</p>
-                  <p className="text-3xl font-bold text-black mt-2" data-testid="total-products">{stats.total_products}</p>
+                  <p className="text-gray-600 text-sm font-medium">Total Unidades en Stock</p>
+                  <p className="text-3xl font-bold text-black mt-2" data-testid="total-products">{stats.total_units_in_stock}</p>
+                  <p className="text-xs text-gray-500 mt-1">Todas las tallas</p>
                 </div>
                 <Package className="w-10 h-10 text-black" />
               </div>
@@ -181,8 +182,9 @@ export default function Dashboard() {
             <div className="bg-white border-4 border-black p-6 shadow-[8px_8px_0px_0px_rgba(0,0,0,1)]">
               <div className="flex items-center justify-between">
                 <div>
-                  <p className="text-gray-600 text-sm font-medium">Total Ventas</p>
-                  <p className="text-3xl font-bold text-black mt-2" data-testid="total-sales">{stats.total_sales}</p>
+                  <p className="text-gray-600 text-sm font-medium">Unidades Vendidas Hoy</p>
+                  <p className="text-3xl font-bold text-black mt-2" data-testid="total-sales">{stats.today_units_sold}</p>
+                  <p className="text-xs text-gray-500 mt-1">{new Date().toLocaleDateString('es')}</p>
                 </div>
                 <ShoppingCart className="w-10 h-10 text-black" />
               </div>
@@ -193,8 +195,9 @@ export default function Dashboard() {
                 <div className="bg-white border-4 border-black p-6 shadow-[8px_8px_0px_0px_rgba(0,0,0,1)]">
                   <div className="flex items-center justify-between">
                     <div>
-                      <p className="text-gray-600 text-sm font-medium">Ingresos Totales</p>
-                      <p className="text-3xl font-bold text-black mt-2" data-testid="total-revenue">${stats.total_revenue?.toLocaleString()}</p>
+                      <p className="text-gray-600 text-sm font-medium">Ingresos de Hoy</p>
+                      <p className="text-3xl font-bold text-black mt-2" data-testid="total-revenue">${stats.today_revenue?.toLocaleString()}</p>
+                      <p className="text-xs text-gray-500 mt-1">{new Date().toLocaleDateString('es')}</p>
                     </div>
                     <TrendingUp className="w-10 h-10 text-black" />
                   </div>
@@ -203,8 +206,9 @@ export default function Dashboard() {
                 <div className="bg-white border-4 border-black p-6 shadow-[8px_8px_0px_0px_rgba(0,0,0,1)]">
                   <div className="flex items-center justify-between">
                     <div>
-                      <p className="text-gray-600 text-sm font-medium">Valor Stock</p>
+                      <p className="text-gray-600 text-sm font-medium">Valor Total del Stock</p>
                       <p className="text-3xl font-bold text-black mt-2" data-testid="stock-value">${stats.total_stock_value?.toLocaleString()}</p>
+                      <p className="text-xs text-gray-500 mt-1">Precio de venta</p>
                     </div>
                     <Package className="w-10 h-10 text-black" />
                   </div>
