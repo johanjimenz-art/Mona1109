@@ -37,12 +37,77 @@ export default function Sales() {
   const [availableTallas, setAvailableTallas] = useState([]);
   const [availableColors, setAvailableColors] = useState([]);
 
+  useEffect(() => {
+    fetchProducts();
+  }, []);
+
+  useEffect(() => {
+    // Update available tallas when referencia changes
+    if (searchData.referencia) {
+      const filtered = products.filter(p => p.referencia === searchData.referencia);
+      const tallas = [...new Set(filtered.map(p => p.talla))];
+      setAvailableTallas(tallas);
+      
+      // Reset talla if not available
+      if (!tallas.includes(searchData.talla)) {
+        setSearchData(prev => ({ ...prev, talla: '' }));
+      }
+    } else {
+      setAvailableTallas([]);
+    }
+  }, [searchData.referencia, products]);
+
+  useEffect(() => {
+    // Update available colors when referencia changes
+    if (searchData.referencia) {
+      const filtered = products.filter(p => p.referencia === searchData.referencia);
+      const colors = [...new Set(filtered.map(p => p.color))];
+      setAvailableColors(colors);
+      
+      // Reset color if not available
+      if (!colors.includes(searchData.color)) {
+        setSearchData(prev => ({ ...prev, color: '' }));
+      }
+    } else {
+      setAvailableColors([]);
+    }
+  }, [searchData.referencia, products]);
+
+  const fetchProducts = async () => {
+    try {
+      const token = localStorage.getItem('token');
+      const response = await axios.get(`${API}/products`, {
+        headers: { Authorization: `Bearer ${token}` }
+      });
+      
+      // Filter only approved products
+      const approvedProducts = response.data.filter(p => p.aprobado);
+      setProducts(approvedProducts);
+      
+      // Get unique references
+      const refs = [...new Set(approvedProducts.map(p => p.referencia))];
+      setUniqueReferencias(refs);
+    } catch (error) {
+      toast.error('Error al cargar productos');
+    }
+  };
+
   const handleClientChange = (e) => {
     setClientData({ ...clientData, [e.target.name]: e.target.value });
   };
 
-  const handleSearchChange = (e) => {
-    setSearchData({ ...searchData, [e.target.name]: e.target.value });
+  const getProductBySelection = () => {
+    return products.find(p => 
+      p.referencia === searchData.referencia && 
+      p.talla === searchData.talla && 
+      p.color === searchData.color &&
+      p.aprobado
+    );
+  };
+
+  const getProductImage = (referencia) => {
+    const product = products.find(p => p.referencia === referencia && p.imagen_url);
+    return product?.imagen_url;
   };
 
   const addToCart = async () => {
