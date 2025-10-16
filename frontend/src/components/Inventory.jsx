@@ -529,9 +529,9 @@ export default function Inventory() {
                 ))}
               </tbody>
             </table>
-            {groupedProducts.length === 0 && (
+            {filteredGroupedProducts.length === 0 && (
               <div className="text-center py-12 text-gray-500" data-testid="no-products">
-                No hay productos en el inventario
+                {searchTerm ? 'No se encontraron productos con ese criterio' : 'No hay productos en el inventario'}
               </div>
             )}
           </div>
