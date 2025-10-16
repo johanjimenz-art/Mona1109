@@ -48,6 +48,29 @@ export default function SalesHistory() {
     }
   };
 
+  const handleExportExcel = async () => {
+    try {
+      const token = localStorage.getItem('token');
+      const response = await axios.get(`${API}/sales/export/excel`, {
+        headers: { Authorization: `Bearer ${token}` },
+        responseType: 'blob'
+      });
+      
+      // Crear enlace de descarga
+      const url = window.URL.createObjectURL(new Blob([response.data]));
+      const link = document.createElement('a');
+      link.href = url;
+      link.setAttribute('download', `ventas_${new Date().toISOString().split('T')[0]}.xlsx`);
+      document.body.appendChild(link);
+      link.click();
+      link.remove();
+      
+      toast.success('Excel exportado exitosamente');
+    } catch (error) {
+      toast.error('Error al exportar Excel');
+    }
+  };
+
   const getStatusInfo = (status) => {
     const statusMap = {
       pendiente: {
