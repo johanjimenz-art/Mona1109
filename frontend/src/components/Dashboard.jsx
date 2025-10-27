@@ -2,7 +2,7 @@ import { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import axios from 'axios';
 import { Button } from './ui/button';
-import { Package, ShoppingCart, History, LogOut, TrendingUp, Users, Bell } from 'lucide-react';
+import { Package, ShoppingCart, History, LogOut, TrendingUp, Users, Bell, CreditCard } from 'lucide-react';
 import { toast } from 'sonner';
 import {
   DropdownMenu,
