@@ -124,6 +124,16 @@ function App() {
               </AdminRoute>
             }
           />
+
+          <Route
+            path="/credits"
+            element={
+              <ProtectedRoute>
+                <Credits />
+              </ProtectedRoute>
+            }
+          />
+
         </Routes>
       </BrowserRouter>
       <Toaster position="top-right" />
