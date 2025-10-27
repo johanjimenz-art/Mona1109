@@ -937,6 +937,210 @@ async def get_stats(current_user: dict = Depends(get_current_user)):
     
     return stats
 
+
+# ============ Credit Sales Routes ============
+
+@api_router.post("/credit-sales", response_model=CreditSale)
+async def create_credit_sale(
+    credit_data: CreditSaleCreate,
+    current_user: dict = Depends(get_current_user)
+):
+    # Get sale info
+    sale = await db.sales.find_one({"id": credit_data.sale_id}, {"_id": 0})
+    if not sale:
+        raise HTTPException(status_code=404, detail="Sale not found")
+    
+    # Calculate saldo pendiente
+    saldo_pendiente = sale['total'] - credit_data.abono_inicial
+    
+    credit_sale = CreditSale(
+        sale_id=credit_data.sale_id,
+        nombre_cliente=sale['nombre_cliente'],
+        documento_cliente=sale['documento_cliente'],
+        celular_cliente=sale['celular_cliente'],
+        total=sale['total'],
+        abono_inicial=credit_data.abono_inicial,
+        saldo_pendiente=saldo_pendiente,
+        fecha_pago=credit_data.fecha_pago,
+        observaciones=credit_data.observaciones,
+        created_by=current_user["username"]
+    )
+    
+    doc = credit_sale.model_dump()
+    doc['created_at'] = doc['created_at'].isoformat()
+    doc['updated_at'] = doc['updated_at'].isoformat()
+    doc['fecha_pago'] = doc['fecha_pago'].isoformat()
+    await db.credit_sales.insert_one(doc)
+    
+    # Create notification
+    await create_notification(
+        tipo="credito_nuevo",
+        mensaje=f"Nueva venta a crédito de {sale['nombre_cliente']} - Saldo: ${saldo_pendiente:,.0f}",
+        sale_id=credit_data.sale_id
+    )
+    
+    return credit_sale
+
+@api_router.get("/credit-sales")
+async def get_credit_sales(
+    estado: Optional[str] = None,
+    current_user: dict = Depends(get_current_user)
+):
+    query = {}
+    if estado:
+        query["estado"] = estado
+    
+    credit_sales = await db.credit_sales.find(query, {"_id": 0}).sort("fecha_pago", 1).to_list(1000)
+    
+    for credit in credit_sales:
+        if isinstance(credit.get('created_at'), str):
+            credit['created_at'] = datetime.fromisoformat(credit['created_at'])
+        if isinstance(credit.get('updated_at'), str):
+            credit['updated_at'] = datetime.fromisoformat(credit['updated_at'])
+        if isinstance(credit.get('fecha_pago'), str):
+            credit['fecha_pago'] = datetime.fromisoformat(credit['fecha_pago'])
+    
+    return credit_sales
+
+@api_router.get("/credit-sales/{credit_id}")
+async def get_credit_sale(
+    credit_id: str,
+    current_user: dict = Depends(get_current_user)
+):
+    credit = await db.credit_sales.find_one({"id": credit_id}, {"_id": 0})
+    
+    if not credit:
+        raise HTTPException(status_code=404, detail="Credit sale not found")
+    
+    if isinstance(credit.get('created_at'), str):
+        credit['created_at'] = datetime.fromisoformat(credit['created_at'])
+    if isinstance(credit.get('updated_at'), str):
+        credit['updated_at'] = datetime.fromisoformat(credit['updated_at'])
+    if isinstance(credit.get('fecha_pago'), str):
+        credit['fecha_pago'] = datetime.fromisoformat(credit['fecha_pago'])
+    
+    # Get payments for this credit
+    payments = await db.payments.find({"credit_sale_id": credit_id}, {"_id": 0}).sort("created_at", -1).to_list(100)
+    for payment in payments:
+        if isinstance(payment.get('created_at'), str):
+            payment['created_at'] = datetime.fromisoformat(payment['created_at'])
+        if isinstance(payment.get('fecha_pago'), str):
+            payment['fecha_pago'] = datetime.fromisoformat(payment['fecha_pago'])
+    
+    credit['payments'] = payments
+    
+    return credit
+
+@api_router.post("/credit-sales/{credit_id}/payments", response_model=Payment)
+async def create_payment(
+    credit_id: str,
+    payment_data: PaymentCreate,
+    current_user: dict = Depends(get_current_user)
+):
+    # Get credit sale
+    credit = await db.credit_sales.find_one({"id": credit_id}, {"_id": 0})
+    if not credit:
+        raise HTTPException(status_code=404, detail="Credit sale not found")
+    
+    # Validate payment amount
+    if payment_data.monto <= 0:
+        raise HTTPException(status_code=400, detail="Payment amount must be positive")
+    
+    if payment_data.monto > credit['saldo_pendiente']:
+        raise HTTPException(status_code=400, detail="Payment amount exceeds remaining balance")
+    
+    # Create payment
+    payment = Payment(
+        credit_sale_id=credit_id,
+        monto=payment_data.monto,
+        observaciones=payment_data.observaciones,
+        registrado_por=current_user["username"]
+    )
+    
+    doc = payment.model_dump()
+    doc['created_at'] = doc['created_at'].isoformat()
+    doc['fecha_pago'] = doc['fecha_pago'].isoformat()
+    await db.payments.insert_one(doc)
+    
+    # Update credit sale
+    new_saldo = credit['saldo_pendiente'] - payment_data.monto
+    new_estado = "pagado" if new_saldo <= 0 else credit['estado']
+    
+    await db.credit_sales.update_one(
+        {"id": credit_id},
+        {
+            "$set": {
+                "saldo_pendiente": new_saldo,
+                "estado": new_estado,
+                "updated_at": datetime.now(timezone.utc).isoformat()
+            }
+        }
+    )
+    
+    # Create notification
+    await create_notification(
+        tipo="pago_abono",
+        mensaje=f"Abono de ${payment_data.monto:,.0f} - {credit['nombre_cliente']} - Saldo: ${new_saldo:,.0f}",
+        sale_id=credit['sale_id']
+    )
+    
+    return payment
+
+@api_router.get("/credit-sales/alerts/upcoming")
+async def get_upcoming_payment_alerts(current_user: dict = Depends(get_current_user)):
+    """Get credits with payments due in the next 2 days"""
+    today = datetime.now(timezone.utc).replace(hour=0, minute=0, second=0, microsecond=0)
+    two_days_later = today + timedelta(days=2)
+    
+    credits = await db.credit_sales.find({
+        "estado": "pendiente",
+        "fecha_pago": {
+            "$gte": today.isoformat(),
+            "$lte": two_days_later.isoformat()
+        }
+    }, {"_id": 0}).to_list(1000)
+    
+    for credit in credits:
+        if isinstance(credit.get('fecha_pago'), str):
+            credit['fecha_pago'] = datetime.fromisoformat(credit['fecha_pago'])
+        if isinstance(credit.get('created_at'), str):
+            credit['created_at'] = datetime.fromisoformat(credit['created_at'])
+        if isinstance(credit.get('updated_at'), str):
+            credit['updated_at'] = datetime.fromisoformat(credit['updated_at'])
+    
+    return credits
+
+@api_router.get("/credit-sales/alerts/overdue")
+async def get_overdue_payment_alerts(current_user: dict = Depends(get_current_user)):
+    """Get credits with overdue payments"""
+    today = datetime.now(timezone.utc).replace(hour=0, minute=0, second=0, microsecond=0)
+    
+    credits = await db.credit_sales.find({
+        "estado": "pendiente",
+        "fecha_pago": {
+            "$lt": today.isoformat()
+        }
+    }, {"_id": 0}).to_list(1000)
+    
+    # Mark as vencido
+    for credit in credits:
+        if credit.get('estado') == 'pendiente':
+            await db.credit_sales.update_one(
+                {"id": credit['id']},
+                {"$set": {"estado": "vencido"}}
+            )
+            credit['estado'] = 'vencido'
+        
+        if isinstance(credit.get('fecha_pago'), str):
+            credit['fecha_pago'] = datetime.fromisoformat(credit['fecha_pago'])
+        if isinstance(credit.get('created_at'), str):
+            credit['created_at'] = datetime.fromisoformat(credit['created_at'])
+        if isinstance(credit.get('updated_at'), str):
+            credit['updated_at'] = datetime.fromisoformat(credit['updated_at'])
+    
+    return credits
+
+
 # Include the router in the main app
 app.include_router(api_router)
 
