@@ -99,6 +99,16 @@ export default function Login({ setIsAuthenticated }) {
               {loading ? 'Procesando...' : 'Iniciar Sesión'}
             </Button>
           </form>
+          
+          <div className="mt-4 text-center">
+            <button
+              type="button"
+              onClick={() => navigate('/password-recovery')}
+              className="text-sm text-gray-600 hover:text-black underline"
+            >
+              ¿Olvidaste tu contraseña? Contacta al administrador
+            </button>
+          </div>
         </div>
 
         <div className="mt-6 text-center text-sm text-gray-600">
