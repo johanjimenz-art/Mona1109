@@ -161,6 +161,44 @@ class Notification(BaseModel):
     leido: bool = False
     created_at: datetime = Field(default_factory=lambda: datetime.now(timezone.utc))
 
+
+class CreditSale(BaseModel):
+    model_config = ConfigDict(extra="ignore")
+    id: str = Field(default_factory=lambda: str(uuid.uuid4()))
+    sale_id: str
+    nombre_cliente: str
+    documento_cliente: str
+    celular_cliente: str
+    total: float
+    abono_inicial: float
+    saldo_pendiente: float
+    fecha_pago: datetime
+    estado: str = "pendiente"  # pendiente, vencido, pagado
+    observaciones: Optional[str] = None
+    created_by: Optional[str] = None
+    created_at: datetime = Field(default_factory=lambda: datetime.now(timezone.utc))
+    updated_at: datetime = Field(default_factory=lambda: datetime.now(timezone.utc))
+
+class CreditSaleCreate(BaseModel):
+    sale_id: str
+    abono_inicial: float
+    fecha_pago: datetime
+    observaciones: Optional[str] = None
+
+class Payment(BaseModel):
+    model_config = ConfigDict(extra="ignore")
+    id: str = Field(default_factory=lambda: str(uuid.uuid4()))
+    credit_sale_id: str
+    monto: float
+    fecha_pago: datetime = Field(default_factory=lambda: datetime.now(timezone.utc))
+    observaciones: Optional[str] = None
+    registrado_por: Optional[str] = None
+    created_at: datetime = Field(default_factory=lambda: datetime.now(timezone.utc))
+
+class PaymentCreate(BaseModel):
+    monto: float
+    observaciones: Optional[str] = None
+
 # ============ Auth Helper Functions ============
 
 def hash_password(password: str) -> str:
