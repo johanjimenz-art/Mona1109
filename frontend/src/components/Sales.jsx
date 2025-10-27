@@ -36,6 +36,14 @@ export default function Sales() {
   const [uniqueReferencias, setUniqueReferencias] = useState([]);
   const [availableTallas, setAvailableTallas] = useState([]);
   const [availableColors, setAvailableColors] = useState([]);
+  
+  // Credit sale states
+  const [isCredit, setIsCredit] = useState(false);
+  const [creditData, setCreditData] = useState({
+    abono_inicial: '',
+    fecha_pago: '',
+    observaciones: ''
+  });
 
   useEffect(() => {
     fetchProducts();
