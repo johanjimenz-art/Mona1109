@@ -189,9 +189,29 @@ export default function Sales() {
       return;
     }
 
+    // Validate credit data if is credit sale
+    if (isCredit) {
+      if (!creditData.abono_inicial || parseFloat(creditData.abono_inicial) < 0) {
+        toast.error('Ingrese un abono inicial válido');
+        return;
+      }
+      if (!creditData.fecha_pago) {
+        toast.error('Seleccione la fecha de pago');
+        return;
+      }
+      
+      const total = calculateTotal();
+      if (parseFloat(creditData.abono_inicial) > total) {
+        toast.error('El abono inicial no puede ser mayor al total');
+        return;
+      }
+    }
+
     try {
       const token = localStorage.getItem('token');
-      await axios.post(
+      
+      // Create sale first
+      const saleResponse = await axios.post(
         `${API}/sales`,
         {
           ...clientData,
@@ -200,7 +220,24 @@ export default function Sales() {
         { headers: { Authorization: `Bearer ${token}` } }
       );
 
-      toast.success('Venta realizada exitosamente. Se ha enviado notificación al equipo.');
+      // If credit sale, create credit record
+      if (isCredit) {
+        await axios.post(
+          `${API}/credit-sales`,
+          {
+            sale_id: saleResponse.data.id,
+            abono_inicial: parseFloat(creditData.abono_inicial),
+            fecha_pago: new Date(creditData.fecha_pago).toISOString(),
+            observaciones: creditData.observaciones
+          },
+          { headers: { Authorization: `Bearer ${token}` } }
+        );
+        toast.success('Venta a crédito registrada exitosamente');
+      } else {
+        toast.success('Venta realizada exitosamente');
+      }
+
+      // Reset form
       setClientData({
         nombre_cliente: '',
         documento_cliente: '',
@@ -208,6 +245,12 @@ export default function Sales() {
         celular_cliente: ''
       });
       setCart([]);
+      setIsCredit(false);
+      setCreditData({
+        abono_inicial: '',
+        fecha_pago: '',
+        observaciones: ''
+      });
     } catch (error) {
       toast.error(error.response?.data?.detail || 'Error al realizar la venta');
     }
