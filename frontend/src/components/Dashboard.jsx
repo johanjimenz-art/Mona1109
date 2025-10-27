@@ -403,6 +403,26 @@ export default function Dashboard() {
             <p className="text-gray-600">Todas las ventas realizadas</p>
           </button>
 
+
+          {/* Créditos - Todos los usuarios */}
+          <button
+            data-testid="credits-nav-btn"
+            onClick={() => navigate('/credits')}
+            className="bg-white border-4 border-black p-8 hover:translate-x-1 hover:translate-y-1 hover:shadow-none shadow-[12px_12px_0px_0px_rgba(0,0,0,1)] transition-all"
+          >
+            <CreditCard className="w-16 h-16 text-black mx-auto mb-4" />
+            <h3 className="text-2xl font-bold text-black mb-2" style={{ fontFamily: 'Space Grotesk, sans-serif' }}>
+              Créditos
+            </h3>
+            <p className="text-gray-600">Gestiona ventas a crédito</p>
+            {stats && stats.total_credits_pending > 0 && (
+              <div className="mt-2 bg-red-500 text-white px-3 py-1 inline-block">
+                {stats.total_credits_pending} pendientes
+              </div>
+            )}
+          </button>
+
+
           {/* Usuarios - Solo admin */}
           {isAdmin && (
             <button
