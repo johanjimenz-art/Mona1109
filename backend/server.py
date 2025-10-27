@@ -400,6 +400,27 @@ async def update_user_permissions(
     
     return {"message": "Permissions updated successfully"}
 
+
+@api_router.put("/users/{user_id}/reset-password")
+async def reset_user_password(
+    user_id: str,
+    new_password: str,
+    current_user: dict = Depends(get_admin_user)
+):
+    """Admin can reset any user's password"""
+    password_hash = hash_password(new_password)
+    
+    result = await db.users.update_one(
+        {"id": user_id},
+        {"$set": {"password_hash": password_hash}}
+    )
+    
+    if result.matched_count == 0:
+        raise HTTPException(status_code=404, detail="User not found")
+    
+    return {"message": "Password reset successfully"}
+
+
 # ============ Product Routes ============
 
 @api_router.post("/products", response_model=Product)
