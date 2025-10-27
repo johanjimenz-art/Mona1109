@@ -931,6 +931,10 @@ async def get_stats(current_user: dict = Depends(get_current_user)):
         "total_stock_value": total_stock_value
     }
     
+    # Count credits
+    total_credits = await db.credit_sales.count_documents({"estado": {"$in": ["pendiente", "vencido"]}})
+    stats["total_credits_pending"] = total_credits
+    
     # Only admins see revenue
     if current_user["role"] == "admin":
         stats["today_revenue"] = today_revenue
