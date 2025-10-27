@@ -9,6 +9,7 @@ import Sales from './components/Sales';
 import Dispatch from './components/Dispatch';
 import SalesHistory from './components/SalesHistory';
 import UserManagement from './components/UserManagement';
+import Credits from './components/Credits';
 import { Toaster } from './components/ui/sonner';
 import './App.css';
 
