@@ -502,13 +502,76 @@ export default function Sales() {
                 </div>
               </div>
 
+              {/* Credit Sale Option */}
+              <div className="mb-6 border-2 border-black p-4">
+                <div className="flex items-center gap-2 mb-4">
+                  <input
+                    type="checkbox"
+                    id="is-credit"
+                    checked={isCredit}
+                    onChange={(e) => setIsCredit(e.target.checked)}
+                    className="w-4 h-4 border-2 border-black"
+                  />
+                  <label htmlFor="is-credit" className="font-bold cursor-pointer">
+                    Venta a Crédito
+                  </label>
+                </div>
+
+                {isCredit && (
+                  <div className="space-y-3 border-t-2 border-black pt-3">
+                    <div>
+                      <Label htmlFor="abono-inicial" className="text-sm">Abono Inicial ($)</Label>
+                      <Input
+                        id="abono-inicial"
+                        type="number"
+                        min="0"
+                        step="0.01"
+                        value={creditData.abono_inicial}
+                        onChange={(e) => setCreditData({ ...creditData, abono_inicial: e.target.value })}
+                        className="rounded-none border-2 border-black h-10"
+                        placeholder="0.00"
+                      />
+                    </div>
+                    <div>
+                      <Label htmlFor="fecha-pago" className="text-sm">Fecha de Pago</Label>
+                      <Input
+                        id="fecha-pago"
+                        type="date"
+                        value={creditData.fecha_pago}
+                        onChange={(e) => setCreditData({ ...creditData, fecha_pago: e.target.value })}
+                        className="rounded-none border-2 border-black h-10"
+                        min={new Date().toISOString().split('T')[0]}
+                      />
+                    </div>
+                    <div>
+                      <Label htmlFor="credit-observations" className="text-sm">Observaciones</Label>
+                      <Input
+                        id="credit-observations"
+                        value={creditData.observaciones}
+                        onChange={(e) => setCreditData({ ...creditData, observaciones: e.target.value })}
+                        className="rounded-none border-2 border-black h-10"
+                        placeholder="Notas adicionales"
+                      />
+                    </div>
+                    {creditData.abono_inicial && (
+                      <div className="bg-gray-100 p-2 border-2 border-black">
+                        <p className="text-sm">
+                          <span className="font-bold">Saldo Pendiente:</span> $
+                          {(calculateTotal() - parseFloat(creditData.abono_inicial || 0)).toLocaleString()}
+                        </p>
+                      </div>
+                    )}
+                  </div>
+                )}
+              </div>
+
               <Button
                 data-testid="complete-sale-btn"
                 onClick={handleSubmitSale}
                 disabled={cart.length === 0}
                 className="w-full bg-black text-white hover:bg-gray-800 rounded-none h-14 text-lg font-bold"
               >
-                Completar Venta
+                {isCredit ? 'Registrar Venta a Crédito' : 'Completar Venta'}
               </Button>
             </div>
           </div>
