@@ -107,6 +107,34 @@ export default function UserManagement() {
     }
   };
 
+
+  const handleResetPassword = async () => {
+    if (!newPassword || newPassword.length < 4) {
+      toast.error('La contraseña debe tener al menos 4 caracteres');
+      return;
+    }
+
+    try {
+      const token = localStorage.getItem('token');
+      await axios.put(
+        `${API}/users/${selectedUser.id}/reset-password`,
+        null,
+        { 
+          params: { new_password: newPassword },
+          headers: { Authorization: `Bearer ${token}` } 
+        }
+      );
+      
+      toast.success(`Contraseña actualizada para ${selectedUser.username}`);
+      setIsResettingPassword(false);
+      setNewPassword('');
+      setSelectedUser(null);
+    } catch (error) {
+      toast.error(error.response?.data?.detail || 'Error al resetear contraseña');
+    }
+  };
+
+
   const handleChange = (e) => {
     setFormData({ ...formData, [e.target.name]: e.target.value });
   };
