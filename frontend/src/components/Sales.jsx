@@ -182,6 +182,40 @@ export default function Sales() {
     toast.success('Producto removido del carrito');
   };
 
+
+  const applyDiscount = (index, discountValue, isPercentage) => {
+    if (!canApplyDiscount && role !== 'admin') {
+      toast.error('No tienes permiso para aplicar descuentos');
+      return;
+    }
+
+    const newCart = [...cart];
+    const item = newCart[index];
+    const basePrice = item.precio_venta * item.cantidad;
+
+    if (isPercentage) {
+      const percentage = parseFloat(discountValue) || 0;
+      if (percentage < 0 || percentage > 100) {
+        toast.error('El porcentaje debe estar entre 0 y 100');
+        return;
+      }
+      item.descuento_porcentaje = percentage;
+      item.descuento = (basePrice * percentage) / 100;
+    } else {
+      const discount = parseFloat(discountValue) || 0;
+      if (discount < 0 || discount > basePrice) {
+        toast.error('El descuento no puede ser mayor al precio total del producto');
+        return;
+      }
+      item.descuento = discount;
+      item.descuento_porcentaje = basePrice > 0 ? (discount / basePrice) * 100 : 0;
+    }
+
+    item.subtotal = basePrice - item.descuento;
+    setCart(newCart);
+  };
+
+
   const calculateTotal = () => {
     return cart.reduce((sum, item) => sum + item.subtotal, 0);
   };
