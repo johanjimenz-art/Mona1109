@@ -152,7 +152,7 @@ export default function Sales() {
         return;
       }
       newCart[existingIndex].cantidad = newCantidad;
-      newCart[existingIndex].subtotal = newCantidad * product.precio_venta;
+      newCart[existingIndex].subtotal = newCantidad * product.precio_venta - (newCart[existingIndex].descuento || 0);
       setCart(newCart);
     } else {
       const item = {
@@ -163,6 +163,8 @@ export default function Sales() {
         color: product.color,
         precio_venta: product.precio_venta,
         cantidad: cantidad,
+        descuento: 0,
+        descuento_porcentaje: 0,
         subtotal: cantidad * product.precio_venta,
         imagen_url: product.imagen_url
       };
