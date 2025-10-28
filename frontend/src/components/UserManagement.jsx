@@ -295,6 +295,15 @@ export default function UserManagement() {
                 />
                 <span>Despacho - Gestionar envíos</span>
               </label>
+              <label className="flex items-center gap-2 cursor-pointer">
+                <input
+                  type="checkbox"
+                  checked={permissionsToEdit.descuentos}
+                  onChange={() => handleEditPermissionChange('descuentos')}
+                  className="w-5 h-5 border-2 border-black"
+                />
+                <span>Descuentos - Aplicar descuentos</span>
+              </label>
             </div>
             <Button
               onClick={handleUpdatePermissions}
