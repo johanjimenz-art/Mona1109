@@ -347,7 +347,8 @@ export default function UserManagement() {
                           {user.permissions?.inventario && <span className="px-2 py-1 bg-blue-100 border border-blue-600 text-xs">Inventario</span>}
                           {user.permissions?.venta && <span className="px-2 py-1 bg-green-100 border border-green-600 text-xs">Venta</span>}
                           {user.permissions?.despacho && <span className="px-2 py-1 bg-yellow-100 border border-yellow-600 text-xs">Despacho</span>}
-                          {!user.permissions?.inventario && !user.permissions?.venta && !user.permissions?.despacho && (
+                          {user.permissions?.descuentos && <span className="px-2 py-1 bg-purple-100 border border-purple-600 text-xs">Descuentos</span>}
+                          {!user.permissions?.inventario && !user.permissions?.venta && !user.permissions?.despacho && !user.permissions?.descuentos && (
                             <span className="text-sm text-gray-500">Sin permisos</span>
                           )}
                         </div>
