@@ -220,6 +220,16 @@ export default function Sales() {
     return cart.reduce((sum, item) => sum + item.subtotal, 0);
   };
 
+
+  const calculateSubtotalBeforeDiscount = () => {
+    return cart.reduce((sum, item) => sum + (item.precio_venta * item.cantidad), 0);
+  };
+
+  const calculateTotalDiscount = () => {
+    return cart.reduce((sum, item) => sum + (item.descuento || 0), 0);
+  };
+
+
   const handleSubmitSale = async () => {
     if (!clientData.nombre_cliente || !clientData.documento_cliente || !clientData.direccion_cliente || !clientData.celular_cliente) {
       toast.error('Complete todos los datos del cliente');
