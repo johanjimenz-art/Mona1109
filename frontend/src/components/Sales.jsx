@@ -261,13 +261,22 @@ export default function Sales() {
 
     try {
       const token = localStorage.getItem('token');
+      const username = localStorage.getItem('username');
+      
+      const subtotalBeforeDiscount = calculateSubtotalBeforeDiscount();
+      const totalDiscount = calculateTotalDiscount();
+      const total = calculateTotal();
       
       // Create sale first
       const saleResponse = await axios.post(
         `${API}/sales`,
         {
           ...clientData,
-          items: cart
+          items: cart,
+          subtotal: subtotalBeforeDiscount,
+          descuento_total: totalDiscount,
+          total: total,
+          aplicado_por: totalDiscount > 0 ? username : null
         },
         { headers: { Authorization: `Bearer ${token}` } }
       );
