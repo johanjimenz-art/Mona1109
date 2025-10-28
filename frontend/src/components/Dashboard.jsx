@@ -167,15 +167,26 @@ export default function Dashboard() {
                       {notifications.map((notif) => (
                         <div
                           key={notif.id}
-                          className={`p-2 text-sm border-2 border-black cursor-pointer ${
+                          className={`p-2 text-sm border-2 cursor-pointer ${
+                            notif.tipo === 'reset_password' 
+                              ? 'border-orange-500 bg-orange-50' 
+                              : 'border-black'
+                          } ${
                             notif.leido ? 'bg-gray-100' : 'bg-white'
                           }`}
                           onClick={() => {
                             markAsRead(notif.id);
-                            navigate('/sales-history');
+                            if (notif.tipo === 'reset_password') {
+                              navigate('/users');
+                            } else {
+                              navigate('/sales-history');
+                            }
                           }}
                         >
-                          <p className="font-medium">{notif.mensaje}</p>
+                          <p className="font-medium">
+                            {notif.tipo === 'reset_password' && '🔑 '}
+                            {notif.mensaje}
+                          </p>
                           <p className="text-xs text-gray-500 mt-1">
                             {new Date(notif.created_at).toLocaleString('es')}
                           </p>
