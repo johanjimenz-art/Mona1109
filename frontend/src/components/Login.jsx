@@ -52,6 +52,30 @@ export default function Login({ setIsAuthenticated }) {
     }
   };
 
+
+  const handleRequestPasswordReset = async () => {
+    if (!resetUsername) {
+      toast.error('Por favor ingresa tu nombre de usuario');
+      return;
+    }
+
+    setResetting(true);
+    try {
+      await axios.post(`${API}/auth/request-password-reset`, null, {
+        params: { username: resetUsername }
+      });
+      
+      toast.success('Solicitud enviada al administrador. Pronto recibirás tu nueva contraseña.');
+      setShowResetDialog(false);
+      setResetUsername('');
+    } catch (error) {
+      toast.error('Error al enviar solicitud');
+    } finally {
+      setResetting(false);
+    }
+  };
+
+
   return (
     <div className="min-h-screen flex items-center justify-center bg-white">
       <div className="w-full max-w-md px-8">
