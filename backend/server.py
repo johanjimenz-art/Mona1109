@@ -124,6 +124,8 @@ class SaleItem(BaseModel):
     color: str
     precio_venta: float
     cantidad: int
+    descuento: float = 0.0  # Descuento en valor absoluto
+    descuento_porcentaje: float = 0.0  # Descuento en porcentaje
     subtotal: float
     imagen_url: Optional[str] = None
 
