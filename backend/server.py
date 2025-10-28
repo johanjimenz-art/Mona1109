@@ -50,6 +50,7 @@ class UserPermissions(BaseModel):
     inventario: bool = False
     venta: bool = False
     despacho: bool = False
+    descuentos: bool = False
 
 class User(BaseModel):
     model_config = ConfigDict(extra="ignore")
