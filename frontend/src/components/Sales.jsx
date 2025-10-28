@@ -609,6 +609,18 @@ export default function Sales() {
               </div>
 
               <div className="border-t-4 border-black pt-4 mb-6">
+                {calculateTotalDiscount() > 0 && (
+                  <>
+                    <div className="flex justify-between items-center text-sm mb-1">
+                      <span className="text-gray-600">Subtotal:</span>
+                      <span className="text-gray-600">${calculateSubtotalBeforeDiscount().toLocaleString()}</span>
+                    </div>
+                    <div className="flex justify-between items-center text-sm mb-2">
+                      <span className="text-green-600 font-bold">Descuento Total:</span>
+                      <span className="text-green-600 font-bold">-${calculateTotalDiscount().toLocaleString()}</span>
+                    </div>
+                  </>
+                )}
                 <div className="flex justify-between items-center">
                   <span className="text-xl font-bold">Total:</span>
                   <span className="text-3xl font-bold" data-testid="cart-total">${calculateTotal().toLocaleString()}</span>
