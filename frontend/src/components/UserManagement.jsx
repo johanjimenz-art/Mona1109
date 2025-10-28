@@ -83,7 +83,8 @@ export default function UserManagement() {
     setPermissionsToEdit(user.permissions || {
       inventario: false,
       venta: false,
-      despacho: false
+      despacho: false,
+      descuentos: false
     });
     setIsEditingPermissions(true);
   };
