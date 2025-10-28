@@ -31,7 +31,8 @@ export default function UserManagement() {
   const [permissionsToEdit, setPermissionsToEdit] = useState({
     inventario: false,
     venta: false,
-    despacho: false
+    despacho: false,
+    descuentos: false
   });
 
   useEffect(() => {
