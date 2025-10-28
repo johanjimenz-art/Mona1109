@@ -444,14 +444,6 @@ async def request_password_reset(username: str):
     
     return {"message": "Solicitud enviada al administrador. Te contactarán pronto."}
 
-        {"$set": {"password_hash": password_hash}}
-    )
-    
-    if result.matched_count == 0:
-        raise HTTPException(status_code=404, detail="User not found")
-    
-    return {"message": "Password reset successfully"}
-
 
 # ============ Product Routes ============
 
