@@ -137,10 +137,13 @@ export default function Login({ setIsAuthenticated }) {
           <div className="mt-4 text-center">
             <button
               type="button"
-              onClick={() => navigate('/password-recovery')}
+              onClick={() => {
+                setResetUsername(username);
+                setShowResetDialog(true);
+              }}
               className="text-sm text-gray-600 hover:text-black underline"
             >
-              ¿Olvidaste tu contraseña? Contacta al administrador
+              ¿Olvidaste tu contraseña?
             </button>
           </div>
         </div>
@@ -149,6 +152,42 @@ export default function Login({ setIsAuthenticated }) {
           <p>Solo usuarios autorizados pueden acceder</p>
         </div>
       </div>
+
+      {/* Password Reset Dialog */}
+      <Dialog open={showResetDialog} onOpenChange={setShowResetDialog}>
+        <DialogContent className="border-4 border-black rounded-none max-w-md">
+          <DialogHeader>
+            <DialogTitle className="text-2xl font-bold">Recuperar Contraseña</DialogTitle>
+            <DialogDescription>
+              Ingresa tu nombre de usuario. El administrador recibirá una notificación y te asignará una nueva contraseña.
+            </DialogDescription>
+          </DialogHeader>
+
+          <div className="space-y-4 mt-4">
+            <div>
+              <Label htmlFor="reset-username" className="text-black font-medium mb-2 block">
+                Nombre de Usuario
+              </Label>
+              <Input
+                id="reset-username"
+                type="text"
+                value={resetUsername}
+                onChange={(e) => setResetUsername(e.target.value)}
+                className="rounded-none border-2 border-black focus:ring-0 focus:border-black h-12"
+                placeholder="Ingresa tu usuario"
+              />
+            </div>
+
+            <Button
+              onClick={handleRequestPasswordReset}
+              disabled={resetting}
+              className="w-full bg-black text-white hover:bg-gray-800 rounded-none h-12"
+            >
+              {resetting ? 'Enviando...' : 'Solicitar Recuperación'}
+            </Button>
+          </div>
+        </DialogContent>
+      </Dialog>
     </div>
   );
 }
