@@ -151,7 +151,8 @@ export default function UserManagement() {
                 permissions: {
                   inventario: false,
                   venta: false,
-                  despacho: false
+                  despacho: false,
+                  descuentos: false
                 }
               });
             }
