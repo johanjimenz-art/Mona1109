@@ -418,7 +418,13 @@ async def reset_user_password(
     
     result = await db.users.update_one(
         {"id": user_id},
-
+        {"$set": {"password_hash": password_hash}}
+    )
+    
+    if result.matched_count == 0:
+        raise HTTPException(status_code=404, detail="User not found")
+    
+    return {"message": "Password reset successfully"}
 
 @api_router.post("/auth/request-password-reset")
 async def request_password_reset(username: str):
