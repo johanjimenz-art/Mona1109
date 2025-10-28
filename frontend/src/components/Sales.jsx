@@ -45,6 +45,12 @@ export default function Sales() {
     observaciones: ''
   });
 
+  // Get user permissions
+  const permissions = JSON.parse(localStorage.getItem('permissions') || '{}');
+  const canApplyDiscount = permissions.descuentos || false;
+  const role = localStorage.getItem('role');
+  });
+
   useEffect(() => {
     fetchProducts();
   }, []);
