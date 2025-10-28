@@ -345,6 +345,40 @@ export default function UserManagement() {
         </DialogContent>
       </Dialog>
 
+
+      {/* Reset Password Dialog */}
+      <Dialog open={isResettingPassword} onOpenChange={setIsResettingPassword}>
+        <DialogContent className="border-4 border-black rounded-none">
+          <DialogHeader>
+            <DialogTitle>Resetear Contraseña de {selectedUser?.username}</DialogTitle>
+          </DialogHeader>
+          <div className="space-y-4 mt-4">
+            <div>
+              <Label htmlFor="new-password" className="text-black font-medium mb-2 block">
+                Nueva Contraseña
+              </Label>
+              <Input
+                id="new-password"
+                type="password"
+                value={newPassword}
+                onChange={(e) => setNewPassword(e.target.value)}
+                className="rounded-none border-2 border-black h-12"
+                placeholder="Ingresa la nueva contraseña"
+              />
+              <p className="text-xs text-gray-600 mt-1">Mínimo 4 caracteres</p>
+            </div>
+            <Button
+              onClick={handleResetPassword}
+              className="w-full bg-orange-500 text-white hover:bg-orange-600 rounded-none h-12"
+            >
+              <Lock className="w-4 h-4 mr-2" />
+              Actualizar Contraseña
+            </Button>
+          </div>
+        </DialogContent>
+      </Dialog>
+
+
       <div className="max-w-7xl mx-auto px-8 py-8">
         <div className="bg-white border-4 border-black">
           <div className="overflow-x-auto">
