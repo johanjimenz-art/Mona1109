@@ -418,6 +418,26 @@ async def reset_user_password(
     
     result = await db.users.update_one(
         {"id": user_id},
+
+
+@api_router.post("/auth/request-password-reset")
+async def request_password_reset(username: str):
+    """User requests password reset - creates notification for admin"""
+    user = await db.users.find_one({"username": username}, {"_id": 0})
+    
+    if not user:
+        # Don't reveal if user exists or not for security
+        return {"message": "Si el usuario existe, se ha notificado al administrador"}
+    
+    # Create notification for admin
+    await create_notification(
+        tipo="reset_password",
+        mensaje=f"Solicitud de recuperación de contraseña de: {username}",
+        user_id=user['id']
+    )
+    
+    return {"message": "Solicitud enviada al administrador. Te contactarán pronto."}
+
         {"$set": {"password_hash": password_hash}}
     )
     
