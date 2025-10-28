@@ -391,10 +391,22 @@ export default function UserManagement() {
                           onClick={() => handleEditPermissions(user)}
                           variant="outline"
                           size="sm"
-                          className="border-2 border-black rounded-none hover:bg-black hover:text-white"
+                          className="border-2 border-black rounded-none hover:bg-black hover:text-white mr-2"
                         >
                           <Edit className="w-4 h-4 mr-1" />
                           Editar Permisos
+                        </Button>
+                        <Button
+                          onClick={() => {
+                            setSelectedUser(user);
+                            setIsResettingPassword(true);
+                          }}
+                          variant="outline"
+                          size="sm"
+                          className="border-2 border-orange-500 text-orange-600 rounded-none hover:bg-orange-500 hover:text-white"
+                        >
+                          <Lock className="w-4 h-4 mr-1" />
+                          Resetear Contraseña
                         </Button>
                       )}
                     </td>
