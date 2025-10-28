@@ -137,9 +137,12 @@ class Sale(BaseModel):
     direccion_cliente: str
     celular_cliente: str
     items: List[SaleItem]
+    subtotal: float = 0.0  # Subtotal antes de descuentos
+    descuento_total: float = 0.0  # Total de descuentos aplicados
     total: float
     estado_despacho: str = "pendiente"  # pendiente, en_camino, despachado
     observaciones: Optional[str] = None  # Campo para observaciones
+    aplicado_por: Optional[str] = None  # Quien aplicó descuentos
     created_by: Optional[str] = None  # Hacer opcional para ventas viejas
     created_at: datetime = Field(default_factory=lambda: datetime.now(timezone.utc))
     updated_at: datetime = Field(default_factory=lambda: datetime.now(timezone.utc))
