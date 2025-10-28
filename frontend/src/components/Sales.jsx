@@ -532,6 +532,7 @@ export default function Sales() {
                             <p className="font-bold text-sm truncate">{item.referencia}</p>
                             <p className="text-xs text-gray-600 truncate">{item.descripcion}</p>
                             <p className="text-xs">Talla: {item.talla} | Color: {item.color}</p>
+                            <p className="text-xs text-gray-700">Precio: ${item.precio_venta.toLocaleString()} x {item.cantidad}</p>
                           </div>
                           <Button
                             data-testid={`remove-cart-item-btn-${index}`}
@@ -543,9 +544,60 @@ export default function Sales() {
                             <Trash2 className="w-4 h-4" />
                           </Button>
                         </div>
-                        <div className="flex justify-between items-center mt-2 pt-2 border-t-2 border-black">
+
+                        {/* Discount Section - Only if user has permission */}
+                        {(canApplyDiscount || role === 'admin') && (
+                          <div className="mb-2 p-2 bg-gray-50 border border-gray-300">
+                            <p className="text-xs font-bold mb-1">Aplicar Descuento:</p>
+                            <div className="grid grid-cols-2 gap-2">
+                              <div>
+                                <Input
+                                  type="number"
+                                  min="0"
+                                  step="0.01"
+                                  placeholder="$ Monto"
+                                  className="h-7 text-xs border-black"
+                                  onBlur={(e) => {
+                                    if (e.target.value) {
+                                      applyDiscount(index, e.target.value, false);
+                                    }
+                                  }}
+                                />
+                              </div>
+                              <div>
+                                <Input
+                                  type="number"
+                                  min="0"
+                                  max="100"
+                                  step="1"
+                                  placeholder="% Porcentaje"
+                                  className="h-7 text-xs border-black"
+                                  onBlur={(e) => {
+                                    if (e.target.value) {
+                                      applyDiscount(index, e.target.value, true);
+                                    }
+                                  }}
+                                />
+                              </div>
+                            </div>
+                            {item.descuento > 0 && (
+                              <p className="text-xs text-green-600 font-bold mt-1">
+                                Descuento aplicado: ${item.descuento.toLocaleString()} ({item.descuento_porcentaje.toFixed(1)}%)
+                              </p>
+                            )}
+                          </div>
+                        )}
+
+                        <div className="flex justify-between items-center pt-2 border-t-2 border-black">
                           <span className="text-xs">Cantidad: {item.cantidad}</span>
-                          <span className="font-bold text-sm">${item.subtotal.toLocaleString()}</span>
+                          <div className="text-right">
+                            {item.descuento > 0 && (
+                              <p className="text-xs text-gray-500 line-through">
+                                ${(item.precio_venta * item.cantidad).toLocaleString()}
+                              </p>
+                            )}
+                            <span className="font-bold text-sm">${item.subtotal.toLocaleString()}</span>
+                          </div>
                         </div>
                       </div>
                     </div>
