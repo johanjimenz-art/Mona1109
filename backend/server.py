@@ -313,7 +313,7 @@ async def setup_admin(user_data: UserCreate):
         raise HTTPException(status_code=400, detail="Admin already exists. Contact your administrator.")
     
     # Create first admin with all permissions
-    admin_permissions = UserPermissions(inventario=True, venta=True, despacho=True)
+    admin_permissions = UserPermissions(inventario=True, venta=True, despacho=True, descuentos=True)
     
     user = User(
         username=user_data.username,
