@@ -152,7 +152,7 @@ export default function Sales() {
       setCart([...cart, item]);
     }
 
-    setSearchData({ referencia: '', talla: '', color: '' });
+    setSearchData({ referencia: '', talla: '' });
     setCantidad(1);
     toast.success('Producto agregado al carrito');
   };
