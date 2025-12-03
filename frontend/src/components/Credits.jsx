@@ -332,18 +332,48 @@ export default function Credits() {
                           </div>
                         )}
 
-                        {credit.estado !== 'pagado' && (
-                          <Button
-                            onClick={() => {
-                              setSelectedCredit(credit);
-                              setShowPaymentModal(true);
-                            }}
-                            className="w-full bg-black text-white hover:bg-gray-800 rounded-none"
-                          >
-                            <DollarSign className="w-4 h-4 mr-2" />
-                            Registrar Abono
-                          </Button>
-                        )}
+                        <div className="flex gap-2">
+                          {credit.estado !== 'pagado' && (
+                            <Button
+                              onClick={() => {
+                                setSelectedCredit(credit);
+                                setShowPaymentModal(true);
+                              }}
+                              className="flex-1 bg-black text-white hover:bg-gray-800 rounded-none"
+                            >
+                              <DollarSign className="w-4 h-4 mr-2" />
+                              Registrar Abono
+                            </Button>
+                          )}
+                          
+                          {userRole === 'admin' && (
+                            <>
+                              <Button
+                                onClick={() => {
+                                  setSelectedCredit(credit);
+                                  setEditData({
+                                    saldo_pendiente: credit.saldo_pendiente,
+                                    fecha_pago: new Date(credit.fecha_pago).toISOString().split('T')[0],
+                                    observaciones: credit.observaciones || ''
+                                  });
+                                  setShowEditModal(true);
+                                }}
+                                variant="outline"
+                                className="border-2 border-black rounded-none hover:bg-gray-100"
+                              >
+                                Editar
+                              </Button>
+                              <Button
+                                onClick={() => handleDeleteCredit(credit.id)}
+                                variant="outline"
+                                className="border-2 border-red-500 text-red-500 rounded-none hover:bg-red-50"
+                                disabled={loading}
+                              >
+                                Eliminar
+                              </Button>
+                            </>
+                          )}
+                        </div>
                       </div>
                     ))}
                 </div>
