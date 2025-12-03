@@ -11,6 +11,10 @@ from pydantic import BaseModel, Field, ConfigDict
 from typing import List, Optional
 import uuid
 from datetime import datetime, timezone, timedelta
+from zoneinfo import ZoneInfo
+
+# Colombia timezone
+COLOMBIA_TZ = ZoneInfo("America/Bogota")
 import bcrypt
 import jwt
 import base64
