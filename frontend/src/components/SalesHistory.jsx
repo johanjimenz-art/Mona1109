@@ -97,19 +97,30 @@ export default function SalesHistory() {
       const contentWidth = pageWidth - (margin * 2);
       let yPosition = margin;
 
-      // Load and add logo
+      // Try to load and add logo
+      let logoLoaded = false;
       try {
-        const logoImg = new Image();
-        logoImg.src = '/logo.png';
-        await new Promise((resolve, reject) => {
-          logoImg.onload = resolve;
-          logoImg.onerror = reject;
-        });
+        const response = await fetch('/logo.png');
+        const blob = await response.blob();
+        const reader = new FileReader();
         
-        const logoWidth = 40;
-        const logoHeight = (logoImg.height / logoImg.width) * logoWidth;
-        doc.addImage(logoImg, 'PNG', (pageWidth - logoWidth) / 2, yPosition, logoWidth, logoHeight);
-        yPosition += logoHeight + 10;
+        await new Promise((resolve, reject) => {
+          reader.onloadend = () => {
+            try {
+              const base64data = reader.result;
+              const logoWidth = 40;
+              const logoHeight = 15; // Fixed height for consistency
+              doc.addImage(base64data, 'PNG', (pageWidth - logoWidth) / 2, yPosition, logoWidth, logoHeight);
+              yPosition += logoHeight + 10;
+              logoLoaded = true;
+              resolve();
+            } catch (e) {
+              reject(e);
+            }
+          };
+          reader.onerror = reject;
+          reader.readAsDataURL(blob);
+        });
       } catch (error) {
         console.log('Logo not loaded, continuing without it');
         yPosition += 5;
@@ -236,7 +247,7 @@ export default function SalesHistory() {
       toast.success('Factura descargada exitosamente');
     } catch (error) {
       console.error('Error generating PDF:', error);
-      toast.error('Error al generar la factura');
+      toast.error('Error al generar la factura: ' + error.message);
     }
   };
 
