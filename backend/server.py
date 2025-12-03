@@ -132,6 +132,7 @@ class SaleItem(BaseModel):
 class Sale(BaseModel):
     model_config = ConfigDict(extra="ignore")
     id: str = Field(default_factory=lambda: str(uuid.uuid4()))
+    numero_factura: Optional[str] = None  # Se genera automáticamente
     nombre_cliente: str
     documento_cliente: str
     direccion_cliente: str
