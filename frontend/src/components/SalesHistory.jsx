@@ -2,10 +2,14 @@ import { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import axios from 'axios';
 import { Button } from './ui/button';
-import { ArrowLeft, Package, Truck, CheckCircle, Image as ImageIcon, Download } from 'lucide-react';
+import { Input } from './ui/input';
+import { Label } from './ui/label';
+import { ArrowLeft, Package, Truck, CheckCircle, Image as ImageIcon, Download, Search, FileText } from 'lucide-react';
 import { toast } from 'sonner';
 import { format } from 'date-fns';
 import { es } from 'date-fns/locale';
+import jsPDF from 'jspdf';
+import 'jspdf-autotable';
 
 const BACKEND_URL = process.env.REACT_APP_BACKEND_URL;
 const API = `${BACKEND_URL}/api`;
@@ -13,13 +17,20 @@ const API = `${BACKEND_URL}/api`;
 export default function SalesHistory() {
   const navigate = useNavigate();
   const [sales, setSales] = useState([]);
+  const [filteredSales, setFilteredSales] = useState([]);
   const [expandedSale, setExpandedSale] = useState(null);
+  const [searchTerm, setSearchTerm] = useState('');
+  const [searchBy, setSearchBy] = useState('nombre'); // nombre, documento, factura
   const role = localStorage.getItem('role');
   const isAdmin = role === 'admin';
 
   useEffect(() => {
     fetchSales();
   }, []);
+
+  useEffect(() => {
+    filterSales();
+  }, [searchTerm, searchBy, sales]);
 
   const fetchSales = async () => {
     try {
@@ -28,12 +39,36 @@ export default function SalesHistory() {
         headers: { Authorization: `Bearer ${token}` }
       });
       setSales(response.data);
+      setFilteredSales(response.data);
     } catch (error) {
-      toast.error('Error al cargar historial');
+      toast.error('Error al cargar ventas');
     }
   };
 
-  const updateStatus = async (saleId, newStatus) => {
+  const filterSales = () => {
+    if (!searchTerm.trim()) {
+      setFilteredSales(sales);
+      return;
+    }
+
+    const term = searchTerm.toLowerCase();
+    const filtered = sales.filter(sale => {
+      switch (searchBy) {
+        case 'nombre':
+          return sale.nombre_cliente.toLowerCase().includes(term);
+        case 'documento':
+          return sale.documento_cliente.toLowerCase().includes(term);
+        case 'factura':
+          return sale.numero_factura?.toLowerCase().includes(term);
+        default:
+          return true;
+      }
+    });
+
+    setFilteredSales(filtered);
+  };
+
+  const handleUpdateStatus = async (saleId, newStatus) => {
     try {
       const token = localStorage.getItem('token');
       await axios.put(
@@ -48,217 +83,374 @@ export default function SalesHistory() {
     }
   };
 
-  const handleExportExcel = async () => {
+  const generateInvoicePDF = async (sale) => {
     try {
-      const token = localStorage.getItem('token');
-      const response = await axios.get(`${API}/sales/export/excel`, {
-        headers: { Authorization: `Bearer ${token}` },
-        responseType: 'blob'
+      const doc = new jsPDF({
+        orientation: 'portrait',
+        unit: 'mm',
+        format: 'a4'
       });
+
+      const pageWidth = doc.internal.pageSize.getWidth();
+      const pageHeight = doc.internal.pageSize.getHeight();
+      const margin = 15;
+      const contentWidth = pageWidth - (margin * 2);
+      let yPosition = margin;
+
+      // Load and add logo
+      try {
+        const logoImg = new Image();
+        logoImg.src = '/logo.png';
+        await new Promise((resolve, reject) => {
+          logoImg.onload = resolve;
+          logoImg.onerror = reject;
+        });
+        
+        const logoWidth = 40;
+        const logoHeight = (logoImg.height / logoImg.width) * logoWidth;
+        doc.addImage(logoImg, 'PNG', (pageWidth - logoWidth) / 2, yPosition, logoWidth, logoHeight);
+        yPosition += logoHeight + 10;
+      } catch (error) {
+        console.log('Logo not loaded, continuing without it');
+        yPosition += 5;
+      }
+
+      // Title
+      doc.setFontSize(20);
+      doc.setFont('helvetica', 'bold');
+      doc.text('FACTURA DE VENTA', pageWidth / 2, yPosition, { align: 'center' });
+      yPosition += 10;
+
+      // Invoice number
+      doc.setFontSize(12);
+      doc.setFont('helvetica', 'normal');
+      doc.text(`Número: ${sale.numero_factura || 'N/A'}`, pageWidth / 2, yPosition, { align: 'center' });
+      yPosition += 8;
+
+      // Date
+      doc.setFontSize(10);
+      const saleDate = new Date(sale.created_at);
+      doc.text(`Fecha: ${format(saleDate, 'dd/MM/yyyy HH:mm', { locale: es })}`, pageWidth / 2, yPosition, { align: 'center' });
+      yPosition += 12;
+
+      // Client information box
+      doc.setDrawColor(0);
+      doc.setLineWidth(0.5);
+      doc.rect(margin, yPosition, contentWidth, 25);
       
-      // Crear enlace de descarga
-      const url = window.URL.createObjectURL(new Blob([response.data]));
-      const link = document.createElement('a');
-      link.href = url;
-      link.setAttribute('download', `ventas_${new Date().toISOString().split('T')[0]}.xlsx`);
-      document.body.appendChild(link);
-      link.click();
-      link.remove();
+      doc.setFontSize(11);
+      doc.setFont('helvetica', 'bold');
+      doc.text('DATOS DEL CLIENTE', margin + 3, yPosition + 6);
       
-      toast.success('Excel exportado exitosamente');
+      doc.setFont('helvetica', 'normal');
+      doc.setFontSize(10);
+      doc.text(`Nombre: ${sale.nombre_cliente}`, margin + 3, yPosition + 11);
+      doc.text(`Documento: ${sale.documento_cliente}`, margin + 3, yPosition + 16);
+      doc.text(`Dirección: ${sale.direccion_cliente}`, margin + 3, yPosition + 21);
+      
+      yPosition += 30;
+
+      // Products table
+      doc.setFontSize(11);
+      doc.setFont('helvetica', 'bold');
+      doc.text('DETALLE DE PRODUCTOS', margin, yPosition);
+      yPosition += 5;
+
+      const tableData = sale.items.map(item => [
+        item.referencia,
+        item.descripcion.substring(0, 25),
+        item.talla,
+        item.cantidad,
+        `$${item.precio_venta.toLocaleString()}`,
+        item.descuento > 0 ? `-$${item.descuento.toLocaleString()}` : '-',
+        `$${item.subtotal.toLocaleString()}`
+      ]);
+
+      doc.autoTable({
+        startY: yPosition,
+        head: [['Ref', 'Descripción', 'Talla', 'Cant', 'Precio', 'Desc', 'Subtotal']],
+        body: tableData,
+        theme: 'grid',
+        headStyles: {
+          fillColor: [0, 0, 0],
+          textColor: [255, 255, 255],
+          fontStyle: 'bold',
+          fontSize: 9
+        },
+        bodyStyles: {
+          fontSize: 8
+        },
+        columnStyles: {
+          0: { cellWidth: 20 },
+          1: { cellWidth: 35 },
+          2: { cellWidth: 15 },
+          3: { cellWidth: 15 },
+          4: { cellWidth: 25 },
+          5: { cellWidth: 20 },
+          6: { cellWidth: 25 }
+        },
+        margin: { left: margin, right: margin }
+      });
+
+      yPosition = doc.lastAutoTable.finalY + 10;
+
+      // Totals box
+      const totalsBoxY = yPosition;
+      const totalsBoxHeight = sale.descuento_total > 0 ? 25 : 15;
+      
+      doc.setDrawColor(0);
+      doc.rect(pageWidth - margin - 60, totalsBoxY, 60, totalsBoxHeight);
+      
+      let totalsY = totalsBoxY + 6;
+      doc.setFontSize(10);
+      
+      if (sale.descuento_total > 0) {
+        doc.setFont('helvetica', 'normal');
+        doc.text('Subtotal:', pageWidth - margin - 57, totalsY);
+        doc.text(`$${(sale.subtotal || sale.total).toLocaleString()}`, pageWidth - margin - 5, totalsY, { align: 'right' });
+        totalsY += 5;
+        
+        doc.setTextColor(0, 150, 0);
+        doc.text('Descuento:', pageWidth - margin - 57, totalsY);
+        doc.text(`-$${sale.descuento_total.toLocaleString()}`, pageWidth - margin - 5, totalsY, { align: 'right' });
+        doc.setTextColor(0, 0, 0);
+        totalsY += 5;
+      }
+      
+      doc.setFont('helvetica', 'bold');
+      doc.setFontSize(12);
+      doc.text('TOTAL:', pageWidth - margin - 57, totalsY);
+      doc.text(`$${sale.total.toLocaleString()}`, pageWidth - margin - 5, totalsY, { align: 'right' });
+
+      // Footer
+      const footerY = pageHeight - 20;
+      doc.setFontSize(8);
+      doc.setFont('helvetica', 'italic');
+      doc.setTextColor(100, 100, 100);
+      doc.text('Gracias por su compra', pageWidth / 2, footerY, { align: 'center' });
+      doc.text('Cloth ON-OF - Sistema de Gestión de Inventario', pageWidth / 2, footerY + 4, { align: 'center' });
+
+      // Save PDF
+      const fileName = `Factura_${sale.numero_factura || sale.id}.pdf`;
+      doc.save(fileName);
+      toast.success('Factura descargada exitosamente');
     } catch (error) {
-      toast.error('Error al exportar Excel');
+      console.error('Error generating PDF:', error);
+      toast.error('Error al generar la factura');
     }
   };
 
-  const getStatusInfo = (status) => {
-    const statusMap = {
-      pendiente: {
-        label: 'Pendiente',
-        icon: Package,
-        color: 'text-yellow-600 bg-yellow-50 border-yellow-600'
-      },
-      en_camino: {
-        label: 'En Camino',
-        icon: Truck,
-        color: 'text-blue-600 bg-blue-50 border-blue-600'
-      },
-      despachado: {
-        label: 'Despachado',
-        icon: CheckCircle,
-        color: 'text-green-600 bg-green-50 border-green-600'
-      }
+  const getStatusBadge = (status) => {
+    const badges = {
+      pendiente: { bg: 'bg-yellow-500', text: 'Pendiente', icon: Package },
+      en_camino: { bg: 'bg-blue-500', text: 'En Camino', icon: Truck },
+      despachado: { bg: 'bg-green-500', text: 'Despachado', icon: CheckCircle }
     };
-    return statusMap[status] || statusMap.pendiente;
+    const badge = badges[status] || badges.pendiente;
+    const Icon = badge.icon;
+    return (
+      <span className={`inline-flex items-center gap-1 px-3 py-1 text-xs font-bold text-white ${badge.bg}`}>
+        <Icon className="w-3 h-3" />
+        {badge.text}
+      </span>
+    );
   };
 
   return (
     <div className="min-h-screen bg-white">
-      {/* Header */}
       <div className="border-b-4 border-black bg-white">
-        <div className="max-w-7xl mx-auto px-8 py-6 flex items-center justify-between">
-          <div className="flex items-center gap-4">
-            <Button
-              data-testid="back-btn"
-              onClick={() => navigate('/')}
-              variant="outline"
-              className="border-2 border-black rounded-none hover:bg-black hover:text-white"
-            >
-              <ArrowLeft className="w-4 h-4" />
-            </Button>
-            <h1 className="text-3xl font-bold text-black" style={{ fontFamily: 'Space Grotesk, sans-serif' }}>
-              Historial de Ventas y Despachos
-            </h1>
-          </div>
-          
-          {isAdmin && (
-            <Button
-              data-testid="export-excel-btn"
-              onClick={handleExportExcel}
-              className="bg-green-600 text-white hover:bg-green-700 rounded-none border-2 border-black"
-            >
-              <Download className="w-4 h-4 mr-2" />
-              Exportar a Excel
-            </Button>
-          )}
+        <div className="max-w-7xl mx-auto px-8 py-6 flex items-center gap-4">
+          <Button
+            data-testid="back-btn"
+            onClick={() => navigate('/')}
+            variant="outline"
+            className="border-2 border-black rounded-none hover:bg-black hover:text-white"
+          >
+            <ArrowLeft className="w-4 h-4" />
+          </Button>
+          <h1 className="text-3xl font-bold text-black" style={{ fontFamily: 'Space Grotesk, sans-serif' }}>
+            Historial de Ventas
+          </h1>
         </div>
       </div>
 
       <div className="max-w-7xl mx-auto px-8 py-8">
-        <div className="space-y-4">
-          {sales.map((sale, index) => {
-            const statusInfo = getStatusInfo(sale.estado_despacho);
-            const StatusIcon = statusInfo.icon;
+        {/* Search Section */}
+        <div className="bg-white border-4 border-black p-6 mb-8">
+          <div className="flex items-center gap-2 mb-4">
+            <Search className="w-5 h-5" />
+            <h2 className="text-xl font-bold">Buscar Ventas</h2>
+          </div>
+          
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+            <div>
+              <Label className="text-sm font-medium mb-2 block">Buscar por:</Label>
+              <select
+                value={searchBy}
+                onChange={(e) => setSearchBy(e.target.value)}
+                className="w-full h-10 px-3 border-2 border-black rounded-none"
+              >
+                <option value="nombre">Nombre del Cliente</option>
+                <option value="documento">Cédula</option>
+                <option value="factura">Número de Factura</option>
+              </select>
+            </div>
             
-            return (
-              <div key={sale.id} className="bg-white border-4 border-black" data-testid={`sale-item-${index}`}>
-                <button
-                  data-testid={`sale-toggle-btn-${index}`}
-                  onClick={() => setExpandedSale(expandedSale === sale.id ? null : sale.id)}
-                  className="w-full p-6 text-left hover:bg-gray-50 transition-colors"
-                >
-                  <div className="flex justify-between items-start">
-                    <div className="flex-1">
-                      <div className="flex items-center gap-3 mb-2">
-                        <p className="font-bold text-lg">{sale.nombre_cliente}</p>
-                        <div className={`flex items-center gap-2 px-3 py-1 border-2 ${statusInfo.color}`}>
-                          <StatusIcon className="w-4 h-4" />
-                          <span className="text-sm font-medium">{statusInfo.label}</span>
-                        </div>
-                      </div>
-                      <p className="text-sm text-gray-600 mt-1">Doc: {sale.documento_cliente}</p>
-                      <p className="text-sm text-gray-600">Tel: {sale.celular_cliente}</p>
-                      <p className="text-sm text-gray-600">Vendido por: {sale.created_by}</p>
-                      <p className="text-sm text-gray-600 mt-2">
-                        {format(new Date(sale.created_at), "d 'de' MMMM 'de' yyyy, HH:mm", { locale: es })}
+            <div className="md:col-span-2">
+              <Label className="text-sm font-medium mb-2 block">Término de búsqueda:</Label>
+              <Input
+                type="text"
+                value={searchTerm}
+                onChange={(e) => setSearchTerm(e.target.value)}
+                placeholder={
+                  searchBy === 'nombre' ? 'Ej: Juan Pérez' :
+                  searchBy === 'documento' ? 'Ej: 1234567890' :
+                  'Ej: FAC-20251016-0001'
+                }
+                className="rounded-none border-2 border-black h-10"
+              />
+            </div>
+          </div>
+          
+          {searchTerm && (
+            <div className="mt-4 text-sm text-gray-600">
+              Mostrando {filteredSales.length} de {sales.length} ventas
+            </div>
+          )}
+        </div>
+
+        {/* Sales List */}
+        <div className="space-y-6">
+          {filteredSales.length === 0 ? (
+            <div className="bg-white border-4 border-black p-12 text-center">
+              <FileText className="w-16 h-16 text-gray-400 mx-auto mb-4" />
+              <p className="text-xl font-bold text-gray-600 mb-2">
+                {searchTerm ? 'No se encontraron resultados' : 'No hay ventas registradas'}
+              </p>
+              <p className="text-gray-500">
+                {searchTerm ? 'Intenta con otro término de búsqueda' : 'Las ventas aparecerán aquí cuando se realicen'}
+              </p>
+            </div>
+          ) : (
+            filteredSales.map((sale) => (
+              <div key={sale.id} className="bg-white border-4 border-black p-6">
+                <div className="flex justify-between items-start mb-4">
+                  <div>
+                    <div className="flex items-center gap-3 mb-2">
+                      <h3 className="text-xl font-bold">{sale.nombre_cliente}</h3>
+                      {getStatusBadge(sale.estado_despacho)}
+                    </div>
+                    <p className="text-sm text-gray-600">Documento: {sale.documento_cliente}</p>
+                    <p className="text-sm text-gray-600">Dirección: {sale.direccion_cliente}</p>
+                    <p className="text-sm text-gray-600">Celular: {sale.celular_cliente}</p>
+                    {sale.numero_factura && (
+                      <p className="text-sm font-bold text-blue-600 mt-2">
+                        Factura: {sale.numero_factura}
                       </p>
-                    </div>
-                    <div className="text-right">
-                      <p className="text-3xl font-bold">${sale.total.toLocaleString()}</p>
-                      <p className="text-sm text-gray-600 mt-1">{sale.items.length} producto(s)</p>
-                    </div>
-                  </div>
-                </button>
-
-                {expandedSale === sale.id && (
-                  <div className="border-t-4 border-black p-6 bg-gray-50">
-                    <div className="mb-6">
-                      <h3 className="font-bold mb-3 text-lg">Cambiar Estado de Despacho</h3>
-                      <div className="flex gap-3">
-                        <Button
-                          data-testid={`status-pendiente-btn-${index}`}
-                          onClick={() => updateStatus(sale.id, 'pendiente')}
-                          disabled={sale.estado_despacho === 'pendiente'}
-                          className={`flex items-center gap-2 border-2 rounded-none ${
-                            sale.estado_despacho === 'pendiente'
-                              ? 'bg-yellow-600 text-white border-yellow-600'
-                              : 'bg-white text-black border-black hover:bg-yellow-600 hover:text-white hover:border-yellow-600'
-                          }`}
-                        >
-                          <Package className="w-4 h-4" />
-                          Pendiente
-                        </Button>
-                        <Button
-                          data-testid={`status-en-camino-btn-${index}`}
-                          onClick={() => updateStatus(sale.id, 'en_camino')}
-                          disabled={sale.estado_despacho === 'en_camino'}
-                          className={`flex items-center gap-2 border-2 rounded-none ${
-                            sale.estado_despacho === 'en_camino'
-                              ? 'bg-blue-600 text-white border-blue-600'
-                              : 'bg-white text-black border-black hover:bg-blue-600 hover:text-white hover:border-blue-600'
-                          }`}
-                        >
-                          <Truck className="w-4 h-4" />
-                          En Camino
-                        </Button>
-                        <Button
-                          data-testid={`status-despachado-btn-${index}`}
-                          onClick={() => updateStatus(sale.id, 'despachado')}
-                          disabled={sale.estado_despacho === 'despachado'}
-                          className={`flex items-center gap-2 border-2 rounded-none ${
-                            sale.estado_despacho === 'despachado'
-                              ? 'bg-green-600 text-white border-green-600'
-                              : 'bg-white text-black border-black hover:bg-green-600 hover:text-white hover:border-green-600'
-                          }`}
-                        >
-                          <CheckCircle className="w-4 h-4" />
-                          Despachado
-                        </Button>
-                      </div>
-                    </div>
-
-                    {/* Mostrar observaciones si existen */}
-                    {sale.observaciones && (
-                      <div className="mb-6 p-4 border-2 border-blue-500 bg-blue-50">
-                        <h4 className="font-bold text-sm text-blue-900 mb-2">📝 Observaciones del Despacho:</h4>
-                        <p className="text-gray-800">{sale.observaciones}</p>
-                      </div>
                     )}
+                  </div>
+                  <div className="text-right">
+                    <p className="text-sm text-gray-600">
+                      {format(new Date(sale.created_at), 'dd/MM/yyyy HH:mm', { locale: es })}
+                    </p>
+                    {isAdmin && (
+                      <>
+                        {sale.descuento_total > 0 && (
+                          <>
+                            <p className="text-xs text-gray-500 mt-2">Subtotal: ${(sale.subtotal || sale.total).toLocaleString()}</p>
+                            <p className="text-xs text-green-600">Descuento: -${sale.descuento_total.toLocaleString()}</p>
+                          </>
+                        )}
+                        <p className="text-2xl font-bold mt-1">${sale.total.toLocaleString()}</p>
+                      </>
+                    )}
+                    {sale.created_by && (
+                      <p className="text-xs text-gray-500 mt-1">Registrado por: {sale.created_by}</p>
+                    )}
+                  </div>
+                </div>
 
-                    <h3 className="font-bold mb-4 text-lg">Detalles de la Venta</h3>
-                    <div className="mb-4">
-                      <p className="text-sm"><span className="font-medium">Dirección:</span> {sale.direccion_cliente}</p>
-                    </div>
+                <div className="border-t-2 border-black pt-4 mb-4">
+                  <div className="flex justify-between items-center mb-3">
+                    <h4 className="font-bold">Productos ({sale.items.length})</h4>
+                    <Button
+                      onClick={() => setExpandedSale(expandedSale === sale.id ? null : sale.id)}
+                      variant="outline"
+                      size="sm"
+                      className="border-2 border-black rounded-none hover:bg-black hover:text-white"
+                    >
+                      {expandedSale === sale.id ? 'Ocultar' : 'Ver'} Detalle
+                    </Button>
+                  </div>
+
+                  {expandedSale === sale.id && (
                     <div className="space-y-3">
-                      {sale.items.map((item, itemIndex) => (
-                        <div key={itemIndex} className="bg-white border-2 border-black p-4">
-                          <div className="flex gap-4">
-                            {item.imagen_url ? (
-                              <img 
-                                src={`${BACKEND_URL}${item.imagen_url}`} 
-                                alt={item.descripcion}
-                                className="w-20 h-20 object-cover border-2 border-black"
-                              />
-                            ) : (
-                              <div className="w-20 h-20 border-2 border-black flex items-center justify-center bg-gray-200">
-                                <ImageIcon className="w-10 h-10 text-gray-400" />
-                              </div>
-                            )}
-                            <div className="flex-1 flex justify-between">
+                      {sale.items.map((item, idx) => (
+                        <div key={idx} className="border-2 border-black p-3 flex gap-3">
+                          {item.imagen_url ? (
+                            <img
+                              src={`${BACKEND_URL}${item.imagen_url}`}
+                              alt={item.descripcion}
+                              className="w-16 h-16 object-cover border-2 border-black"
+                            />
+                          ) : (
+                            <div className="w-16 h-16 border-2 border-black flex items-center justify-center bg-gray-200">
+                              <ImageIcon className="w-8 h-8 text-gray-400" />
+                            </div>
+                          )}
+                          <div className="flex-1">
+                            <p className="font-bold">{item.referencia}</p>
+                            <p className="text-sm text-gray-600">{item.descripcion}</p>
+                            <p className="text-sm">Talla: {item.talla} | Cantidad: {item.cantidad}</p>
+                            <div className="flex justify-between items-center mt-2">
                               <div>
-                                <p className="font-bold">{item.referencia}</p>
-                                <p className="text-sm text-gray-600">{item.descripcion}</p>
-                                <p className="text-sm">Talla: {item.talla} | Color: {item.color}</p>
-                                <p className="text-sm">Cantidad: {item.cantidad} × ${item.precio_venta.toLocaleString()}</p>
+                                <span className="text-sm text-gray-600">Precio: ${item.precio_venta.toLocaleString()}</span>
+                                {item.descuento > 0 && (
+                                  <span className="text-sm text-green-600 ml-2">Desc: -${item.descuento.toLocaleString()}</span>
+                                )}
                               </div>
-                              <div className="text-right">
-                                <p className="font-bold text-lg">${item.subtotal.toLocaleString()}</p>
-                              </div>
+                              <span className="font-bold">${item.subtotal.toLocaleString()}</span>
                             </div>
                           </div>
                         </div>
                       ))}
                     </div>
-                  </div>
-                )}
-              </div>
-            );
-          })}
+                  )}
+                </div>
 
-          {sales.length === 0 && (
-            <div className="text-center py-12 text-gray-500 border-4 border-black bg-white" data-testid="no-sales">
-              No hay ventas registradas
-            </div>
+                <div className="flex gap-2 flex-wrap">
+                  <Button
+                    onClick={() => generateInvoicePDF(sale)}
+                    className="bg-blue-600 text-white hover:bg-blue-700 rounded-none"
+                  >
+                    <Download className="w-4 h-4 mr-2" />
+                    Descargar Factura
+                  </Button>
+
+                  {isAdmin && sale.estado_despacho === 'pendiente' && (
+                    <Button
+                      onClick={() => handleUpdateStatus(sale.id, 'en_camino')}
+                      variant="outline"
+                      className="border-2 border-black rounded-none hover:bg-blue-500 hover:text-white hover:border-blue-500"
+                    >
+                      <Truck className="w-4 h-4 mr-2" />
+                      Marcar En Camino
+                    </Button>
+                  )}
+
+                  {isAdmin && sale.estado_despacho === 'en_camino' && (
+                    <Button
+                      onClick={() => handleUpdateStatus(sale.id, 'despachado')}
+                      variant="outline"
+                      className="border-2 border-black rounded-none hover:bg-green-500 hover:text-white hover:border-green-500"
+                    >
+                      <CheckCircle className="w-4 h-4 mr-2" />
+                      Marcar Despachado
+                    </Button>
+                  )}
+                </div>
+              </div>
+            ))
           )}
         </div>
       </div>
