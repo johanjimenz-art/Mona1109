@@ -369,7 +369,7 @@ export default function SalesHistory() {
                   </div>
                   <div className="text-right">
                     <p className="text-sm text-gray-600">
-                      {format(new Date(sale.created_at), 'dd/MM/yyyy HH:mm', { locale: es })}
+                      {formatInTimeZone(new Date(sale.created_at), COLOMBIA_TZ, 'dd/MM/yyyy HH:mm', { locale: es })}
                     </p>
                     {isAdmin && (
                       <>
