@@ -457,7 +457,7 @@ export default function Sales() {
                         <SelectValue placeholder="Selecciona color" />
                       </SelectTrigger>
                       <SelectContent className="border-2 border-black rounded-none">
-                        {availableColors.map((color) => (
+                        {getAvailableColors().map((color) => (
                           <SelectItem key={color} value={color}>{color}</SelectItem>
                         ))}
                       </SelectContent>
