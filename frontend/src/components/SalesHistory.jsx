@@ -83,7 +83,7 @@ export default function SalesHistory() {
     }
   };
 
-  const generateInvoicePDF = async (sale) => {
+  const generateInvoicePDF = (sale) => {
     try {
       const doc = new jsPDF({
         orientation: 'portrait',
@@ -94,52 +94,27 @@ export default function SalesHistory() {
       const pageWidth = doc.internal.pageSize.getWidth();
       const pageHeight = doc.internal.pageSize.getHeight();
       const margin = 15;
-      const contentWidth = pageWidth - (margin * 2);
       let yPosition = margin;
 
-      // Try to load and add logo
-      let logoLoaded = false;
-      try {
-        const response = await fetch('/logo.png');
-        const blob = await response.blob();
-        const reader = new FileReader();
-        
-        await new Promise((resolve, reject) => {
-          reader.onloadend = () => {
-            try {
-              const base64data = reader.result;
-              const logoWidth = 40;
-              const logoHeight = 15; // Fixed height for consistency
-              doc.addImage(base64data, 'PNG', (pageWidth - logoWidth) / 2, yPosition, logoWidth, logoHeight);
-              yPosition += logoHeight + 10;
-              logoLoaded = true;
-              resolve();
-            } catch (e) {
-              reject(e);
-            }
-          };
-          reader.onerror = reject;
-          reader.readAsDataURL(blob);
-        });
-      } catch (error) {
-        console.log('Logo not loaded, continuing without it');
-        yPosition += 5;
-      }
-
       // Title
-      doc.setFontSize(20);
+      doc.setFontSize(22);
       doc.setFont('helvetica', 'bold');
-      doc.text('FACTURA DE VENTA', pageWidth / 2, yPosition, { align: 'center' });
+      doc.text('CLOTH ON-OF', pageWidth / 2, yPosition, { align: 'center' });
       yPosition += 10;
+      
+      doc.setFontSize(18);
+      doc.text('FACTURA DE VENTA', pageWidth / 2, yPosition, { align: 'center' });
+      yPosition += 12;
 
       // Invoice number
       doc.setFontSize(12);
-      doc.setFont('helvetica', 'normal');
-      doc.text(`Número: ${sale.numero_factura || 'N/A'}`, pageWidth / 2, yPosition, { align: 'center' });
+      doc.setFont('helvetica', 'bold');
+      doc.text(`No. Factura: ${sale.numero_factura || 'N/A'}`, pageWidth / 2, yPosition, { align: 'center' });
       yPosition += 8;
 
       // Date
       doc.setFontSize(10);
+      doc.setFont('helvetica', 'normal');
       const saleDate = new Date(sale.created_at);
       doc.text(`Fecha: ${format(saleDate, 'dd/MM/yyyy HH:mm', { locale: es })}`, pageWidth / 2, yPosition, { align: 'center' });
       yPosition += 12;
@@ -147,91 +122,108 @@ export default function SalesHistory() {
       // Client information box
       doc.setDrawColor(0);
       doc.setLineWidth(0.5);
-      doc.rect(margin, yPosition, contentWidth, 25);
+      doc.rect(margin, yPosition, pageWidth - (margin * 2), 28);
       
       doc.setFontSize(11);
       doc.setFont('helvetica', 'bold');
       doc.text('DATOS DEL CLIENTE', margin + 3, yPosition + 6);
       
       doc.setFont('helvetica', 'normal');
-      doc.setFontSize(10);
-      doc.text(`Nombre: ${sale.nombre_cliente}`, margin + 3, yPosition + 11);
-      doc.text(`Documento: ${sale.documento_cliente}`, margin + 3, yPosition + 16);
-      doc.text(`Dirección: ${sale.direccion_cliente}`, margin + 3, yPosition + 21);
+      doc.setFontSize(9);
+      doc.text(`Cliente: ${sale.nombre_cliente}`, margin + 3, yPosition + 12);
+      doc.text(`Documento: ${sale.documento_cliente}`, margin + 3, yPosition + 17);
+      doc.text(`Dirección: ${sale.direccion_cliente}`, margin + 3, yPosition + 22);
+      doc.text(`Celular: ${sale.celular_cliente}`, margin + 3, yPosition + 27);
       
-      yPosition += 30;
+      yPosition += 34;
 
-      // Products table
-      doc.setFontSize(11);
+      // Products table header
+      doc.setFontSize(10);
       doc.setFont('helvetica', 'bold');
       doc.text('DETALLE DE PRODUCTOS', margin, yPosition);
-      yPosition += 5;
+      yPosition += 6;
 
-      const tableData = sale.items.map(item => [
-        item.referencia,
-        item.descripcion.substring(0, 25),
-        item.talla,
-        item.cantidad,
-        `$${item.precio_venta.toLocaleString()}`,
-        item.descuento > 0 ? `-$${item.descuento.toLocaleString()}` : '-',
-        `$${item.subtotal.toLocaleString()}`
-      ]);
+      // Table header
+      const colWidths = [25, 60, 20, 15, 30, 30];
+      const colX = [margin, margin + 25, margin + 85, margin + 105, margin + 120, margin + 150];
+      
+      doc.setFillColor(0, 0, 0);
+      doc.rect(margin, yPosition, pageWidth - (margin * 2), 8, 'F');
+      
+      doc.setTextColor(255, 255, 255);
+      doc.setFontSize(8);
+      doc.setFont('helvetica', 'bold');
+      doc.text('Referencia', colX[0] + 2, yPosition + 5);
+      doc.text('Descripción', colX[1] + 2, yPosition + 5);
+      doc.text('Talla', colX[2] + 2, yPosition + 5);
+      doc.text('Cant', colX[3] + 2, yPosition + 5);
+      doc.text('Precio', colX[4] + 2, yPosition + 5);
+      doc.text('Subtotal', colX[5] + 2, yPosition + 5);
+      
+      yPosition += 8;
+      doc.setTextColor(0, 0, 0);
 
-      autoTable(doc, {
-        startY: yPosition,
-        head: [['Ref', 'Descripción', 'Talla', 'Cant', 'Precio', 'Desc', 'Subtotal']],
-        body: tableData,
-        theme: 'grid',
-        headStyles: {
-          fillColor: [0, 0, 0],
-          textColor: [255, 255, 255],
-          fontStyle: 'bold',
-          fontSize: 9
-        },
-        bodyStyles: {
-          fontSize: 8
-        },
-        columnStyles: {
-          0: { cellWidth: 20 },
-          1: { cellWidth: 35 },
-          2: { cellWidth: 15 },
-          3: { cellWidth: 15 },
-          4: { cellWidth: 25 },
-          5: { cellWidth: 20 },
-          6: { cellWidth: 25 }
-        },
-        margin: { left: margin, right: margin }
+      // Table rows
+      doc.setFont('helvetica', 'normal');
+      doc.setFontSize(8);
+      
+      sale.items.forEach((item, index) => {
+        const rowHeight = 7;
+        
+        // Alternate row colors
+        if (index % 2 === 0) {
+          doc.setFillColor(245, 245, 245);
+          doc.rect(margin, yPosition, pageWidth - (margin * 2), rowHeight, 'F');
+        }
+        
+        doc.text(item.referencia.substring(0, 12), colX[0] + 1, yPosition + 5);
+        doc.text(item.descripcion.substring(0, 30), colX[1] + 1, yPosition + 5);
+        doc.text(item.talla, colX[2] + 1, yPosition + 5);
+        doc.text(String(item.cantidad), colX[3] + 1, yPosition + 5);
+        doc.text(`$${item.precio_venta.toLocaleString()}`, colX[4] + 1, yPosition + 5);
+        doc.text(`$${item.subtotal.toLocaleString()}`, colX[5] + 1, yPosition + 5);
+        
+        yPosition += rowHeight;
       });
 
-      yPosition = doc.previousAutoTable.finalY + 10;
+      // Draw table border
+      doc.setDrawColor(0);
+      doc.setLineWidth(0.3);
+      doc.rect(margin, yPosition - (sale.items.length * 7), pageWidth - (margin * 2), sale.items.length * 7);
 
-      // Totals box
-      const totalsBoxY = yPosition;
-      const totalsBoxHeight = sale.descuento_total > 0 ? 25 : 15;
+      yPosition += 5;
+
+      // Totals section
+      const totalsX = pageWidth - margin - 50;
       
       doc.setDrawColor(0);
-      doc.rect(pageWidth - margin - 60, totalsBoxY, 60, totalsBoxHeight);
-      
-      let totalsY = totalsBoxY + 6;
-      doc.setFontSize(10);
+      doc.setLineWidth(0.5);
       
       if (sale.descuento_total > 0) {
+        doc.rect(totalsX, yPosition, 50, 20);
+        
+        doc.setFontSize(9);
         doc.setFont('helvetica', 'normal');
-        doc.text('Subtotal:', pageWidth - margin - 57, totalsY);
-        doc.text(`$${(sale.subtotal || sale.total).toLocaleString()}`, pageWidth - margin - 5, totalsY, { align: 'right' });
-        totalsY += 5;
+        doc.text('Subtotal:', totalsX + 2, yPosition + 5);
+        doc.text(`$${(sale.subtotal || sale.total).toLocaleString()}`, totalsX + 48, yPosition + 5, { align: 'right' });
         
         doc.setTextColor(0, 150, 0);
-        doc.text('Descuento:', pageWidth - margin - 57, totalsY);
-        doc.text(`-$${sale.descuento_total.toLocaleString()}`, pageWidth - margin - 5, totalsY, { align: 'right' });
+        doc.text('Descuento:', totalsX + 2, yPosition + 10);
+        doc.text(`-$${sale.descuento_total.toLocaleString()}`, totalsX + 48, yPosition + 10, { align: 'right' });
         doc.setTextColor(0, 0, 0);
-        totalsY += 5;
+        
+        doc.setFont('helvetica', 'bold');
+        doc.setFontSize(11);
+        doc.text('TOTAL:', totalsX + 2, yPosition + 17);
+        doc.text(`$${sale.total.toLocaleString()}`, totalsX + 48, yPosition + 17, { align: 'right' });
+      } else {
+        doc.rect(totalsX, yPosition, 50, 10);
+        
+        doc.setFont('helvetica', 'bold');
+        doc.setFontSize(11);
+        doc.text('TOTAL:', totalsX + 2, yPosition + 7);
+        doc.text(`$${sale.total.toLocaleString()}`, totalsX + 48, yPosition + 7, { align: 'right' });
       }
-      
-      doc.setFont('helvetica', 'bold');
-      doc.setFontSize(12);
-      doc.text('TOTAL:', pageWidth - margin - 57, totalsY);
-      doc.text(`$${sale.total.toLocaleString()}`, pageWidth - margin - 5, totalsY, { align: 'right' });
 
       // Footer
       const footerY = pageHeight - 20;
@@ -240,6 +232,11 @@ export default function SalesHistory() {
       doc.setTextColor(100, 100, 100);
       doc.text('Gracias por su compra', pageWidth / 2, footerY, { align: 'center' });
       doc.text('Cloth ON-OF - Sistema de Gestión de Inventario', pageWidth / 2, footerY + 4, { align: 'center' });
+      
+      if (sale.created_by) {
+        doc.setFontSize(7);
+        doc.text(`Atendido por: ${sale.created_by}`, pageWidth / 2, footerY + 8, { align: 'center' });
+      }
 
       // Save PDF
       const fileName = `Factura_${sale.numero_factura || sale.id}.pdf`;
