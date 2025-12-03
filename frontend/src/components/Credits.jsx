@@ -38,6 +38,8 @@ export default function Credits() {
   const [userRole, setUserRole] = useState('');
 
   useEffect(() => {
+    const role = localStorage.getItem('role');
+    setUserRole(role);
     fetchCredits();
     fetchAlerts();
   }, []);
