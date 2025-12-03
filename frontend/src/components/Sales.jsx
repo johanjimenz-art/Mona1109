@@ -68,22 +68,6 @@ export default function Sales() {
     }
   }, [searchData.referencia, products]);
 
-  useEffect(() => {
-    // Update available colors when referencia changes
-    if (searchData.referencia) {
-      const filtered = products.filter(p => p.referencia === searchData.referencia);
-      const colors = [...new Set(filtered.map(p => p.color))];
-      setAvailableColors(colors);
-      
-      // Reset color if not available
-      if (!colors.includes(searchData.color)) {
-        setSearchData(prev => ({ ...prev, color: '' }));
-      }
-    } else {
-      setAvailableColors([]);
-    }
-  }, [searchData.referencia, products]);
-
   const fetchProducts = async () => {
     try {
       const token = localStorage.getItem('token');
