@@ -70,7 +70,7 @@ class User(BaseModel):
     role: str = "user"  # "admin" or "user"
     permissions: UserPermissions = Field(default_factory=UserPermissions)
     created_by: Optional[str] = None
-    created_at: datetime = Field(default_factory=lambda: datetime.now(timezone.utc))
+    created_at: datetime = Field(default_factory=lambda: now_colombia())
 
 class UserCreate(BaseModel):
     username: str
@@ -105,7 +105,7 @@ class Product(BaseModel):
     imagen_url: Optional[str] = None
     aprobado: bool = False
     created_by: Optional[str] = None  # Hacer opcional para productos viejos
-    created_at: datetime = Field(default_factory=lambda: datetime.now(timezone.utc))
+    created_at: datetime = Field(default_factory=lambda: now_colombia())
 
 class ProductCreate(BaseModel):
     descripcion: str
@@ -155,8 +155,8 @@ class Sale(BaseModel):
     observaciones: Optional[str] = None  # Campo para observaciones
     aplicado_por: Optional[str] = None  # Quien aplicó descuentos
     created_by: Optional[str] = None  # Hacer opcional para ventas viejas
-    created_at: datetime = Field(default_factory=lambda: datetime.now(timezone.utc))
-    updated_at: datetime = Field(default_factory=lambda: datetime.now(timezone.utc))
+    created_at: datetime = Field(default_factory=lambda: now_colombia())
+    updated_at: datetime = Field(default_factory=lambda: now_colombia())
 
 class SaleCreate(BaseModel):
     nombre_cliente: str
@@ -176,7 +176,7 @@ class Notification(BaseModel):
     mensaje: str
     sale_id: str
     leido: bool = False
-    created_at: datetime = Field(default_factory=lambda: datetime.now(timezone.utc))
+    created_at: datetime = Field(default_factory=lambda: now_colombia())
 
 
 class CreditSale(BaseModel):
@@ -193,8 +193,8 @@ class CreditSale(BaseModel):
     estado: str = "pendiente"  # pendiente, vencido, pagado
     observaciones: Optional[str] = None
     created_by: Optional[str] = None
-    created_at: datetime = Field(default_factory=lambda: datetime.now(timezone.utc))
-    updated_at: datetime = Field(default_factory=lambda: datetime.now(timezone.utc))
+    created_at: datetime = Field(default_factory=lambda: now_colombia())
+    updated_at: datetime = Field(default_factory=lambda: now_colombia())
 
 class CreditSaleCreate(BaseModel):
     sale_id: str
@@ -207,10 +207,10 @@ class Payment(BaseModel):
     id: str = Field(default_factory=lambda: str(uuid.uuid4()))
     credit_sale_id: str
     monto: float
-    fecha_pago: datetime = Field(default_factory=lambda: datetime.now(timezone.utc))
+    fecha_pago: datetime = Field(default_factory=lambda: now_colombia())
     observaciones: Optional[str] = None
     registrado_por: Optional[str] = None
-    created_at: datetime = Field(default_factory=lambda: datetime.now(timezone.utc))
+    created_at: datetime = Field(default_factory=lambda: now_colombia())
 
 class PaymentCreate(BaseModel):
     monto: float
@@ -226,7 +226,7 @@ def verify_password(password: str, hashed: str) -> bool:
 
 def create_access_token(data: dict):
     to_encode = data.copy()
-    expire = datetime.now(timezone.utc) + timedelta(minutes=ACCESS_TOKEN_EXPIRE_MINUTES)
+    expire = now_colombia() + timedelta(minutes=ACCESS_TOKEN_EXPIRE_MINUTES)
     to_encode.update({"exp": expire})
     
     # Ensure permissions are serialized properly
@@ -653,10 +653,10 @@ async def create_notification(tipo: str, mensaje: str, sale_id: str):
 
 async def generate_invoice_number():
     """Generate unique invoice number with format: FAC-YYYYMMDD-XXXX"""
-    today = datetime.now(timezone.utc).strftime('%Y%m%d')
+    today = now_colombia().strftime('%Y%m%d')
     
     # Count today's sales
-    today_start = datetime.now(timezone.utc).replace(hour=0, minute=0, second=0, microsecond=0)
+    today_start = now_colombia().replace(hour=0, minute=0, second=0, microsecond=0)
     count = await db.sales.count_documents({
         "created_at": {"$gte": today_start.isoformat()}
     })
@@ -727,8 +727,8 @@ async def create_sale(sale_data: SaleCreate, current_user: dict = Depends(get_cu
 @api_router.get("/sales/today/detail")
 async def get_today_sales_detail(current_user: dict = Depends(get_current_user)):
     # Obtener ventas de hoy
-    today_start = datetime.now(timezone.utc).replace(hour=0, minute=0, second=0, microsecond=0)
-    today_end = datetime.now(timezone.utc).replace(hour=23, minute=59, second=59, microsecond=999999)
+    today_start = now_colombia().replace(hour=0, minute=0, second=0, microsecond=0)
+    today_end = now_colombia().replace(hour=23, minute=59, second=59, microsecond=999999)
     
     sales = await db.sales.find({
         "created_at": {
@@ -805,7 +805,7 @@ async def update_sale_status(
     
     update_dict = {
         "estado_despacho": status_data.estado_despacho,
-        "updated_at": datetime.now(timezone.utc).isoformat()
+        "updated_at": now_colombia().isoformat()
     }
     
     if status_data.observaciones is not None:
@@ -963,8 +963,8 @@ async def get_stats(current_user: dict = Depends(get_current_user)):
     total_stock_value = sum(p['cantidad_stock'] * p['precio_venta'] for p in products)
     
     # Obtener ventas de hoy
-    today_start = datetime.now(timezone.utc).replace(hour=0, minute=0, second=0, microsecond=0)
-    today_end = datetime.now(timezone.utc).replace(hour=23, minute=59, second=59, microsecond=999999)
+    today_start = now_colombia().replace(hour=0, minute=0, second=0, microsecond=0)
+    today_end = now_colombia().replace(hour=23, minute=59, second=59, microsecond=999999)
     
     today_sales = await db.sales.find({
         "created_at": {
@@ -1133,7 +1133,7 @@ async def create_payment(
             "$set": {
                 "saldo_pendiente": new_saldo,
                 "estado": new_estado,
-                "updated_at": datetime.now(timezone.utc).isoformat()
+                "updated_at": now_colombia().isoformat()
             }
         }
     )
@@ -1150,7 +1150,7 @@ async def create_payment(
 @api_router.get("/credit-sales/alerts/upcoming")
 async def get_upcoming_payment_alerts(current_user: dict = Depends(get_current_user)):
     """Get credits with payments due in the next 2 days"""
-    today = datetime.now(timezone.utc).replace(hour=0, minute=0, second=0, microsecond=0)
+    today = now_colombia().replace(hour=0, minute=0, second=0, microsecond=0)
     two_days_later = today + timedelta(days=2)
     
     credits = await db.credit_sales.find({
@@ -1174,7 +1174,7 @@ async def get_upcoming_payment_alerts(current_user: dict = Depends(get_current_u
 @api_router.get("/credit-sales/alerts/overdue")
 async def get_overdue_payment_alerts(current_user: dict = Depends(get_current_user)):
     """Get credits with overdue payments"""
-    today = datetime.now(timezone.utc).replace(hour=0, minute=0, second=0, microsecond=0)
+    today = now_colombia().replace(hour=0, minute=0, second=0, microsecond=0)
     
     credits = await db.credit_sales.find({
         "estado": "pendiente",
