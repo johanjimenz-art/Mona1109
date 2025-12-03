@@ -114,7 +114,7 @@ export default function SalesHistory() {
       yPosition += 5;
       
       const saleDate = new Date(sale.created_at);
-      doc.text(format(saleDate, 'dd/MM/yyyy HH:mm', { locale: es }), pageWidth / 2, yPosition, { align: 'center' });
+      doc.text(formatInTimeZone(saleDate, COLOMBIA_TZ, 'dd/MM/yyyy HH:mm', { locale: es }), pageWidth / 2, yPosition, { align: 'center' });
       yPosition += 7;
 
       // Separator line
