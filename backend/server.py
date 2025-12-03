@@ -640,6 +640,21 @@ async def create_notification(tipo: str, mensaje: str, sale_id: str):
     doc['created_at'] = doc['created_at'].isoformat()
     await db.notifications.insert_one(doc)
 
+
+async def generate_invoice_number():
+    """Generate unique invoice number with format: FAC-YYYYMMDD-XXXX"""
+    today = datetime.now(timezone.utc).strftime('%Y%m%d')
+    
+    # Count today's sales
+    today_start = datetime.now(timezone.utc).replace(hour=0, minute=0, second=0, microsecond=0)
+    count = await db.sales.count_documents({
+        "created_at": {"$gte": today_start.isoformat()}
+    })
+    
+    sequential = str(count + 1).zfill(4)
+    return f"FAC-{today}-{sequential}"
+
+
 @api_router.post("/sales", response_model=Sale)
 async def create_sale(sale_data: SaleCreate, current_user: dict = Depends(get_current_user)):
     total = sum(item.subtotal for item in sale_data.items)
