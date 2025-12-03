@@ -15,6 +15,12 @@ from zoneinfo import ZoneInfo
 
 # Colombia timezone
 COLOMBIA_TZ = ZoneInfo("America/Bogota")
+
+
+def now_colombia():
+    """Get current datetime in Colombia timezone"""
+    return datetime.now(COLOMBIA_TZ)
+
 import bcrypt
 import jwt
 import base64
