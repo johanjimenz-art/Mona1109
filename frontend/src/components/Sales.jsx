@@ -49,6 +49,25 @@ export default function Sales() {
   const canApplyDiscount = permissions.descuentos || false;
   const role = localStorage.getItem('role');
 
+  const fetchProducts = async () => {
+    try {
+      const token = localStorage.getItem('token');
+      const response = await axios.get(`${API}/products`, {
+        headers: { Authorization: `Bearer ${token}` }
+      });
+      
+      // Filter only approved products
+      const approvedProducts = response.data.filter(p => p.aprobado);
+      setProducts(approvedProducts);
+      
+      // Get unique references
+      const refs = [...new Set(approvedProducts.map(p => p.referencia))];
+      setUniqueReferencias(refs);
+    } catch (error) {
+      toast.error('Error al cargar productos');
+    }
+  };
+
   useEffect(() => {
     fetchProducts();
   }, []);
@@ -68,25 +87,6 @@ export default function Sales() {
       setAvailableTallas([]);
     }
   }, [searchData.referencia, products]);
-
-  const fetchProducts = async () => {
-    try {
-      const token = localStorage.getItem('token');
-      const response = await axios.get(`${API}/products`, {
-        headers: { Authorization: `Bearer ${token}` }
-      });
-      
-      // Filter only approved products
-      const approvedProducts = response.data.filter(p => p.aprobado);
-      setProducts(approvedProducts);
-      
-      // Get unique references
-      const refs = [...new Set(approvedProducts.map(p => p.referencia))];
-      setUniqueReferencias(refs);
-    } catch (error) {
-      toast.error('Error al cargar productos');
-    }
-  };
 
   const handleClientChange = (e) => {
     setClientData({ ...clientData, [e.target.name]: e.target.value });
