@@ -62,10 +62,12 @@ export default function Credits() {
         })
       ]);
       
-      setUpcomingAlerts(upcomingRes.data);
-      setOverdueAlerts(overdueRes.data);
+      setUpcomingAlerts(upcomingRes.data || []);
+      setOverdueAlerts(overdueRes.data || []);
     } catch (error) {
-      console.error('Error al cargar alertas');
+      console.error('Error al cargar alertas:', error);
+      setUpcomingAlerts([]);
+      setOverdueAlerts([]);
     }
   };
 
