@@ -61,7 +61,7 @@ async def main():
     
     # Importar ventas
     if 'sales' in exported_data and exported_data['sales']:
-        print(f("🛒 Importando {len(exported_data['sales'])} ventas...")
+        print(f"🛒 Importando {len(exported_data['sales'])} ventas...")
         await db.sales.delete_many({})
         for sale in exported_data['sales']:
             await db.sales.insert_one(sale)
