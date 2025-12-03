@@ -202,6 +202,11 @@ class CreditSaleCreate(BaseModel):
     fecha_pago: datetime
     observaciones: Optional[str] = None
 
+class CreditSaleUpdate(BaseModel):
+    saldo_pendiente: Optional[float] = None
+    fecha_pago: Optional[str] = None
+    observaciones: Optional[str] = None
+
 class Payment(BaseModel):
     model_config = ConfigDict(extra="ignore")
     id: str = Field(default_factory=lambda: str(uuid.uuid4()))
