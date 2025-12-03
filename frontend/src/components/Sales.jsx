@@ -28,7 +28,8 @@ export default function Sales() {
   const [cart, setCart] = useState([]);
   const [searchData, setSearchData] = useState({
     referencia: '',
-    talla: ''
+    talla: '',
+    color: ''
   });
   const [cantidad, setCantidad] = useState(1);
   const [products, setProducts] = useState([]);
