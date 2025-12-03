@@ -220,7 +220,7 @@ export default function Credits() {
             {['all', 'pendiente', 'vencido', 'pagado'].map((tab) => (
               <TabsContent key={tab} value={tab}>
                 <div className="space-y-4">
-                  {credits
+                  {(credits || [])
                     .filter((c) => tab === 'all' || c.estado === tab)
                     .map((credit) => (
                       <div key={credit.id} className="border-2 border-black p-4">
