@@ -434,6 +434,84 @@ export default function Credits() {
           </div>
         </DialogContent>
       </Dialog>
+
+      {/* Edit Credit Modal (Admin Only) */}
+      <Dialog open={showEditModal} onOpenChange={setShowEditModal}>
+        <DialogContent className="border-4 border-black rounded-none">
+          <DialogHeader>
+            <DialogTitle>Editar Crédito (Admin)</DialogTitle>
+            <DialogDescription>
+              {selectedCredit && (
+                <>
+                  <p className="font-bold text-black mt-2">{selectedCredit.nombre_cliente}</p>
+                  <p className="text-sm">Documento: {selectedCredit.documento_cliente}</p>
+                </>
+              )}
+            </DialogDescription>
+          </DialogHeader>
+
+          <div className="space-y-4 mt-4">
+            <div>
+              <Label htmlFor="edit-saldo">Saldo Pendiente</Label>
+              <Input
+                id="edit-saldo"
+                type="number"
+                min="0"
+                step="0.01"
+                value={editData.saldo_pendiente}
+                onChange={(e) => setEditData({...editData, saldo_pendiente: e.target.value})}
+                className="rounded-none border-2 border-black"
+                placeholder="Nuevo saldo pendiente"
+              />
+              <p className="text-xs text-gray-500 mt-1">
+                Saldo actual: ${selectedCredit?.saldo_pendiente.toLocaleString()}
+              </p>
+            </div>
+
+            <div>
+              <Label htmlFor="edit-fecha">Fecha de Pago</Label>
+              <Input
+                id="edit-fecha"
+                type="date"
+                value={editData.fecha_pago}
+                onChange={(e) => setEditData({...editData, fecha_pago: e.target.value})}
+                className="rounded-none border-2 border-black"
+              />
+            </div>
+
+            <div>
+              <Label htmlFor="edit-observations">Observaciones</Label>
+              <Input
+                id="edit-observations"
+                value={editData.observaciones}
+                onChange={(e) => setEditData({...editData, observaciones: e.target.value})}
+                className="rounded-none border-2 border-black"
+                placeholder="Actualizar observaciones"
+              />
+            </div>
+
+            <div className="flex gap-2">
+              <Button
+                onClick={handleEditCredit}
+                disabled={loading}
+                className="flex-1 bg-black text-white hover:bg-gray-800 rounded-none h-12"
+              >
+                {loading ? 'Guardando...' : 'Guardar Cambios'}
+              </Button>
+              <Button
+                onClick={() => {
+                  setShowEditModal(false);
+                  setEditData({ saldo_pendiente: '', fecha_pago: '', observaciones: '' });
+                }}
+                variant="outline"
+                className="border-2 border-black rounded-none h-12"
+              >
+                Cancelar
+              </Button>
+            </div>
+          </div>
+        </DialogContent>
+      </Dialog>
     </div>
   );
 }
