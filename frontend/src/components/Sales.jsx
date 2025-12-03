@@ -420,42 +420,22 @@ export default function Sales() {
                   </Select>
                 </div>
 
-                <div className="grid grid-cols-2 gap-4">
-                  <div>
-                    <Label htmlFor="talla" className="text-black font-medium mb-2 block">Talla</Label>
-                    <Select 
-                      value={searchData.talla} 
-                      onValueChange={(value) => setSearchData({ ...searchData, talla: value })}
-                      disabled={!searchData.referencia}
-                    >
-                      <SelectTrigger className="rounded-none border-2 border-black h-10" data-testid="talla-select">
-                        <SelectValue placeholder="Selecciona talla" />
-                      </SelectTrigger>
-                      <SelectContent className="border-2 border-black rounded-none">
-                        {availableTallas.map((talla) => (
-                          <SelectItem key={talla} value={talla}>{talla}</SelectItem>
-                        ))}
-                      </SelectContent>
-                    </Select>
-                  </div>
-
-                  <div>
-                    <Label htmlFor="color" className="text-black font-medium mb-2 block">Color</Label>
-                    <Select 
-                      value={searchData.color} 
-                      onValueChange={(value) => setSearchData({ ...searchData, color: value })}
-                      disabled={!searchData.referencia}
-                    >
-                      <SelectTrigger className="rounded-none border-2 border-black h-10" data-testid="color-select">
-                        <SelectValue placeholder="Selecciona color" />
-                      </SelectTrigger>
-                      <SelectContent className="border-2 border-black rounded-none">
-                        {getAvailableColors().map((color) => (
-                          <SelectItem key={color} value={color}>{color}</SelectItem>
-                        ))}
-                      </SelectContent>
-                    </Select>
-                  </div>
+                <div>
+                  <Label htmlFor="talla" className="text-black font-medium mb-2 block">Talla</Label>
+                  <Select 
+                    value={searchData.talla} 
+                    onValueChange={(value) => setSearchData({ ...searchData, talla: value })}
+                    disabled={!searchData.referencia}
+                  >
+                    <SelectTrigger className="rounded-none border-2 border-black h-10" data-testid="talla-select">
+                      <SelectValue placeholder="Selecciona talla" />
+                    </SelectTrigger>
+                    <SelectContent className="border-2 border-black rounded-none">
+                      {availableTallas.map((talla) => (
+                        <SelectItem key={talla} value={talla}>{talla}</SelectItem>
+                      ))}
+                    </SelectContent>
+                  </Select>
                 </div>
 
                 <div>
