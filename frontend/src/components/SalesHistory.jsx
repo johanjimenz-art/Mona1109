@@ -84,6 +84,32 @@ export default function SalesHistory() {
     }
   };
 
+  const handleDeleteSale = async (saleId, restoreStock = true) => {
+    const confirmMessage = restoreStock
+      ? '¿Eliminar esta venta y restaurar el inventario? Esta acción no se puede deshacer.'
+      : '¿Eliminar esta venta SIN restaurar el inventario? Esta acción no se puede deshacer.';
+    
+    if (!window.confirm(confirmMessage)) {
+      return;
+    }
+
+    try {
+      const token = localStorage.getItem('token');
+      await axios.delete(`${API}/sales/${saleId}`, {
+        params: { restore_stock: restoreStock },
+        headers: { Authorization: `Bearer ${token}` }
+      });
+      
+      toast.success(restoreStock 
+        ? 'Venta eliminada e inventario restaurado' 
+        : 'Venta eliminada');
+      fetchSales();
+      setExpandedSale(null);
+    } catch (error) {
+      toast.error(error.response?.data?.detail || 'Error al eliminar venta');
+    }
+  };
+
   const generateInvoicePDF = (sale) => {
     try {
       const doc = new jsPDF({
