@@ -177,7 +177,7 @@ export default function SalesHistory() {
         `$${item.subtotal.toLocaleString()}`
       ]);
 
-      doc.autoTable({
+      autoTable(doc, {
         startY: yPosition,
         head: [['Ref', 'Descripción', 'Talla', 'Cant', 'Precio', 'Desc', 'Subtotal']],
         body: tableData,
@@ -203,7 +203,7 @@ export default function SalesHistory() {
         margin: { left: margin, right: margin }
       });
 
-      yPosition = doc.lastAutoTable.finalY + 10;
+      yPosition = doc.previousAutoTable.finalY + 10;
 
       // Totals box
       const totalsBoxY = yPosition;
