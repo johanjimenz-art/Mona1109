@@ -41,8 +41,10 @@ export default function Credits() {
       const response = await axios.get(`${API}/credit-sales`, {
         headers: { Authorization: `Bearer ${token}` }
       });
-      setCredits(response.data);
+      setCredits(response.data || []);
     } catch (error) {
+      console.error('Error al cargar créditos:', error);
+      setCredits([]);
       toast.error('Error al cargar créditos');
     }
   };
