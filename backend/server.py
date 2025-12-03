@@ -1160,6 +1160,16 @@ async def get_upcoming_payment_alerts(current_user: dict = Depends(get_current_u
             "$lte": two_days_later.isoformat()
         }
     }, {"_id": 0}).to_list(1000)
+    
+    for credit in credits:
+        if isinstance(credit.get('fecha_pago'), str):
+            credit['fecha_pago'] = datetime.fromisoformat(credit['fecha_pago'])
+        if isinstance(credit.get('created_at'), str):
+            credit['created_at'] = datetime.fromisoformat(credit['created_at'])
+        if isinstance(credit.get('updated_at'), str):
+            credit['updated_at'] = datetime.fromisoformat(credit['updated_at'])
+    
+    return credits
 
 
 @api_router.put("/credit-sales/{credit_id}")
