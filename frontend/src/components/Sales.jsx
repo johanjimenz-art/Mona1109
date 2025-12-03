@@ -95,7 +95,6 @@ export default function Sales() {
     return products.find(p => 
       p.referencia === searchData.referencia && 
       p.talla === searchData.talla && 
-      p.color === searchData.color &&
       p.aprobado
     );
   };
