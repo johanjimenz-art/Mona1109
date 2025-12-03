@@ -659,6 +659,9 @@ async def generate_invoice_number():
 async def create_sale(sale_data: SaleCreate, current_user: dict = Depends(get_current_user)):
     total = sum(item.subtotal for item in sale_data.items)
     
+    # Generate invoice number
+    numero_factura = await generate_invoice_number()
+    
     # Update inventory for each item
     for item in sale_data.items:
         product = await db.products.find_one({"id": item.product_id})
@@ -684,12 +687,16 @@ async def create_sale(sale_data: SaleCreate, current_user: dict = Depends(get_cu
     
     # Create sale
     sale = Sale(
+        numero_factura=numero_factura,
         nombre_cliente=sale_data.nombre_cliente,
         documento_cliente=sale_data.documento_cliente,
         direccion_cliente=sale_data.direccion_cliente,
         celular_cliente=sale_data.celular_cliente,
         items=[item.model_dump() for item in sale_data.items],
+        subtotal=sale_data.subtotal if hasattr(sale_data, 'subtotal') else total,
+        descuento_total=sale_data.descuento_total if hasattr(sale_data, 'descuento_total') else 0,
         total=total,
+        aplicado_por=sale_data.aplicado_por if hasattr(sale_data, 'aplicado_por') else None,
         created_by=current_user["username"]
     )
     
