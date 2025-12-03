@@ -1172,26 +1172,34 @@ async def get_upcoming_payment_alerts(current_user: dict = Depends(get_current_u
     return credits
 
 
+class CreditSaleUpdate(BaseModel):
+    saldo_pendiente: Optional[float] = None
+    fecha_pago: Optional[str] = None
+    observaciones: Optional[str] = None
+
 @api_router.put("/credit-sales/{credit_id}")
 async def update_credit_sale(
     credit_id: str,
-    saldo_pendiente: Optional[float] = None,
-    fecha_pago: Optional[datetime] = None,
-    observaciones: Optional[str] = None,
+    update_request: CreditSaleUpdate,
     current_user: dict = Depends(get_admin_user)
 ):
     """Admin can update credit sale details"""
     update_data = {}
     
-    if saldo_pendiente is not None:
-        update_data["saldo_pendiente"] = saldo_pendiente
-        update_data["estado"] = "pagado" if saldo_pendiente <= 0 else "pendiente"
+    if update_request.saldo_pendiente is not None:
+        update_data["saldo_pendiente"] = update_request.saldo_pendiente
+        update_data["estado"] = "pagado" if update_request.saldo_pendiente <= 0 else "pendiente"
     
-    if fecha_pago is not None:
-        update_data["fecha_pago"] = fecha_pago.isoformat()
+    if update_request.fecha_pago is not None:
+        # Parse the date string
+        try:
+            fecha_dt = datetime.fromisoformat(update_request.fecha_pago.replace('Z', '+00:00'))
+            update_data["fecha_pago"] = fecha_dt.isoformat()
+        except:
+            update_data["fecha_pago"] = update_request.fecha_pago
     
-    if observaciones is not None:
-        update_data["observaciones"] = observaciones
+    if update_request.observaciones is not None:
+        update_data["observaciones"] = update_request.observaciones
     
     if update_data:
         update_data["updated_at"] = now_colombia().isoformat()
