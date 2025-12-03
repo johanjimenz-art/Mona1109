@@ -492,6 +492,25 @@ export default function SalesHistory() {
                       Marcar Despachado
                     </Button>
                   )}
+
+                  {isAdmin && (
+                    <>
+                      <Button
+                        onClick={() => handleDeleteSale(sale.id, true)}
+                        variant="outline"
+                        className="border-2 border-orange-500 text-orange-600 rounded-none hover:bg-orange-50"
+                      >
+                        Anular Venta (Restaurar Stock)
+                      </Button>
+                      <Button
+                        onClick={() => handleDeleteSale(sale.id, false)}
+                        variant="outline"
+                        className="border-2 border-red-500 text-red-600 rounded-none hover:bg-red-50"
+                      >
+                        Eliminar Venta (Sin Restaurar)
+                      </Button>
+                    </>
+                  )}
                 </div>
               </div>
             ))
