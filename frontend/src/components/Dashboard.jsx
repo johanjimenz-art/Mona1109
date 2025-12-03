@@ -246,7 +246,7 @@ export default function Dashboard() {
                 <DialogHeader>
                   <DialogTitle className="text-2xl font-bold">Resumen de Ventas de Hoy</DialogTitle>
                   <DialogDescription>
-                    {new Date().toLocaleDateString('es', { weekday: 'long', year: 'numeric', month: 'long', day: 'numeric' })}
+                    {new Date().toLocaleDateString('es-CO', { timeZone: 'America/Bogota', weekday: 'long', year: 'numeric', month: 'long', day: 'numeric' })}
                   </DialogDescription>
                 </DialogHeader>
                 
