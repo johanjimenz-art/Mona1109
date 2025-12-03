@@ -112,6 +112,66 @@ export default function Credits() {
     }
   };
 
+  const handleEditCredit = async () => {
+    setLoading(true);
+    try {
+      const token = localStorage.getItem('token');
+      const updateData = {};
+      
+      if (editData.saldo_pendiente !== '') {
+        updateData.saldo_pendiente = parseFloat(editData.saldo_pendiente);
+      }
+      if (editData.fecha_pago !== '') {
+        updateData.fecha_pago = new Date(editData.fecha_pago).toISOString();
+      }
+      if (editData.observaciones !== '') {
+        updateData.observaciones = editData.observaciones;
+      }
+
+      await axios.put(
+        `${API}/credit-sales/${selectedCredit.id}`,
+        updateData,
+        { 
+          headers: { Authorization: `Bearer ${token}` },
+          params: updateData
+        }
+      );
+
+      toast.success('Crédito actualizado exitosamente');
+      setShowEditModal(false);
+      setEditData({ saldo_pendiente: '', fecha_pago: '', observaciones: '' });
+      setSelectedCredit(null);
+      fetchCredits();
+      fetchAlerts();
+    } catch (error) {
+      toast.error(error.response?.data?.detail || 'Error al actualizar crédito');
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  const handleDeleteCredit = async (creditId) => {
+    if (!window.confirm('¿Está seguro de eliminar este crédito? Esta acción no se puede deshacer.')) {
+      return;
+    }
+
+    setLoading(true);
+    try {
+      const token = localStorage.getItem('token');
+      await axios.delete(`${API}/credit-sales/${creditId}`, {
+        headers: { Authorization: `Bearer ${token}` }
+      });
+
+      toast.success('Crédito eliminado exitosamente');
+      fetchCredits();
+      fetchAlerts();
+    } catch (error) {
+      toast.error(error.response?.data?.detail || 'Error al eliminar crédito');
+    } finally {
+      setLoading(false);
+    }
+  };
+
   const getStatusBadge = (estado) => {
     const badges = {
       pendiente: { color: 'bg-yellow-500', text: 'Pendiente', icon: Clock },
