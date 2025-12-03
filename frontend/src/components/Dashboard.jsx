@@ -188,7 +188,7 @@ export default function Dashboard() {
                             {notif.mensaje}
                           </p>
                           <p className="text-xs text-gray-500 mt-1">
-                            {new Date(notif.created_at).toLocaleString('es')}
+                            {new Date(notif.created_at).toLocaleString('es-CO', { timeZone: 'America/Bogota' })}
                           </p>
                         </div>
                       ))}
