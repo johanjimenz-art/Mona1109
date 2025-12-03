@@ -26,9 +26,16 @@ export default function Credits() {
   const [overdueAlerts, setOverdueAlerts] = useState([]);
   const [selectedCredit, setSelectedCredit] = useState(null);
   const [showPaymentModal, setShowPaymentModal] = useState(false);
+  const [showEditModal, setShowEditModal] = useState(false);
   const [paymentAmount, setPaymentAmount] = useState('');
   const [paymentObservations, setPaymentObservations] = useState('');
+  const [editData, setEditData] = useState({
+    saldo_pendiente: '',
+    fecha_pago: '',
+    observaciones: ''
+  });
   const [loading, setLoading] = useState(false);
+  const [userRole, setUserRole] = useState('');
 
   useEffect(() => {
     fetchCredits();
