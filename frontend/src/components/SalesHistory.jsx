@@ -7,11 +7,13 @@ import { Label } from './ui/label';
 import { ArrowLeft, Package, Truck, CheckCircle, Image as ImageIcon, Download, Search, FileText } from 'lucide-react';
 import { toast } from 'sonner';
 import { format } from 'date-fns';
+import { formatInTimeZone } from 'date-fns-tz';
 import { es } from 'date-fns/locale';
 import jsPDF from 'jspdf';
 
 const BACKEND_URL = process.env.REACT_APP_BACKEND_URL;
 const API = `${BACKEND_URL}/api`;
+const COLOMBIA_TZ = 'America/Bogota';
 
 export default function SalesHistory() {
   const navigate = useNavigate();
