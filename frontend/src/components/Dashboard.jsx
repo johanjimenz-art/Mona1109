@@ -331,7 +331,7 @@ export default function Dashboard() {
                     <div>
                       <p className="text-gray-600 text-sm font-medium">Ingresos de Hoy</p>
                       <p className="text-3xl font-bold text-black mt-2" data-testid="total-revenue">${stats.today_revenue?.toLocaleString()}</p>
-                      <p className="text-xs text-gray-500 mt-1">{new Date().toLocaleDateString('es')}</p>
+                      <p className="text-xs text-gray-500 mt-1">{new Date().toLocaleDateString('es-CO', { timeZone: 'America/Bogota' })}</p>
                     </div>
                     <TrendingUp className="w-10 h-10 text-black" />
                   </div>
