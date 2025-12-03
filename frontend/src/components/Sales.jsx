@@ -104,14 +104,9 @@ export default function Sales() {
     return product?.imagen_url;
   };
 
-  const getAvailableColors = () => {
-    if (!searchData.referencia) return [];
-    const filtered = products.filter(p => p.referencia === searchData.referencia);
-    return [...new Set(filtered.map(p => p.color))];
-  };
 
   const addToCart = async () => {
-    if (!searchData.referencia || !searchData.talla || !searchData.color) {
+    if (!searchData.referencia || !searchData.talla) {
       toast.error('Complete todos los campos de búsqueda');
       return;
     }
