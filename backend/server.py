@@ -1294,17 +1294,6 @@ async def delete_sale(
     
     return {"message": "Sale deleted successfully", "stock_restored": restore_stock}
 
-    
-    for credit in credits:
-        if isinstance(credit.get('fecha_pago'), str):
-            credit['fecha_pago'] = datetime.fromisoformat(credit['fecha_pago'])
-        if isinstance(credit.get('created_at'), str):
-            credit['created_at'] = datetime.fromisoformat(credit['created_at'])
-        if isinstance(credit.get('updated_at'), str):
-            credit['updated_at'] = datetime.fromisoformat(credit['updated_at'])
-    
-    return credits
-
 @api_router.get("/credit-sales/alerts/overdue")
 async def get_overdue_payment_alerts(current_user: dict = Depends(get_current_user)):
     """Get credits with overdue payments"""
