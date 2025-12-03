@@ -1177,11 +1177,6 @@ async def get_upcoming_payment_alerts(current_user: dict = Depends(get_current_u
     return credits
 
 
-class CreditSaleUpdate(BaseModel):
-    saldo_pendiente: Optional[float] = None
-    fecha_pago: Optional[str] = None
-    observaciones: Optional[str] = None
-
 @api_router.put("/credit-sales/{credit_id}")
 async def update_credit_sale(
     credit_id: str,
