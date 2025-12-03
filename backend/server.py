@@ -1160,6 +1160,130 @@ async def get_upcoming_payment_alerts(current_user: dict = Depends(get_current_u
             "$lte": two_days_later.isoformat()
         }
     }, {"_id": 0}).to_list(1000)
+
+
+@api_router.put("/credit-sales/{credit_id}")
+async def update_credit_sale(
+    credit_id: str,
+    saldo_pendiente: Optional[float] = None,
+    fecha_pago: Optional[datetime] = None,
+    observaciones: Optional[str] = None,
+    current_user: dict = Depends(get_admin_user)
+):
+    """Admin can update credit sale details"""
+    update_data = {}
+    
+    if saldo_pendiente is not None:
+        update_data["saldo_pendiente"] = saldo_pendiente
+        update_data["estado"] = "pagado" if saldo_pendiente <= 0 else "pendiente"
+    
+    if fecha_pago is not None:
+        update_data["fecha_pago"] = fecha_pago.isoformat()
+    
+    if observaciones is not None:
+        update_data["observaciones"] = observaciones
+    
+    if update_data:
+        update_data["updated_at"] = now_colombia().isoformat()
+        
+        result = await db.credit_sales.update_one(
+            {"id": credit_id},
+            {"$set": update_data}
+        )
+        
+        if result.matched_count == 0:
+            raise HTTPException(status_code=404, detail="Credit sale not found")
+    
+    return {"message": "Credit sale updated successfully"}
+
+@api_router.delete("/credit-sales/{credit_id}")
+async def delete_credit_sale(
+    credit_id: str,
+    current_user: dict = Depends(get_admin_user)
+):
+    """Admin can delete credit sale"""
+    result = await db.credit_sales.delete_one({"id": credit_id})
+    
+    if result.deleted_count == 0:
+        raise HTTPException(status_code=404, detail="Credit sale not found")
+    
+    # Also delete related payments
+    await db.payments.delete_many({"credit_sale_id": credit_id})
+    
+    return {"message": "Credit sale deleted successfully"}
+
+@api_router.put("/sales/{sale_id}")
+async def update_sale(
+    sale_id: str,
+    items: Optional[List[SaleItem]] = None,
+    subtotal: Optional[float] = None,
+    descuento_total: Optional[float] = None,
+    total: Optional[float] = None,
+    observaciones: Optional[str] = None,
+    current_user: dict = Depends(get_admin_user)
+):
+    """Admin can update sale details"""
+    update_data = {}
+    
+    if items is not None:
+        update_data["items"] = [item.model_dump() for item in items]
+    
+    if subtotal is not None:
+        update_data["subtotal"] = subtotal
+    
+    if descuento_total is not None:
+        update_data["descuento_total"] = descuento_total
+    
+    if total is not None:
+        update_data["total"] = total
+    
+    if observaciones is not None:
+        update_data["observaciones"] = observaciones
+    
+    if update_data:
+        update_data["updated_at"] = now_colombia().isoformat()
+        
+        result = await db.sales.update_one(
+            {"id": sale_id},
+            {"$set": update_data}
+        )
+        
+        if result.matched_count == 0:
+            raise HTTPException(status_code=404, detail="Sale not found")
+    
+    return {"message": "Sale updated successfully"}
+
+@api_router.delete("/sales/{sale_id}")
+async def delete_sale(
+    sale_id: str,
+    restore_stock: bool = True,
+    current_user: dict = Depends(get_admin_user)
+):
+    """Admin can delete sale and optionally restore stock"""
+    sale = await db.sales.find_one({"id": sale_id}, {"_id": 0})
+    
+    if not sale:
+        raise HTTPException(status_code=404, detail="Sale not found")
+    
+    # Restore stock if requested
+    if restore_stock:
+        for item in sale.get("items", []):
+            await db.products.update_one(
+                {"id": item["product_id"]},
+                {"$inc": {"cantidad_stock": item["cantidad"]}}
+            )
+    
+    # Delete the sale
+    await db.sales.delete_one({"id": sale_id})
+    
+    # Delete related credit if exists
+    await db.credit_sales.delete_many({"sale_id": sale_id})
+    
+    # Delete related notifications
+    await db.notifications.delete_many({"sale_id": sale_id})
+    
+    return {"message": "Sale deleted successfully", "stock_restored": restore_stock}
+
     
     for credit in credits:
         if isinstance(credit.get('fecha_pago'), str):
