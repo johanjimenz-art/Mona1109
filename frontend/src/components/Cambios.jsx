@@ -546,93 +546,96 @@ export default function Cambios() {
               <CardTitle>Paso 3: Seleccionar Nuevo Producto</CardTitle>
             </CardHeader>
             <CardContent className="p-6">
-              <div className="mb-4 p-4 bg-gray-100 border-2 border-black">
-                <p className="font-bold">Producto a cambiar:</p>
-                <p>{selectedProduct.referencia} - {selectedProduct.descripcion}</p>
-                <p className="text-sm">Talla: {selectedProduct.talla}</p>
-              </div>
-
-              <div className="grid grid-cols-2 gap-4 mb-4">
-                <div>
-                  <Label>Referencia Nueva</Label>
-                  <select
-                    value={searchNewProduct.referencia}
-                    onChange={(e) => setSearchNewProduct({...searchNewProduct, referencia: e.target.value, talla: ''})}
-                    className="w-full p-2 border-2 border-black rounded-none"
-                  >
-                    <option value="">Seleccionar...</option>
-                    {uniqueReferencias.map(ref => (
-                      <option key={ref} value={ref}>{ref}</option>
-                    ))}
-                  </select>
-                </div>
-                <div>
-                  <Label>Talla Nueva</Label>
-                  <select
-                    value={searchNewProduct.talla}
-                    onChange={(e) => setSearchNewProduct({...searchNewProduct, talla: e.target.value})}
-                    className="w-full p-2 border-2 border-black rounded-none"
-                    disabled={!searchNewProduct.referencia}
-                  >
-                    <option value="">Seleccionar...</option>
-                    {availableTallas.map(talla => (
-                      <option key={talla} value={talla}>{talla}</option>
-                    ))}
-                  </select>
-                </div>
-              </div>
-
-              {/* Mostrar productos disponibles con fotos */}
-              {searchNewProduct.referencia && (
-                <div className="mb-4">
-                  <p className="font-bold mb-2">Productos disponibles con esta referencia:</p>
-                  <div className="grid grid-cols-2 gap-4">
-                    {products
-                      .filter(p => p.referencia === searchNewProduct.referencia)
-                      .map(product => (
-                        <Card
-                          key={product.id}
-                          className={`border-2 rounded-none cursor-pointer ${
-                            searchNewProduct.talla === product.talla 
-                              ? 'border-green-500 bg-green-50' 
-                              : 'border-gray-300 hover:border-black'
-                          }`}
-                          onClick={() => setSearchNewProduct({...searchNewProduct, talla: product.talla})}
-                        >
-                          <CardContent className="p-4">
-                            {product.imagen_url ? (
-                              <img
-                                src={`${BACKEND_URL}${product.imagen_url}`}
-                                alt={product.descripcion}
-                                className="w-full h-32 object-cover border-2 border-black mb-2"
-                              />
-                            ) : (
-                              <div className="w-full h-32 border-2 border-black flex items-center justify-center bg-gray-200 mb-2">
-                                <p className="text-gray-500">Sin imagen</p>
-                              </div>
-                            )}
-                            <p className="font-bold text-sm">{product.referencia}</p>
-                            <p className="text-xs">{product.descripcion}</p>
-                            <p className="text-sm">Talla: <span className="font-bold">{product.talla}</span></p>
-                            <p className="text-sm">Color: {product.color || 'N/A'}</p>
-                            <p className="font-bold mt-1">${product.precio_venta.toLocaleString()}</p>
-                            <p className={`text-xs ${product.cantidad_stock > 0 ? 'text-green-600' : 'text-red-600'}`}>
-                              Stock: {product.cantidad_stock}
-                            </p>
-                          </CardContent>
-                        </Card>
-                      ))}
+              <div className="mb-6 p-4 bg-yellow-50 border-2 border-yellow-500">
+                <p className="font-bold text-yellow-900 mb-2">📦 Producto a cambiar:</p>
+                <div className="flex gap-4 items-center">
+                  {selectedProduct.imagen_url && (
+                    <img
+                      src={`${BACKEND_URL}${selectedProduct.imagen_url}`}
+                      alt={selectedProduct.descripcion}
+                      className="w-16 h-16 object-cover border-2 border-black"
+                    />
+                  )}
+                  <div>
+                    <p className="font-bold">{selectedProduct.referencia} - {selectedProduct.descripcion}</p>
+                    <p className="text-sm">Talla: {selectedProduct.talla} | Color: {selectedProduct.color || 'N/A'}</p>
+                    <p className="text-sm">Precio: ${selectedProduct.precio_venta.toLocaleString()}</p>
                   </div>
                 </div>
-              )}
+              </div>
 
-              <Button
-                onClick={selectNewProduct}
-                disabled={!searchNewProduct.referencia || !searchNewProduct.talla}
-                className="bg-black text-white hover:bg-gray-800 rounded-none"
-              >
-                Confirmar Nuevo Producto
-              </Button>
+              <div className="space-y-4">
+                <p className="font-bold text-lg">🔍 Buscar Nuevo Producto:</p>
+                
+                <div className="grid grid-cols-2 gap-4">
+                  <div>
+                    <Label className="text-black font-medium mb-2 block">Referencia</Label>
+                    <Select 
+                      value={searchNewProduct.referencia} 
+                      onValueChange={(value) => setSearchNewProduct({...searchNewProduct, referencia: value, talla: ''})}
+                    >
+                      <SelectTrigger className="rounded-none border-2 border-black h-10">
+                        <SelectValue placeholder="Selecciona una referencia" />
+                      </SelectTrigger>
+                      <SelectContent className="max-h-60 border-2 border-black rounded-none">
+                        {uniqueReferencias.map((ref) => {
+                          const productInfo = products.find(p => p.referencia === ref);
+                          const imageUrl = getProductImage(ref);
+                          return (
+                            <SelectItem key={ref} value={ref} className="py-2">
+                              <div className="flex items-center gap-2">
+                                {imageUrl ? (
+                                  <img 
+                                    src={`${BACKEND_URL}${imageUrl}`}
+                                    alt={ref}
+                                    className="w-8 h-8 object-cover border border-black"
+                                  />
+                                ) : (
+                                  <div className="w-8 h-8 border border-black flex items-center justify-center bg-gray-200">
+                                    <ImageIcon className="w-4 h-4 text-gray-400" />
+                                  </div>
+                                )}
+                                <div className="text-sm">
+                                  <p className="font-medium">{ref}</p>
+                                  {productInfo && (
+                                    <p className="text-xs text-gray-600">{productInfo.descripcion}</p>
+                                  )}
+                                </div>
+                              </div>
+                            </SelectItem>
+                          );
+                        })}
+                      </SelectContent>
+                    </Select>
+                  </div>
+
+                  <div>
+                    <Label className="text-black font-medium mb-2 block">Talla</Label>
+                    <Select 
+                      value={searchNewProduct.talla} 
+                      onValueChange={(value) => setSearchNewProduct({...searchNewProduct, talla: value})}
+                      disabled={!searchNewProduct.referencia}
+                    >
+                      <SelectTrigger className="rounded-none border-2 border-black h-10">
+                        <SelectValue placeholder="Selecciona talla" />
+                      </SelectTrigger>
+                      <SelectContent className="border-2 border-black rounded-none">
+                        {availableTallas.map((talla) => (
+                          <SelectItem key={talla} value={talla}>{talla}</SelectItem>
+                        ))}
+                      </SelectContent>
+                    </Select>
+                  </div>
+                </div>
+
+                <Button
+                  onClick={selectNewProduct}
+                  disabled={!searchNewProduct.referencia || !searchNewProduct.talla}
+                  className="w-full bg-black text-white hover:bg-gray-800 rounded-none h-12 text-lg"
+                >
+                  ✅ Confirmar Nuevo Producto
+                </Button>
+              </div>
             </CardContent>
           </Card>
         )}
