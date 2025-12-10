@@ -387,8 +387,53 @@ export default function Cambios() {
                 </div>
               </div>
 
+              {/* Mostrar productos disponibles con fotos */}
+              {searchNewProduct.referencia && (
+                <div className="mb-4">
+                  <p className="font-bold mb-2">Productos disponibles con esta referencia:</p>
+                  <div className="grid grid-cols-2 gap-4">
+                    {products
+                      .filter(p => p.referencia === searchNewProduct.referencia)
+                      .map(product => (
+                        <Card
+                          key={product.id}
+                          className={`border-2 rounded-none cursor-pointer ${
+                            searchNewProduct.talla === product.talla 
+                              ? 'border-green-500 bg-green-50' 
+                              : 'border-gray-300 hover:border-black'
+                          }`}
+                          onClick={() => setSearchNewProduct({...searchNewProduct, talla: product.talla})}
+                        >
+                          <CardContent className="p-4">
+                            {product.imagen_url ? (
+                              <img
+                                src={`${BACKEND_URL}${product.imagen_url}`}
+                                alt={product.descripcion}
+                                className="w-full h-32 object-cover border-2 border-black mb-2"
+                              />
+                            ) : (
+                              <div className="w-full h-32 border-2 border-black flex items-center justify-center bg-gray-200 mb-2">
+                                <p className="text-gray-500">Sin imagen</p>
+                              </div>
+                            )}
+                            <p className="font-bold text-sm">{product.referencia}</p>
+                            <p className="text-xs">{product.descripcion}</p>
+                            <p className="text-sm">Talla: <span className="font-bold">{product.talla}</span></p>
+                            <p className="text-sm">Color: {product.color || 'N/A'}</p>
+                            <p className="font-bold mt-1">${product.precio_venta.toLocaleString()}</p>
+                            <p className={`text-xs ${product.cantidad_stock > 0 ? 'text-green-600' : 'text-red-600'}`}>
+                              Stock: {product.cantidad_stock}
+                            </p>
+                          </CardContent>
+                        </Card>
+                      ))}
+                  </div>
+                </div>
+              )}
+
               <Button
                 onClick={selectNewProduct}
+                disabled={!searchNewProduct.referencia || !searchNewProduct.talla}
                 className="bg-black text-white hover:bg-gray-800 rounded-none"
               >
                 Confirmar Nuevo Producto
