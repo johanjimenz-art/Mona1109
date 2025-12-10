@@ -289,6 +289,7 @@ export default function Sales() {
         celular_cliente: ''
       });
       setCart([]);
+      setObservaciones('');
       setIsCredit(false);
       setCreditData({
         abono_inicial: '',
