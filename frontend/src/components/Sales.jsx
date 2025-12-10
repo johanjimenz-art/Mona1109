@@ -72,6 +72,268 @@ export default function Sales() {
     }
   };
 
+  const generateInvoicePDF = async (sale) => {
+    try {
+      // Buscar si esta venta tiene un crédito asociado
+      let creditInfo = null;
+      try {
+        const token = localStorage.getItem('token');
+        const creditResponse = await axios.get(`${API}/credit-sales`, {
+          headers: { Authorization: `Bearer ${token}` }
+        });
+        creditInfo = creditResponse.data.find(c => c.sale_id === sale.id);
+      } catch (error) {
+        console.log('No se pudo obtener info de crédito:', error);
+      }
+
+      const doc = new jsPDF({
+        orientation: 'portrait',
+        unit: 'mm',
+        format: [80, 500]
+      });
+
+      const pageWidth = 80;
+      const margin = 5;
+      const contentWidth = pageWidth - (margin * 2);
+      let yPosition = margin;
+
+      // Title
+      doc.setFontSize(18);
+      doc.setFont('helvetica', 'bold');
+      doc.text('ON-OF', pageWidth / 2, yPosition, { align: 'center' });
+      yPosition += 6;
+      
+      doc.setFontSize(12);
+      doc.text('FACTURA DE VENTA', pageWidth / 2, yPosition, { align: 'center' });
+      yPosition += 8;
+
+      // Invoice details
+      doc.setFontSize(9);
+      doc.setFont('helvetica', 'normal');
+      doc.text(`No: ${sale.numero_factura || 'N/A'}`, pageWidth / 2, yPosition, { align: 'center' });
+      yPosition += 5;
+      
+      const saleDate = new Date(sale.created_at);
+      doc.text(formatInTimeZone(saleDate, COLOMBIA_TZ, 'dd/MM/yyyy HH:mm', { locale: es }), pageWidth / 2, yPosition, { align: 'center' });
+      yPosition += 7;
+
+      // Separator
+      doc.setLineWidth(0.3);
+      doc.line(margin, yPosition, pageWidth - margin, yPosition);
+      yPosition += 5;
+
+      // Client info
+      doc.setFontSize(8);
+      doc.setFont('helvetica', 'bold');
+      doc.text('CLIENTE:', margin, yPosition);
+      yPosition += 4;
+      
+      doc.setFont('helvetica', 'normal');
+      doc.text(sale.nombre_cliente, margin, yPosition, { maxWidth: contentWidth });
+      yPosition += 4;
+      doc.text(`Doc: ${sale.documento_cliente}`, margin, yPosition);
+      yPosition += 4;
+      doc.text(`Tel: ${sale.celular_cliente}`, margin, yPosition);
+      yPosition += 4;
+      doc.text(sale.direccion_cliente, margin, yPosition, { maxWidth: contentWidth });
+      yPosition += 6;
+
+      // Separator
+      doc.line(margin, yPosition, pageWidth - margin, yPosition);
+      yPosition += 5;
+
+      // Products
+      doc.setFont('helvetica', 'bold');
+      doc.text('DETALLE DE PRODUCTOS', margin, yPosition);
+      yPosition += 5;
+
+      doc.setFont('helvetica', 'normal');
+      doc.setFontSize(8);
+      
+      sale.items.forEach((item, index) => {
+        doc.setFont('helvetica', 'bold');
+        doc.text(item.referencia, margin, yPosition);
+        yPosition += 4;
+        
+        doc.setFont('helvetica', 'normal');
+        doc.text(item.descripcion.substring(0, 30), margin + 2, yPosition, { maxWidth: contentWidth - 2 });
+        yPosition += 4;
+        
+        doc.text(`Talla: ${item.talla}`, margin + 2, yPosition);
+        doc.text(`Cant: ${item.cantidad}`, pageWidth - margin - 20, yPosition);
+        yPosition += 4;
+        
+        doc.text(`Precio unit: $${item.precio_venta.toLocaleString()}`, margin + 2, yPosition);
+        yPosition += 4;
+        
+        const precioTotal = item.precio_venta * item.cantidad;
+        doc.text(`Precio total: $${precioTotal.toLocaleString()}`, margin + 2, yPosition);
+        yPosition += 4;
+        
+        if (item.descuento > 0) {
+          doc.setTextColor(200, 0, 0);
+          doc.text(`Descuento: -$${item.descuento.toLocaleString()} (${item.descuento_porcentaje.toFixed(1)}%)`, margin + 2, yPosition);
+          doc.setTextColor(0, 0, 0);
+          yPosition += 4;
+        }
+        
+        doc.setFont('helvetica', 'bold');
+        doc.text(`Subtotal: $${item.subtotal.toLocaleString()}`, margin + 2, yPosition);
+        doc.setFont('helvetica', 'normal');
+        yPosition += 6;
+        
+        if (index < sale.items.length - 1) {
+          doc.setDrawColor(200);
+          doc.setLineWidth(0.1);
+          doc.line(margin + 2, yPosition, pageWidth - margin - 2, yPosition);
+          yPosition += 4;
+        }
+      });
+
+      // Final separator
+      doc.setDrawColor(0);
+      doc.setLineWidth(0.3);
+      doc.line(margin, yPosition, pageWidth - margin, yPosition);
+      yPosition += 5;
+
+      // Totals
+      doc.setFont('helvetica', 'normal');
+      doc.setFontSize(9);
+      
+      if (sale.descuento_total > 0) {
+        doc.text('Subtotal:', margin, yPosition);
+        doc.text(`$${(sale.subtotal || sale.total).toLocaleString()}`, pageWidth - margin, yPosition, { align: 'right' });
+        yPosition += 5;
+        
+        doc.setTextColor(0, 150, 0);
+        doc.text('Descuento total:', margin, yPosition);
+        doc.text(`-$${sale.descuento_total.toLocaleString()}`, pageWidth - margin, yPosition, { align: 'right' });
+        doc.setTextColor(0, 0, 0);
+        yPosition += 6;
+      }
+      
+      doc.setFont('helvetica', 'bold');
+      doc.setFontSize(11);
+      doc.text('TOTAL:', margin, yPosition);
+      doc.text(`$${sale.total.toLocaleString()}`, pageWidth - margin, yPosition, { align: 'right' });
+      yPosition += 8;
+
+      // Credit info if exists
+      if (creditInfo) {
+        doc.setLineWidth(0.3);
+        doc.line(margin, yPosition, pageWidth - margin, yPosition);
+        yPosition += 5;
+        
+        doc.setFont('helvetica', 'bold');
+        doc.setFontSize(10);
+        doc.setTextColor(0, 100, 200);
+        doc.text('VENTA A CRÉDITO', pageWidth / 2, yPosition, { align: 'center' });
+        yPosition += 6;
+        
+        doc.setFont('helvetica', 'normal');
+        doc.setFontSize(9);
+        doc.setTextColor(0, 0, 0);
+        
+        doc.text('Abono inicial:', margin, yPosition);
+        doc.text(`$${creditInfo.abono_inicial.toLocaleString()}`, pageWidth - margin, yPosition, { align: 'right' });
+        yPosition += 5;
+        
+        doc.text('Saldo pendiente:', margin, yPosition);
+        doc.setFont('helvetica', 'bold');
+        doc.setTextColor(200, 0, 0);
+        doc.text(`$${creditInfo.saldo_pendiente.toLocaleString()}`, pageWidth - margin, yPosition, { align: 'right' });
+        doc.setTextColor(0, 0, 0);
+        doc.setFont('helvetica', 'normal');
+        yPosition += 5;
+        
+        const fechaPago = new Date(creditInfo.fecha_pago);
+        doc.text('Fecha de pago:', margin, yPosition);
+        doc.text(formatInTimeZone(fechaPago, COLOMBIA_TZ, 'dd/MM/yyyy', { locale: es }), pageWidth - margin, yPosition, { align: 'right' });
+        yPosition += 5;
+        
+        doc.text('Estado:', margin, yPosition);
+        const estadoText = creditInfo.estado === 'pagado' ? 'PAGADO' : 
+                          creditInfo.estado === 'pendiente' ? 'PENDIENTE' : 'VENCIDO';
+        const estadoColor = creditInfo.estado === 'pagado' ? [0, 150, 0] : 
+                           creditInfo.estado === 'pendiente' ? [200, 150, 0] : [200, 0, 0];
+        doc.setTextColor(...estadoColor);
+        doc.text(estadoText, pageWidth - margin, yPosition, { align: 'right' });
+        doc.setTextColor(0, 0, 0);
+        yPosition += 6;
+        
+        if (creditInfo.observaciones) {
+          doc.setFontSize(8);
+          doc.text('Observaciones crédito:', margin, yPosition);
+          yPosition += 4;
+          const obsLines = doc.splitTextToSize(creditInfo.observaciones, contentWidth);
+          doc.text(obsLines, margin + 2, yPosition);
+          yPosition += (obsLines.length * 4) + 2;
+        }
+      }
+
+      // Sale observations
+      if (sale.observaciones) {
+        doc.setLineWidth(0.3);
+        doc.line(margin, yPosition, pageWidth - margin, yPosition);
+        yPosition += 5;
+        
+        doc.setFont('helvetica', 'bold');
+        doc.setFontSize(8);
+        doc.text('OBSERVACIONES:', margin, yPosition);
+        yPosition += 4;
+        
+        doc.setFont('helvetica', 'normal');
+        const obsLines = doc.splitTextToSize(sale.observaciones, contentWidth);
+        doc.text(obsLines, margin, yPosition);
+        yPosition += (obsLines.length * 4) + 4;
+      }
+
+      // Separator
+      doc.setLineWidth(0.3);
+      doc.line(margin, yPosition, pageWidth - margin, yPosition);
+      yPosition += 5;
+
+      // Footer
+      doc.setFontSize(7);
+      doc.setFont('helvetica', 'italic');
+      doc.setTextColor(80, 80, 80);
+      doc.text('Gracias por su compra', pageWidth / 2, yPosition, { align: 'center' });
+      yPosition += 4;
+      doc.text('ON-OF', pageWidth / 2, yPosition, { align: 'center' });
+      
+      if (sale.created_by) {
+        yPosition += 4;
+        doc.setFontSize(6);
+        doc.text(`Atendido por: ${sale.created_by}`, pageWidth / 2, yPosition, { align: 'center' });
+      }
+      
+      // Policy section
+      yPosition += 8;
+      doc.setLineWidth(0.2);
+      doc.line(margin, yPosition, pageWidth - margin, yPosition);
+      yPosition += 4;
+      
+      doc.setFontSize(4.5);
+      doc.setFont('helvetica', 'italic');
+      doc.setTextColor(60, 60, 60);
+      
+      const policyText = `POLÍTICA DE CAMBIO Y GARANTÍA – ON–OF: ON–OF ofrece a sus clientes un periodo de hasta tres (3) meses desde la fecha de compra para realizar cambios de prendas, siempre que estas se encuentren en buen estado, sin signos de uso excesivo, sin manchas, suciedad ni olores, y con la etiqueta original en buen estado, presentando además el comprobante de compra. Los cambios aplican únicamente por otra prenda del mismo valor o abonando la diferencia si se elige una de mayor precio. No se realizan devoluciones de dinero. Quedan excluidas de cambio las prendas de ropa interior, trajes de baño y productos adquiridos en promociones especiales o remates, salvo defecto de fabricación. Asimismo, todas nuestras prendas cuentan con una garantía de seis (6) meses por defectos de fabricación, incluyendo costuras dañadas, desprendimiento de accesorios o fallas de origen en la tela. Esta garantía no cubre daños ocasionados por mal uso, lavado inadecuado, desgaste natural o intervenciones posteriores a la compra. La evaluación del producto es obligatoria y puede tardar entre 24 y 72 horas. Según el resultado, ON–OF podrá proceder con la reparación, reposición o cambio por una prenda equivalente en caso de no haber disponibilidad del mismo modelo. ON–OF se reserva el derecho de rechazar solicitudes que no cumplan con las condiciones aquí establecidas. Al efectuar la compra, el cliente acepta íntegramente esta política.`;
+      
+      const policyLines = doc.splitTextToSize(policyText, 60);
+      doc.text(policyLines, margin, yPosition, { maxWidth: 60, align: 'justify' });
+      yPosition += (policyLines.length * 2.5);
+
+      // Save PDF
+      const clientNameClean = sale.nombre_cliente.replace(/[^a-zA-Z0-9]/g, '_');
+      const fileName = `Factura_${sale.numero_factura || sale.id}_${clientNameClean}.pdf`;
+      doc.save(fileName);
+      toast.success('Factura descargada exitosamente');
+    } catch (error) {
+      console.error('Error generating PDF:', error);
+      toast.error('Error al generar la factura');
+    }
+  };
+
   useEffect(() => {
     fetchProducts();
   }, []);
