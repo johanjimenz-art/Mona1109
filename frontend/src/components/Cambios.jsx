@@ -67,6 +67,11 @@ export default function Cambios() {
     }
   };
 
+  const getProductImage = (referencia) => {
+    const product = products.find(p => p.referencia === referencia && p.imagen_url);
+    return product?.imagen_url;
+  };
+
   const searchSales = async () => {
     if (!searchTerm.trim()) {
       toast.error('Ingresa nombre, documento o número de factura');
