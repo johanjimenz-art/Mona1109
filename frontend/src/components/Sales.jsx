@@ -34,6 +34,7 @@ export default function Sales() {
   const [products, setProducts] = useState([]);
   const [uniqueReferencias, setUniqueReferencias] = useState([]);
   const [availableTallas, setAvailableTallas] = useState([]);
+  const [observaciones, setObservaciones] = useState('');
   
   // Credit sale states
   const [isCredit, setIsCredit] = useState(false);
