@@ -13,9 +13,13 @@ import {
   SelectTrigger,
   SelectValue,
 } from './ui/select';
+import jsPDF from 'jspdf';
+import { formatInTimeZone } from 'date-fns-tz';
+import { es } from 'date-fns/locale';
 
 const BACKEND_URL = process.env.REACT_APP_BACKEND_URL;
 const API = `${BACKEND_URL}/api`;
+const COLOMBIA_TZ = 'America/Bogota';
 
 export default function Sales() {
   const navigate = useNavigate();
