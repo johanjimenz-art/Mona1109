@@ -127,7 +127,7 @@ export default function SalesHistory() {
       const doc = new jsPDF({
         orientation: 'portrait',
         unit: 'mm',
-        format: [80, 400] // 8cm de ancho, altura aumentada para la política
+        format: [80, 500] // 8cm de ancho, altura suficiente para todo el contenido
       });
 
       const pageWidth = 80;
