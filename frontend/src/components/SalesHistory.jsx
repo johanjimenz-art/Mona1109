@@ -356,8 +356,9 @@ export default function SalesHistory() {
         doc.text(`Atendido por: ${sale.created_by}`, pageWidth / 2, yPosition, { align: 'center' });
       }
 
-      // Save PDF
-      const fileName = `Factura_${sale.numero_factura || sale.id}.pdf`;
+      // Save PDF with client name
+      const clientNameClean = sale.nombre_cliente.replace(/[^a-zA-Z0-9]/g, '_');
+      const fileName = `Factura_${sale.numero_factura || sale.id}_${clientNameClean}.pdf`;
       doc.save(fileName);
       toast.success('Factura descargada exitosamente');
     } catch (error) {
