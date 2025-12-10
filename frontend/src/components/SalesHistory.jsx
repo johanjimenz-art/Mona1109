@@ -458,6 +458,14 @@ export default function SalesHistory() {
                           </div>
                         </div>
                       ))}
+                      
+                      {/* Mostrar observaciones si existen */}
+                      {sale.observaciones && (
+                        <div className="border-2 border-blue-500 bg-blue-50 p-3 mt-3">
+                          <p className="font-bold text-sm text-blue-900 mb-1">📝 Observaciones:</p>
+                          <p className="text-sm text-gray-700">{sale.observaciones}</p>
+                        </div>
+                      )}
                     </div>
                   )}
                 </div>
