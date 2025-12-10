@@ -141,6 +141,185 @@ export default function Cambios() {
     return newProduct.precio_venta - selectedProduct.precio_venta;
   };
 
+  const generateCambioInvoice = (cambioData) => {
+    try {
+      const doc = new jsPDF({
+        orientation: 'portrait',
+        unit: 'mm',
+        format: [80, 500]
+      });
+
+      const pageWidth = 80;
+      const margin = 5;
+      const contentWidth = pageWidth - (margin * 2);
+      let yPosition = margin;
+
+      // Title
+      doc.setFontSize(18);
+      doc.setFont('helvetica', 'bold');
+      doc.text('ON-OF', pageWidth / 2, yPosition, { align: 'center' });
+      yPosition += 6;
+      
+      doc.setFontSize(12);
+      doc.setTextColor(200, 0, 0);
+      doc.text('COMPROBANTE DE CAMBIO', pageWidth / 2, yPosition, { align: 'center' });
+      doc.setTextColor(0, 0, 0);
+      yPosition += 8;
+
+      // Invoice and date
+      doc.setFontSize(9);
+      doc.setFont('helvetica', 'normal');
+      doc.text(`Factura Original: ${selectedSale.numero_factura}`, pageWidth / 2, yPosition, { align: 'center' });
+      yPosition += 5;
+      
+      const cambioDate = new Date();
+      doc.text(formatInTimeZone(cambioDate, COLOMBIA_TZ, 'dd/MM/yyyy HH:mm', { locale: es }), pageWidth / 2, yPosition, { align: 'center' });
+      yPosition += 7;
+
+      // Separator
+      doc.setLineWidth(0.3);
+      doc.line(margin, yPosition, pageWidth - margin, yPosition);
+      yPosition += 5;
+
+      // Client info
+      doc.setFontSize(8);
+      doc.setFont('helvetica', 'bold');
+      doc.text('CLIENTE:', margin, yPosition);
+      yPosition += 4;
+      
+      doc.setFont('helvetica', 'normal');
+      doc.text(selectedSale.nombre_cliente, margin, yPosition, { maxWidth: contentWidth });
+      yPosition += 4;
+      doc.text(`Doc: ${selectedSale.documento_cliente}`, margin, yPosition);
+      yPosition += 6;
+
+      // Separator
+      doc.line(margin, yPosition, pageWidth - margin, yPosition);
+      yPosition += 5;
+
+      // Original product
+      doc.setFont('helvetica', 'bold');
+      doc.setFontSize(9);
+      doc.setTextColor(200, 0, 0);
+      doc.text('❌ PRODUCTO DEVUELTO:', margin, yPosition);
+      doc.setTextColor(0, 0, 0);
+      yPosition += 5;
+
+      doc.setFont('helvetica', 'normal');
+      doc.setFontSize(8);
+      doc.text(selectedProduct.referencia, margin + 2, yPosition);
+      yPosition += 4;
+      doc.text(selectedProduct.descripcion.substring(0, 30), margin + 2, yPosition, { maxWidth: contentWidth - 2 });
+      yPosition += 4;
+      doc.text(`Talla: ${selectedProduct.talla} | Color: ${selectedProduct.color || 'N/A'}`, margin + 2, yPosition);
+      yPosition += 4;
+      doc.text(`Precio: $${selectedProduct.precio_venta.toLocaleString()}`, margin + 2, yPosition);
+      yPosition += 6;
+
+      // New product
+      doc.setFont('helvetica', 'bold');
+      doc.setFontSize(9);
+      doc.setTextColor(0, 150, 0);
+      doc.text('✅ PRODUCTO NUEVO:', margin, yPosition);
+      doc.setTextColor(0, 0, 0);
+      yPosition += 5;
+
+      doc.setFont('helvetica', 'normal');
+      doc.setFontSize(8);
+      doc.text(newProduct.referencia, margin + 2, yPosition);
+      yPosition += 4;
+      doc.text(newProduct.descripcion.substring(0, 30), margin + 2, yPosition, { maxWidth: contentWidth - 2 });
+      yPosition += 4;
+      doc.text(`Talla: ${newProduct.talla} | Color: ${newProduct.color || 'N/A'}`, margin + 2, yPosition);
+      yPosition += 4;
+      doc.text(`Precio: $${newProduct.precio_venta.toLocaleString()}`, margin + 2, yPosition);
+      yPosition += 6;
+
+      // Separator
+      doc.setDrawColor(0);
+      doc.setLineWidth(0.3);
+      doc.line(margin, yPosition, pageWidth - margin, yPosition);
+      yPosition += 5;
+
+      // Price difference
+      const difference = calculateDifference();
+      doc.setFont('helvetica', 'bold');
+      doc.setFontSize(10);
+      doc.text('DIFERENCIA DE PRECIO:', margin, yPosition);
+      yPosition += 5;
+
+      if (difference === 0) {
+        doc.setTextColor(0, 150, 0);
+        doc.text('Cambio directo - Sin costo', margin + 2, yPosition);
+      } else if (difference > 0) {
+        doc.setTextColor(200, 0, 0);
+        doc.text(`Cliente debe pagar: $${difference.toLocaleString()}`, margin + 2, yPosition);
+      } else {
+        doc.setTextColor(0, 150, 0);
+        doc.text(`A favor del cliente: $${Math.abs(difference).toLocaleString()}`, margin + 2, yPosition);
+      }
+      doc.setTextColor(0, 0, 0);
+      yPosition += 8;
+
+      // Observations
+      if (observations) {
+        doc.setLineWidth(0.2);
+        doc.line(margin, yPosition, pageWidth - margin, yPosition);
+        yPosition += 4;
+        
+        doc.setFont('helvetica', 'bold');
+        doc.setFontSize(8);
+        doc.text('OBSERVACIONES:', margin, yPosition);
+        yPosition += 4;
+        
+        doc.setFont('helvetica', 'normal');
+        const obsLines = doc.splitTextToSize(observations, contentWidth);
+        doc.text(obsLines, margin, yPosition);
+        yPosition += (obsLines.length * 4) + 4;
+      }
+
+      // Separator
+      doc.setLineWidth(0.3);
+      doc.line(margin, yPosition, pageWidth - margin, yPosition);
+      yPosition += 5;
+
+      // Footer
+      doc.setFontSize(7);
+      doc.setFont('helvetica', 'italic');
+      doc.setTextColor(80, 80, 80);
+      doc.text('Gracias por su compra', pageWidth / 2, yPosition, { align: 'center' });
+      yPosition += 4;
+      doc.text('ON-OF', pageWidth / 2, yPosition, { align: 'center' });
+      yPosition += 4;
+      doc.setFontSize(6);
+      doc.text(`Realizado por: ${cambioData.realizado_por}`, pageWidth / 2, yPosition, { align: 'center' });
+      yPosition += 8;
+
+      // Policy
+      doc.setLineWidth(0.2);
+      doc.line(margin, yPosition, pageWidth - margin, yPosition);
+      yPosition += 4;
+      
+      doc.setFontSize(4.5);
+      doc.setFont('helvetica', 'italic');
+      doc.setTextColor(60, 60, 60);
+      
+      const policyText = `POLÍTICA DE CAMBIO Y GARANTÍA – ON–OF: ON–OF ofrece a sus clientes un periodo de hasta tres (3) meses desde la fecha de compra para realizar cambios de prendas, siempre que estas se encuentren en buen estado, sin signos de uso excesivo, sin manchas, suciedad ni olores, y con la etiqueta original en buen estado, presentando además el comprobante de compra. Los cambios aplican únicamente por otra prenda del mismo valor o abonando la diferencia si se elige una de mayor precio. No se realizan devoluciones de dinero. Quedan excluidas de cambio las prendas de ropa interior, trajes de baño y productos adquiridos en promociones especiales o remates, salvo defecto de fabricación. Asimismo, todas nuestras prendas cuentan con una garantía de seis (6) meses por defectos de fabricación, incluyendo costuras dañadas, desprendimiento de accesorios o fallas de origen en la tela. Esta garantía no cubre daños ocasionados por mal uso, lavado inadecuado, desgaste natural o intervenciones posteriores a la compra. La evaluación del producto es obligatoria y puede tardar entre 24 y 72 horas. Según el resultado, ON–OF podrá proceder con la reparación, reposición o cambio por una prenda equivalente en caso de no haber disponibilidad del mismo modelo. ON–OF se reserva el derecho de rechazar solicitudes que no cumplan con las condiciones aquí establecidas. Al efectuar la compra, el cliente acepta íntegramente esta política.`;
+      
+      const policyLines = doc.splitTextToSize(policyText, 60);
+      doc.text(policyLines, margin, yPosition, { maxWidth: 60, align: 'justify' });
+
+      // Save PDF
+      const clientNameClean = selectedSale.nombre_cliente.replace(/[^a-zA-Z0-9]/g, '_');
+      const fileName = `Cambio_${selectedSale.numero_factura}_${clientNameClean}.pdf`;
+      doc.save(fileName);
+      toast.success('Comprobante de cambio descargado');
+    } catch (error) {
+      console.error('Error generating PDF:', error);
+      toast.error('Error al generar comprobante');
+    }
+  };
+
   const processCambio = async () => {
     if (!selectedSale || !selectedProduct || !newProduct) {
       toast.error('Completa todos los pasos');
@@ -190,6 +369,9 @@ export default function Cambios() {
       });
 
       toast.success('Cambio procesado exitosamente');
+      
+      // Generar factura del cambio
+      generateCambioInvoice(cambioData);
       
       // Reset
       setSelectedSale(null);
