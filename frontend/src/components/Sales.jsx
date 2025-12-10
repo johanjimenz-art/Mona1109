@@ -950,6 +950,16 @@ export default function Sales() {
               >
                 {isCredit ? 'Registrar Venta a Crédito' : 'Completar Venta'}
               </Button>
+
+              {showInvoiceButton && lastSale && (
+                <Button
+                  data-testid="download-invoice-btn"
+                  onClick={async () => await generateInvoicePDF(lastSale)}
+                  className="w-full bg-blue-600 text-white hover:bg-blue-700 rounded-none h-14 text-lg font-bold mt-4"
+                >
+                  📄 Descargar Factura de Última Venta
+                </Button>
+              )}
             </div>
           </div>
         </div>
