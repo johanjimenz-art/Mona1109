@@ -550,8 +550,9 @@ export default function Sales() {
         toast.success('Venta realizada exitosamente');
       }
 
-      // Generar y descargar factura automáticamente
-      await generateInvoicePDF(saleResponse.data);
+      // Guardar la última venta y mostrar botón de descarga
+      setLastSale(saleResponse.data);
+      setShowInvoiceButton(true);
 
       // Reset form
       setClientData({
