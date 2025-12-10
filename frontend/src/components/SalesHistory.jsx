@@ -348,7 +348,7 @@ export default function SalesHistory() {
       doc.setTextColor(80, 80, 80);
       doc.text('Gracias por su compra', pageWidth / 2, yPosition, { align: 'center' });
       yPosition += 4;
-      doc.text('Cloth ON-OF', pageWidth / 2, yPosition, { align: 'center' });
+      doc.text('ON-OF', pageWidth / 2, yPosition, { align: 'center' });
       
       if (sale.created_by) {
         yPosition += 4;
