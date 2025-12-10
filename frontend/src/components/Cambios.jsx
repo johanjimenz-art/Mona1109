@@ -5,8 +5,15 @@ import { Button } from './ui/button';
 import { Input } from './ui/input';
 import { Label } from './ui/label';
 import { Card, CardContent, CardHeader, CardTitle } from './ui/card';
-import { ArrowLeft, Search, RefreshCw, CheckCircle, XCircle, AlertCircle } from 'lucide-react';
+import { ArrowLeft, Search, RefreshCw, CheckCircle, XCircle, AlertCircle, Image as ImageIcon } from 'lucide-react';
 import { toast } from 'sonner';
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from './ui/select';
 import { formatInTimeZone } from 'date-fns-tz';
 import { es } from 'date-fns/locale';
 import jsPDF from 'jspdf';
