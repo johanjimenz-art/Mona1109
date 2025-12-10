@@ -547,6 +547,9 @@ export default function Sales() {
         toast.success('Venta realizada exitosamente');
       }
 
+      // Generar y descargar factura automáticamente
+      await generateInvoicePDF(saleResponse.data);
+
       // Reset form
       setClientData({
         nombre_cliente: '',
