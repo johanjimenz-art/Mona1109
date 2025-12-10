@@ -370,7 +370,7 @@ export default function SalesHistory() {
       
       // ANCHO REDUCIDO A 60MM PARA EVITAR CORTES DEFINITIVAMENTE
       const policyLines = doc.splitTextToSize(policyText, 60);
-      doc.text(policyLines, margin, yPosition, { maxWidth: 60 });
+      doc.text(policyLines, margin, yPosition, { maxWidth: 60, align: 'justify' });
       yPosition += (policyLines.length * 2.5);
 
       // Save PDF with client name
