@@ -136,9 +136,9 @@ export default function SalesHistory() {
       let yPosition = margin;
 
       // Title - Centered
-      doc.setFontSize(14);
+      doc.setFontSize(18);
       doc.setFont('helvetica', 'bold');
-      doc.text('CLOTH ON-OF', pageWidth / 2, yPosition, { align: 'center' });
+      doc.text('ON-OF', pageWidth / 2, yPosition, { align: 'center' });
       yPosition += 6;
       
       doc.setFontSize(12);
