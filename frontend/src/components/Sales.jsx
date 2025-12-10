@@ -424,6 +424,7 @@ export default function Sales() {
 
     setSearchData({ referencia: '', talla: '' });
     setCantidad(1);
+    setShowInvoiceButton(false); // Ocultar botón al agregar nuevo producto
     toast.success('Producto agregado al carrito');
   };
 
