@@ -134,6 +134,14 @@ function App() {
               </ProtectedRoute>
             }
           />
+          <Route
+            path="/cambios"
+            element={
+              <ProtectedRoute>
+                <Cambios />
+              </ProtectedRoute>
+            }
+          />
 
         </Routes>
       </BrowserRouter>
