@@ -433,6 +433,19 @@ export default function Dashboard() {
             )}
           </button>
 
+          {/* Cambios - Todos los usuarios */}
+          <button
+            data-testid="cambios-nav-btn"
+            onClick={() => navigate('/cambios')}
+            className="bg-white border-4 border-black p-8 hover:translate-x-1 hover:translate-y-1 hover:shadow-none shadow-[12px_12px_0px_0px_rgba(0,0,0,1)] transition-all"
+          >
+            <RefreshCw className="w-16 h-16 text-black mx-auto mb-4" />
+            <h3 className="text-2xl font-bold text-black mb-2" style={{ fontFamily: 'Space Grotesk, sans-serif' }}>
+              Cambios
+            </h3>
+            <p className="text-gray-600">Cambios de talla, color o producto</p>
+          </button>
+
 
           {/* Usuarios - Solo admin */}
           {isAdmin && (
