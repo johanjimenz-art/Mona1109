@@ -164,6 +164,10 @@ class SaleCreate(BaseModel):
     direccion_cliente: str
     celular_cliente: str
     items: List[SaleItem]
+    observaciones: Optional[str] = None
+    subtotal: Optional[float] = None
+    descuento_total: Optional[float] = None
+    aplicado_por: Optional[str] = None
 
 class SaleUpdateStatus(BaseModel):
     estado_despacho: str
