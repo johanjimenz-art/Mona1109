@@ -355,6 +355,22 @@ export default function SalesHistory() {
         doc.setFontSize(6);
         doc.text(`Atendido por: ${sale.created_by}`, pageWidth / 2, yPosition, { align: 'center' });
       }
+      
+      // Policy section
+      yPosition += 8;
+      doc.setLineWidth(0.2);
+      doc.line(margin, yPosition, pageWidth - margin, yPosition);
+      yPosition += 4;
+      
+      doc.setFontSize(5);
+      doc.setFont('helvetica', 'italic');
+      doc.setTextColor(60, 60, 60);
+      
+      const policyText = `POLÍTICA DE CAMBIO Y GARANTÍA – ON–OF: ON–OF ofrece a sus clientes un periodo de hasta tres (3) meses desde la fecha de compra para realizar cambios de prendas, siempre que estas se encuentren en buen estado, sin signos de uso excesivo, sin manchas, suciedad ni olores, y con la etiqueta original en buen estado, presentando además el comprobante de compra. Los cambios aplican únicamente por otra prenda del mismo valor o abonando la diferencia si se elige una de mayor precio. No se realizan devoluciones de dinero. Quedan excluidas de cambio las prendas de ropa interior, trajes de baño y productos adquiridos en promociones especiales o remates, salvo defecto de fabricación. Asimismo, todas nuestras prendas cuentan con una garantía de seis (6) meses por defectos de fabricación, incluyendo costuras dañadas, desprendimiento de accesorios o fallas de origen en la tela. Esta garantía no cubre daños ocasionados por mal uso, lavado inadecuado, desgaste natural o intervenciones posteriores a la compra. La evaluación del producto es obligatoria y puede tardar entre 24 y 72 horas. Según el resultado, ON–OF podrá proceder con la reparación, reposición o cambio por una prenda equivalente en caso de no haber disponibilidad del mismo modelo. ON–OF se reserva el derecho de rechazar solicitudes que no cumplan con las condiciones aquí establecidas. Al efectuar la compra, el cliente acepta íntegramente esta política.`;
+      
+      const policyLines = doc.splitTextToSize(policyText, contentWidth);
+      doc.text(policyLines, margin, yPosition, { align: 'justify' });
+      yPosition += (policyLines.length * 2.5);
 
       // Save PDF with client name
       const clientNameClean = sale.nombre_cliente.replace(/[^a-zA-Z0-9]/g, '_');
