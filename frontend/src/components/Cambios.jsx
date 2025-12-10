@@ -9,6 +9,7 @@ import { ArrowLeft, Search, RefreshCw, CheckCircle, XCircle, AlertCircle } from 
 import { toast } from 'sonner';
 import { formatInTimeZone } from 'date-fns-tz';
 import { es } from 'date-fns/locale';
+import jsPDF from 'jspdf';
 
 const BACKEND_URL = process.env.REACT_APP_BACKEND_URL;
 const API = `${BACKEND_URL}/api`;
