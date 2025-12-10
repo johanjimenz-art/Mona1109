@@ -110,8 +110,20 @@ export default function SalesHistory() {
     }
   };
 
-  const generateInvoicePDF = (sale) => {
+  const generateInvoicePDF = async (sale) => {
     try {
+      // Buscar si esta venta tiene un crédito asociado
+      let creditInfo = null;
+      try {
+        const token = localStorage.getItem('token');
+        const creditResponse = await axios.get(`${API}/credit-sales`, {
+          headers: { Authorization: `Bearer ${token}` }
+        });
+        creditInfo = creditResponse.data.find(c => c.sale_id === sale.id);
+      } catch (error) {
+        console.log('No se pudo obtener info de crédito:', error);
+      }
+
       const doc = new jsPDF({
         orientation: 'portrait',
         unit: 'mm',
