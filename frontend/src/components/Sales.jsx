@@ -374,6 +374,21 @@ export default function Sales() {
                   />
                 </div>
               </div>
+              
+              {/* Observaciones generales de la venta */}
+              <div className="mt-4">
+                <Label htmlFor="observaciones" className="text-black font-medium mb-2 block">
+                  Observaciones de la Venta (opcional)
+                </Label>
+                <Input
+                  id="observaciones"
+                  data-testid="observaciones-input"
+                  value={observaciones}
+                  onChange={(e) => setObservaciones(e.target.value)}
+                  className="rounded-none border-2 border-black"
+                  placeholder="Notas, instrucciones especiales, etc."
+                />
+              </div>
             </div>
 
             {/* Product Search */}
