@@ -555,7 +555,7 @@ export default function SalesHistory() {
 
                 <div className="flex gap-2 flex-wrap">
                   <Button
-                    onClick={() => generateInvoicePDF(sale)}
+                    onClick={async () => await generateInvoicePDF(sale)}
                     className="bg-blue-600 text-white hover:bg-blue-700 rounded-none"
                   >
                     <Download className="w-4 h-4 mr-2" />
