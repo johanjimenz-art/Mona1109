@@ -267,6 +267,76 @@ export default function SalesHistory() {
       doc.text(`$${sale.total.toLocaleString()}`, pageWidth - margin, yPosition, { align: 'right' });
       yPosition += 8;
 
+      // Credit information if exists
+      if (creditInfo) {
+        doc.setLineWidth(0.3);
+        doc.line(margin, yPosition, pageWidth - margin, yPosition);
+        yPosition += 5;
+        
+        doc.setFont('helvetica', 'bold');
+        doc.setFontSize(10);
+        doc.setTextColor(0, 100, 200);
+        doc.text('VENTA A CRÉDITO', pageWidth / 2, yPosition, { align: 'center' });
+        yPosition += 6;
+        
+        doc.setFont('helvetica', 'normal');
+        doc.setFontSize(9);
+        doc.setTextColor(0, 0, 0);
+        
+        doc.text('Abono inicial:', margin, yPosition);
+        doc.text(`$${creditInfo.abono_inicial.toLocaleString()}`, pageWidth - margin, yPosition, { align: 'right' });
+        yPosition += 5;
+        
+        doc.text('Saldo pendiente:', margin, yPosition);
+        doc.setFont('helvetica', 'bold');
+        doc.setTextColor(200, 0, 0);
+        doc.text(`$${creditInfo.saldo_pendiente.toLocaleString()}`, pageWidth - margin, yPosition, { align: 'right' });
+        doc.setTextColor(0, 0, 0);
+        doc.setFont('helvetica', 'normal');
+        yPosition += 5;
+        
+        const fechaPago = new Date(creditInfo.fecha_pago);
+        doc.text('Fecha de pago:', margin, yPosition);
+        doc.text(formatInTimeZone(fechaPago, COLOMBIA_TZ, 'dd/MM/yyyy', { locale: es }), pageWidth - margin, yPosition, { align: 'right' });
+        yPosition += 5;
+        
+        doc.text('Estado:', margin, yPosition);
+        const estadoText = creditInfo.estado === 'pagado' ? 'PAGADO' : 
+                          creditInfo.estado === 'pendiente' ? 'PENDIENTE' : 'VENCIDO';
+        const estadoColor = creditInfo.estado === 'pagado' ? [0, 150, 0] : 
+                           creditInfo.estado === 'pendiente' ? [200, 150, 0] : [200, 0, 0];
+        doc.setTextColor(...estadoColor);
+        doc.text(estadoText, pageWidth - margin, yPosition, { align: 'right' });
+        doc.setTextColor(0, 0, 0);
+        yPosition += 6;
+        
+        if (creditInfo.observaciones) {
+          doc.setFontSize(8);
+          doc.text('Observaciones crédito:', margin, yPosition);
+          yPosition += 4;
+          const obsLines = doc.splitTextToSize(creditInfo.observaciones, contentWidth);
+          doc.text(obsLines, margin + 2, yPosition);
+          yPosition += (obsLines.length * 4) + 2;
+        }
+      }
+
+      // Sale observations if exist
+      if (sale.observaciones) {
+        doc.setLineWidth(0.3);
+        doc.line(margin, yPosition, pageWidth - margin, yPosition);
+        yPosition += 5;
+        
+        doc.setFont('helvetica', 'bold');
+        doc.setFontSize(8);
+        doc.text('OBSERVACIONES:', margin, yPosition);
+        yPosition += 4;
+        
+        doc.setFont('helvetica', 'normal');
+        const obsLines = doc.splitTextToSize(sale.observaciones, contentWidth);
+        doc.text(obsLines, margin, yPosition);
+        yPosition += (obsLines.length * 4) + 4;
+      }
+
       // Separator line
       doc.setLineWidth(0.3);
       doc.line(margin, yPosition, pageWidth - margin, yPosition);
