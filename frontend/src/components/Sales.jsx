@@ -258,7 +258,8 @@ export default function Sales() {
           subtotal: subtotalBeforeDiscount,
           descuento_total: totalDiscount,
           total: total,
-          aplicado_por: totalDiscount > 0 ? username : null
+          aplicado_por: totalDiscount > 0 ? username : null,
+          observaciones: observaciones || null
         },
         { headers: { Authorization: `Bearer ${token}` } }
       );
