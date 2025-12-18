@@ -46,6 +46,19 @@ export default function Credits() {
     fetchAlerts();
   }, []);
 
+  useEffect(() => {
+    if (searchTerm.trim() === '') {
+      setFilteredCredits([]);
+    } else {
+      const filtered = credits.filter(credit => 
+        credit.nombre_cliente.toLowerCase().includes(searchTerm.toLowerCase()) ||
+        credit.documento_cliente.includes(searchTerm) ||
+        (credit.numero_factura && credit.numero_factura.toLowerCase().includes(searchTerm.toLowerCase()))
+      );
+      setFilteredCredits(filtered);
+    }
+  }, [searchTerm, credits]);
+
   const fetchCredits = async () => {
     try {
       const token = localStorage.getItem('token');
