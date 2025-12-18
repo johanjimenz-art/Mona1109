@@ -362,8 +362,57 @@ export default function Sales() {
     }
   }, [searchData.referencia, products]);
 
+  const searchClients = async (query) => {
+    if (!query || query.length < 2) {
+      setClientSuggestions([]);
+      setShowSuggestions(false);
+      return;
+    }
+
+    try {
+      const token = localStorage.getItem('token');
+      const response = await axios.get(`${API}/clientes/buscar?q=${encodeURIComponent(query)}`, {
+        headers: { Authorization: `Bearer ${token}` }
+      });
+      setClientSuggestions(response.data);
+      setShowSuggestions(response.data.length > 0);
+    } catch (error) {
+      console.error('Error searching clients:', error);
+      setClientSuggestions([]);
+      setShowSuggestions(false);
+    }
+  };
+
   const handleClientChange = (e) => {
-    setClientData({ ...clientData, [e.target.name]: e.target.value });
+    const { name, value } = e.target;
+    setClientData({ ...clientData, [name]: value });
+
+    // Search clients when typing in name or document fields
+    if (name === 'nombre_cliente' || name === 'documento_cliente') {
+      // Clear previous timeout
+      if (searchTimeout) {
+        clearTimeout(searchTimeout);
+      }
+
+      // Set new timeout for search
+      const timeout = setTimeout(() => {
+        searchClients(value);
+      }, 300); // 300ms delay
+      
+      setSearchTimeout(timeout);
+    }
+  };
+
+  const selectClient = (client) => {
+    setClientData({
+      nombre_cliente: client.nombre_cliente,
+      documento_cliente: client.documento_cliente,
+      direccion_cliente: client.direccion_cliente,
+      celular_cliente: client.celular_cliente
+    });
+    setShowSuggestions(false);
+    setClientSuggestions([]);
+    toast.success('Cliente seleccionado');
   };
 
   const getProductBySelection = () => {
