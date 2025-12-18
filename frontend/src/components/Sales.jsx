@@ -43,6 +43,11 @@ export default function Sales() {
   const [lastSale, setLastSale] = useState(null);
   const [showInvoiceButton, setShowInvoiceButton] = useState(false);
   
+  // Client search states
+  const [clientSuggestions, setClientSuggestions] = useState([]);
+  const [showSuggestions, setShowSuggestions] = useState(false);
+  const [searchTimeout, setSearchTimeout] = useState(null);
+  
   // Credit sale states
   const [isCredit, setIsCredit] = useState(false);
   const [creditData, setCreditData] = useState({
