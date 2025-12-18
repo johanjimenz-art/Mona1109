@@ -52,46 +52,29 @@ export default function SalesHistory() {
       const token = localStorage.getItem('token');
       toast.info('Generando Excel... Por favor espera');
       
+      // Descargar archivo Excel binario
       const response = await axios.get(`${API}/sales/export-excel`, {
-        headers: { Authorization: `Bearer ${token}` }
+        headers: { Authorization: `Bearer ${token}` },
+        responseType: 'blob'  // Important: handle binary data
       });
       
-      // Crear archivo Excel usando una librería simple
-      const data = response.data.data;
-      
-      if (data.length === 0) {
-        toast.error('No hay ventas para exportar');
-        return;
-      }
-      
-      // Crear CSV (Excel puede abrirlo)
-      const headers = Object.keys(data[0]);
-      const csvContent = [
-        headers.join(','),
-        ...data.map(row => 
-          headers.map(header => {
-            const value = row[header] || '';
-            // Escape commas and quotes
-            const escaped = String(value).replace(/"/g, '""');
-            return `"${escaped}"`;
-          }).join(',')
-        )
-      ].join('\n');
-      
       // Crear blob y descargar
-      const blob = new Blob(['\ufeff' + csvContent], { type: 'text/csv;charset=utf-8;' });
+      const blob = new Blob([response.data], { 
+        type: 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet' 
+      });
       const link = document.createElement('a');
       const url = URL.createObjectURL(blob);
       const fecha = new Date().toISOString().split('T')[0];
       
       link.setAttribute('href', url);
-      link.setAttribute('download', `Historial_Ventas_Completo_${fecha}.csv`);
+      link.setAttribute('download', `Historial_Ventas_Completo_${fecha}.xlsx`);
       link.style.visibility = 'hidden';
       document.body.appendChild(link);
       link.click();
       document.body.removeChild(link);
+      URL.revokeObjectURL(url);
       
-      toast.success(`Excel descargado: ${response.data.total_ventas} ventas`);
+      toast.success('✅ Excel descargado exitosamente');
     } catch (error) {
       toast.error('Error al exportar a Excel');
       console.error('Export error:', error);
