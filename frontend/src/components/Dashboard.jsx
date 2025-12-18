@@ -351,9 +351,9 @@ export default function Dashboard() {
                 <div className="bg-white border-4 border-black p-6 shadow-[8px_8px_0px_0px_rgba(0,0,0,1)]">
                   <div className="flex items-center justify-between">
                     <div>
-                      <p className="text-gray-600 text-sm font-medium">Valor Stock Fabricación</p>
+                      <p className="text-gray-600 text-sm font-medium">Costo de Fabricación Total</p>
                       <p className="text-3xl font-bold text-green-700 mt-2" data-testid="stock-value-fabricacion">${stats.total_stock_value_fabricacion?.toLocaleString()}</p>
-                      <p className="text-xs text-gray-500 mt-1">Precio de fabricación</p>
+                      <p className="text-xs text-gray-500 mt-1">Inventario completo</p>
                     </div>
                     <Package className="w-10 h-10 text-green-700" />
                   </div>
