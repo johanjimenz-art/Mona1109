@@ -328,11 +328,11 @@ export default function Credits() {
                 </TabsTrigger>
               </TabsList>
 
-            {['all', 'pendiente', 'vencido', 'pagado'].map((tab) => (
+            {['pendiente', 'vencido', 'pagado'].map((tab) => (
               <TabsContent key={tab} value={tab}>
                 <div className="space-y-4">
                   {(credits || [])
-                    .filter((c) => tab === 'all' || c.estado === tab)
+                    .filter((c) => c.estado === tab)
                     .map((credit) => (
                       <div key={credit.id} className="border-2 border-black p-4">
                         <div className="flex justify-between items-start mb-3">
