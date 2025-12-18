@@ -801,6 +801,99 @@ async def search_clients(
     
     return list(clientes_dict.values())
 
+@api_router.get("/sales/recent")
+async def get_recent_sales(current_user: dict = Depends(get_current_user)):
+    """Get sales from last 10 days only"""
+    ten_days_ago = now_colombia() - timedelta(days=10)
+    
+    sales = await db.sales.find({
+        "created_at": {"$gte": ten_days_ago.isoformat()}
+    }, {"_id": 0}).to_list(1000)
+    
+    # Convert datetime objects
+    for sale in sales:
+        if isinstance(sale.get('created_at'), str):
+            sale['created_at'] = datetime.fromisoformat(sale['created_at'])
+        if isinstance(sale.get('updated_at'), str):
+            sale['updated_at'] = datetime.fromisoformat(sale['updated_at'])
+    
+    return sales
+
+@api_router.get("/sales/export-excel")
+async def export_sales_to_excel(current_user: dict = Depends(get_current_user)):
+    """Export ALL sales to Excel format (no date limit)"""
+    try:
+        # Get ALL sales without date filter
+        sales = await db.sales.find({}, {"_id": 0}).sort("created_at", -1).to_list(10000)
+        
+        # Prepare data for Excel
+        excel_data = []
+        for sale in sales:
+            # Parse date
+            if isinstance(sale.get('created_at'), str):
+                sale_date = datetime.fromisoformat(sale['created_at'])
+            else:
+                sale_date = sale.get('created_at', datetime.now())
+            
+            # Format date for Colombia
+            fecha_formateada = sale_date.strftime('%d/%m/%Y %H:%M')
+            
+            # Get credit info if exists
+            credit_info = await db.credit_sales.find_one({"sale_id": sale['id']}, {"_id": 0})
+            
+            # Base row data
+            row = {
+                "Fecha": fecha_formateada,
+                "No. Factura": sale.get('numero_factura', 'N/A'),
+                "Cliente": sale.get('nombre_cliente', ''),
+                "Documento": sale.get('documento_cliente', ''),
+                "Teléfono": sale.get('celular_cliente', ''),
+                "Dirección": sale.get('direccion_cliente', ''),
+                "Subtotal": sale.get('subtotal', sale.get('total', 0)),
+                "Descuento": sale.get('descuento_total', 0),
+                "Total": sale.get('total', 0),
+                "Estado Despacho": sale.get('estado_despacho', 'pendiente').upper(),
+                "Tipo Venta": "CRÉDITO" if credit_info else "CONTADO",
+                "Observaciones": sale.get('observaciones', ''),
+                "Atendido Por": sale.get('created_by', '')
+            }
+            
+            # Add credit specific fields if applicable
+            if credit_info:
+                row["Abono Inicial"] = credit_info.get('abono_inicial', 0)
+                row["Saldo Pendiente"] = credit_info.get('saldo_pendiente', 0)
+                row["Estado Crédito"] = credit_info.get('estado', '').upper()
+                if credit_info.get('fecha_pago'):
+                    fecha_pago = datetime.fromisoformat(credit_info['fecha_pago'])
+                    row["Fecha Pago Acordada"] = fecha_pago.strftime('%d/%m/%Y')
+                else:
+                    row["Fecha Pago Acordada"] = ''
+            else:
+                row["Abono Inicial"] = 0
+                row["Saldo Pendiente"] = 0
+                row["Estado Crédito"] = "N/A"
+                row["Fecha Pago Acordada"] = ""
+            
+            # Add products detail
+            productos_detalle = []
+            for item in sale.get('items', []):
+                productos_detalle.append(
+                    f"{item.get('referencia', '')} - {item.get('descripcion', '')} "
+                    f"(Talla: {item.get('talla', '')}, Cant: {item.get('cantidad', 0)})"
+                )
+            row["Productos"] = " | ".join(productos_detalle)
+            
+            excel_data.append(row)
+        
+        return {
+            "data": excel_data,
+            "total_ventas": len(excel_data),
+            "fecha_generacion": now_colombia().isoformat()
+        }
+        
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=f"Error al exportar: {str(e)}")
+
 @api_router.get("/sales/pending", response_model=List[Sale])
 async def get_pending_sales(current_user: dict = Depends(get_current_user)):
     # Users with despacho permission or admin can see pending sales
