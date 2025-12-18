@@ -400,17 +400,14 @@ export default function Credits() {
             <Tabs defaultValue="pendiente" className="w-full">
               <TabsList className="border-2 border-black rounded-none mb-6">
                 <TabsTrigger value="pendiente" className="data-[state=active]:bg-green-600 data-[state=active]:text-white">
-                  💚 Créditos Vigentes
+                  💚 Crédito Vigente
                 </TabsTrigger>
                 <TabsTrigger value="vencido" className="data-[state=active]:bg-red-500 data-[state=active]:text-white">
-                  🔴 Créditos Vencidos
-                </TabsTrigger>
-                <TabsTrigger value="pagado" className="data-[state=active]:bg-blue-500 data-[state=active]:text-white">
-                  ✅ Créditos Liquidados
+                  🔴 Vencidos
                 </TabsTrigger>
               </TabsList>
 
-              {['pendiente', 'vencido', 'pagado'].map((tab) => (
+              {['pendiente', 'vencido'].map((tab) => (
                 <TabsContent key={tab} value={tab}>
                   <div className="space-y-4">
                     {(credits || [])
