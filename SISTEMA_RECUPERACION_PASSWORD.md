@@ -143,7 +143,7 @@ PUT /api/users/{user_id}/reset-password?new_password={password}
 ## 🧪 Cómo Probar el Sistema
 
 ### Test 1: Usuario Solicita Recuperación
-1. Ir al login: https://clothtrack-sales.preview.emergentagent.com/
+1. Ir al login: https://credittrack-1.preview.emergentagent.com/
 2. Escribir cualquier usuario en el campo "Usuario"
 3. Click en "¿Olvidaste tu contraseña?"
 4. Confirmar usuario y enviar

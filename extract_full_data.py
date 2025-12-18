@@ -10,8 +10,8 @@ import os
 from datetime import datetime
 
 # URLs de producción
-PROD_URL = "https://clothtrack-sales.preview.emergentagent.com/api"
-PROD_BACKEND = "https://clothtrack-sales.preview.emergentagent.com"
+PROD_URL = "https://credittrack-1.preview.emergentagent.com/api"
+PROD_BACKEND = "https://credittrack-1.preview.emergentagent.com"
 
 # MongoDB local
 MONGO_URL = "mongodb://localhost:27017"

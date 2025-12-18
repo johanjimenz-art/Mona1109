@@ -10,7 +10,7 @@ import os
 from datetime import datetime
 
 # Configuración
-PROD_URL = "https://clothtrack.preview.emergentagent.com/api"
+PROD_URL = "https://credittrack-1.preview.emergentagent.com/api"
 USERNAME = "SEBASTIAN MONA"
 PASSWORD = "Monin1109."
 
