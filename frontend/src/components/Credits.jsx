@@ -308,7 +308,89 @@ export default function Credits() {
                   <p className="text-gray-500 text-center py-8">No se encontraron créditos</p>
                 ) : (
                   filteredCredits.map((credit) => (
-                    <CreditCard key={credit.id} credit={credit} />
+                    <div key={credit.id} className="border-2 border-black p-4">
+                      <div className="flex justify-between items-start mb-3">
+                        <div>
+                          <h3 className="text-lg font-bold">{credit.nombre_cliente}</h3>
+                          <p className="text-sm text-gray-600">{credit.documento_cliente}</p>
+                          <p className="text-sm text-gray-600">{credit.celular_cliente}</p>
+                        </div>
+                        <div className="text-right">
+                          {getStatusBadge(credit.estado)}
+                        </div>
+                      </div>
+
+                      <div className="grid grid-cols-2 md:grid-cols-4 gap-4 mb-3">
+                        <div>
+                          <p className="text-xs text-gray-600">Total</p>
+                          <p className="font-bold">${credit.total?.toLocaleString()}</p>
+                        </div>
+                        <div>
+                          <p className="text-xs text-gray-600">Abono Inicial</p>
+                          <p className="font-bold">${credit.abono_inicial?.toLocaleString()}</p>
+                        </div>
+                        <div>
+                          <p className="text-xs text-gray-600">Saldo Pendiente</p>
+                          <p className="font-bold text-red-600">${credit.saldo_pendiente?.toLocaleString()}</p>
+                        </div>
+                        <div>
+                          <p className="text-xs text-gray-600">Fecha de Pago</p>
+                          <p className="font-bold">
+                            {new Date(credit.fecha_pago).toLocaleDateString('es')}
+                          </p>
+                        </div>
+                      </div>
+
+                      {credit.observaciones && (
+                        <div className="mb-3">
+                          <p className="text-xs text-gray-600">Observaciones:</p>
+                          <p className="text-sm">{credit.observaciones}</p>
+                        </div>
+                      )}
+
+                      <div className="flex gap-2">
+                        {credit.estado !== 'pagado' && (
+                          <Button
+                            onClick={() => {
+                              setSelectedCredit(credit);
+                              setShowPaymentModal(true);
+                            }}
+                            className="flex-1 bg-black text-white hover:bg-gray-800 rounded-none"
+                          >
+                            <DollarSign className="w-4 h-4 mr-2" />
+                            Registrar Abono
+                          </Button>
+                        )}
+                        
+                        {userRole === 'admin' && (
+                          <>
+                            <Button
+                              onClick={() => {
+                                setSelectedCredit(credit);
+                                setEditData({
+                                  saldo_pendiente: credit.saldo_pendiente,
+                                  fecha_pago: new Date(credit.fecha_pago).toISOString().split('T')[0],
+                                  observaciones: credit.observaciones || ''
+                                });
+                                setShowEditModal(true);
+                              }}
+                              variant="outline"
+                              className="border-2 border-black rounded-none hover:bg-gray-100"
+                            >
+                              Editar
+                            </Button>
+                            <Button
+                              onClick={() => handleDeleteCredit(credit.id)}
+                              variant="outline"
+                              className="border-2 border-red-500 text-red-500 rounded-none hover:bg-red-50"
+                              disabled={loading}
+                            >
+                              Eliminar
+                            </Button>
+                          </>
+                        )}
+                      </div>
+                    </div>
                   ))
                 )}
               </div>
@@ -328,100 +410,101 @@ export default function Credits() {
                 </TabsTrigger>
               </TabsList>
 
-            {['pendiente', 'vencido', 'pagado'].map((tab) => (
-              <TabsContent key={tab} value={tab}>
-                <div className="space-y-4">
-                  {(credits || [])
-                    .filter((c) => c.estado === tab)
-                    .map((credit) => (
-                      <div key={credit.id} className="border-2 border-black p-4">
-                        <div className="flex justify-between items-start mb-3">
-                          <div>
-                            <h3 className="text-lg font-bold">{credit.nombre_cliente}</h3>
-                            <p className="text-sm text-gray-600">{credit.documento_cliente}</p>
-                            <p className="text-sm text-gray-600">{credit.celular_cliente}</p>
+              {['pendiente', 'vencido', 'pagado'].map((tab) => (
+                <TabsContent key={tab} value={tab}>
+                  <div className="space-y-4">
+                    {(credits || [])
+                      .filter((c) => c.estado === tab)
+                      .map((credit) => (
+                        <div key={credit.id} className="border-2 border-black p-4">
+                          <div className="flex justify-between items-start mb-3">
+                            <div>
+                              <h3 className="text-lg font-bold">{credit.nombre_cliente}</h3>
+                              <p className="text-sm text-gray-600">{credit.documento_cliente}</p>
+                              <p className="text-sm text-gray-600">{credit.celular_cliente}</p>
+                            </div>
+                            <div className="text-right">
+                              {getStatusBadge(credit.estado)}
+                            </div>
                           </div>
-                          <div className="text-right">
-                            {getStatusBadge(credit.estado)}
-                          </div>
-                        </div>
 
-                        <div className="grid grid-cols-2 md:grid-cols-4 gap-4 mb-3">
-                          <div>
-                            <p className="text-xs text-gray-600">Total</p>
-                            <p className="font-bold">${credit.total.toLocaleString()}</p>
+                          <div className="grid grid-cols-2 md:grid-cols-4 gap-4 mb-3">
+                            <div>
+                              <p className="text-xs text-gray-600">Total</p>
+                              <p className="font-bold">${credit.total?.toLocaleString()}</p>
+                            </div>
+                            <div>
+                              <p className="text-xs text-gray-600">Abono Inicial</p>
+                              <p className="font-bold">${credit.abono_inicial?.toLocaleString()}</p>
+                            </div>
+                            <div>
+                              <p className="text-xs text-gray-600">Saldo Pendiente</p>
+                              <p className="font-bold text-red-600">${credit.saldo_pendiente?.toLocaleString()}</p>
+                            </div>
+                            <div>
+                              <p className="text-xs text-gray-600">Fecha de Pago</p>
+                              <p className="font-bold">
+                                {new Date(credit.fecha_pago).toLocaleDateString('es')}
+                              </p>
+                            </div>
                           </div>
-                          <div>
-                            <p className="text-xs text-gray-600">Abono Inicial</p>
-                            <p className="font-bold">${credit.abono_inicial.toLocaleString()}</p>
-                          </div>
-                          <div>
-                            <p className="text-xs text-gray-600">Saldo Pendiente</p>
-                            <p className="font-bold text-red-600">${credit.saldo_pendiente.toLocaleString()}</p>
-                          </div>
-                          <div>
-                            <p className="text-xs text-gray-600">Fecha de Pago</p>
-                            <p className="font-bold">
-                              {new Date(credit.fecha_pago).toLocaleDateString('es')}
-                            </p>
-                          </div>
-                        </div>
 
-                        {credit.observaciones && (
-                          <div className="mb-3">
-                            <p className="text-xs text-gray-600">Observaciones:</p>
-                            <p className="text-sm">{credit.observaciones}</p>
-                          </div>
-                        )}
-
-                        <div className="flex gap-2">
-                          {credit.estado !== 'pagado' && (
-                            <Button
-                              onClick={() => {
-                                setSelectedCredit(credit);
-                                setShowPaymentModal(true);
-                              }}
-                              className="flex-1 bg-black text-white hover:bg-gray-800 rounded-none"
-                            >
-                              <DollarSign className="w-4 h-4 mr-2" />
-                              Registrar Abono
-                            </Button>
+                          {credit.observaciones && (
+                            <div className="mb-3">
+                              <p className="text-xs text-gray-600">Observaciones:</p>
+                              <p className="text-sm">{credit.observaciones}</p>
+                            </div>
                           )}
-                          
-                          {userRole === 'admin' && (
-                            <>
+
+                          <div className="flex gap-2">
+                            {credit.estado !== 'pagado' && (
                               <Button
                                 onClick={() => {
                                   setSelectedCredit(credit);
-                                  setEditData({
-                                    saldo_pendiente: credit.saldo_pendiente,
-                                    fecha_pago: new Date(credit.fecha_pago).toISOString().split('T')[0],
-                                    observaciones: credit.observaciones || ''
-                                  });
-                                  setShowEditModal(true);
+                                  setShowPaymentModal(true);
                                 }}
-                                variant="outline"
-                                className="border-2 border-black rounded-none hover:bg-gray-100"
+                                className="flex-1 bg-black text-white hover:bg-gray-800 rounded-none"
                               >
-                                Editar
+                                <DollarSign className="w-4 h-4 mr-2" />
+                                Registrar Abono
                               </Button>
-                              <Button
-                                onClick={() => handleDeleteCredit(credit.id)}
-                                variant="outline"
-                                className="border-2 border-red-500 text-red-500 rounded-none hover:bg-red-50"
-                                disabled={loading}
-                              >
-                                Eliminar
-                              </Button>
-                            </>
-                          )}
+                            )}
+                            
+                            {userRole === 'admin' && (
+                              <>
+                                <Button
+                                  onClick={() => {
+                                    setSelectedCredit(credit);
+                                    setEditData({
+                                      saldo_pendiente: credit.saldo_pendiente,
+                                      fecha_pago: new Date(credit.fecha_pago).toISOString().split('T')[0],
+                                      observaciones: credit.observaciones || ''
+                                    });
+                                    setShowEditModal(true);
+                                  }}
+                                  variant="outline"
+                                  className="border-2 border-black rounded-none hover:bg-gray-100"
+                                >
+                                  Editar
+                                </Button>
+                                <Button
+                                  onClick={() => handleDeleteCredit(credit.id)}
+                                  variant="outline"
+                                  className="border-2 border-red-500 text-red-500 rounded-none hover:bg-red-50"
+                                  disabled={loading}
+                                >
+                                  Eliminar
+                                </Button>
+                              </>
+                            )}
+                          </div>
                         </div>
-                      </div>
-                    ))}
-                </div>
-              </TabsContent>
-            ))}
-          </Tabs>
+                      ))}
+                  </div>
+                </TabsContent>
+              ))}
+            </Tabs>
+          )}
         </div>
       </div>
 
