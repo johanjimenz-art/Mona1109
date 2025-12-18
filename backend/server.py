@@ -1154,13 +1154,16 @@ async def get_stats(current_user: dict = Depends(get_current_user)):
     # Total unidades en stock (suma de cantidad_stock de todos los productos aprobados)
     products = await db.products.find(
         {"aprobado": True},
-        {"_id": 0, "cantidad_stock": 1, "precio_venta": 1}
+        {"_id": 0, "cantidad_stock": 1, "precio_venta": 1, "precio_fabricacion": 1}
     ).to_list(10000)
     
     total_units_in_stock = sum(p['cantidad_stock'] for p in products)
     
     # Valor del stock usando precio de venta
     total_stock_value = sum(p['cantidad_stock'] * p['precio_venta'] for p in products)
+    
+    # Valor del stock usando precio de fabricación
+    total_stock_value_fabricacion = sum(p['cantidad_stock'] * p.get('precio_fabricacion', 0) for p in products)
     
     # Obtener ventas de hoy
     today_start = now_colombia().replace(hour=0, minute=0, second=0, microsecond=0)
