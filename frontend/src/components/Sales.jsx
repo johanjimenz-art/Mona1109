@@ -657,7 +657,7 @@ export default function Sales() {
                 Datos del Cliente
               </h2>
               <div className="space-y-4">
-                <div>
+                <div className="relative">
                   <Label htmlFor="nombre_cliente" className="text-black font-medium mb-2 block">Nombre</Label>
                   <Input
                     id="nombre_cliente"
@@ -665,10 +665,39 @@ export default function Sales() {
                     name="nombre_cliente"
                     value={clientData.nombre_cliente}
                     onChange={handleClientChange}
+                    onFocus={() => {
+                      if (clientSuggestions.length > 0) {
+                        setShowSuggestions(true);
+                      }
+                    }}
+                    onBlur={() => {
+                      // Delay hiding suggestions to allow clicking
+                      setTimeout(() => setShowSuggestions(false), 200);
+                    }}
                     className="rounded-none border-2 border-black"
+                    placeholder="Escriba el nombre del cliente..."
+                    autoComplete="off"
                   />
+                  
+                  {/* Client Suggestions Dropdown */}
+                  {showSuggestions && clientSuggestions.length > 0 && (
+                    <div className="absolute z-50 w-full mt-1 bg-white border-2 border-black max-h-60 overflow-y-auto">
+                      {clientSuggestions.map((client, index) => (
+                        <div
+                          key={index}
+                          className="p-3 hover:bg-gray-100 cursor-pointer border-b border-gray-200 last:border-b-0"
+                          onClick={() => selectClient(client)}
+                        >
+                          <div className="font-medium text-sm">{client.nombre_cliente}</div>
+                          <div className="text-xs text-gray-600">Doc: {client.documento_cliente}</div>
+                          <div className="text-xs text-gray-600">Tel: {client.celular_cliente}</div>
+                          <div className="text-xs text-gray-500 truncate">{client.direccion_cliente}</div>
+                        </div>
+                      ))}
+                    </div>
+                  )}
                 </div>
-                <div>
+                <div className="relative">
                   <Label htmlFor="documento_cliente" className="text-black font-medium mb-2 block">Documento</Label>
                   <Input
                     id="documento_cliente"
@@ -676,8 +705,37 @@ export default function Sales() {
                     name="documento_cliente"
                     value={clientData.documento_cliente}
                     onChange={handleClientChange}
+                    onFocus={() => {
+                      if (clientSuggestions.length > 0) {
+                        setShowSuggestions(true);
+                      }
+                    }}
+                    onBlur={() => {
+                      // Delay hiding suggestions to allow clicking
+                      setTimeout(() => setShowSuggestions(false), 200);
+                    }}
                     className="rounded-none border-2 border-black"
+                    placeholder="Escriba el documento del cliente..."
+                    autoComplete="off"
                   />
+                  
+                  {/* Client Suggestions Dropdown for Document field */}
+                  {showSuggestions && clientSuggestions.length > 0 && (
+                    <div className="absolute z-50 w-full mt-1 bg-white border-2 border-black max-h-60 overflow-y-auto">
+                      {clientSuggestions.map((client, index) => (
+                        <div
+                          key={index}
+                          className="p-3 hover:bg-gray-100 cursor-pointer border-b border-gray-200 last:border-b-0"
+                          onClick={() => selectClient(client)}
+                        >
+                          <div className="font-medium text-sm">{client.nombre_cliente}</div>
+                          <div className="text-xs text-gray-600">Doc: {client.documento_cliente}</div>
+                          <div className="text-xs text-gray-600">Tel: {client.celular_cliente}</div>
+                          <div className="text-xs text-gray-500 truncate">{client.direccion_cliente}</div>
+                        </div>
+                      ))}
+                    </div>
+                  )}
                 </div>
                 <div>
                   <Label htmlFor="direccion_cliente" className="text-black font-medium mb-2 block">Dirección</Label>
