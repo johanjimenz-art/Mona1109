@@ -36,6 +36,8 @@ export default function Credits() {
   });
   const [loading, setLoading] = useState(false);
   const [userRole, setUserRole] = useState('');
+  const [searchTerm, setSearchTerm] = useState('');
+  const [filteredCredits, setFilteredCredits] = useState([]);
 
   useEffect(() => {
     const role = localStorage.getItem('role');
