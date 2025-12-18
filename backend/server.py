@@ -770,6 +770,37 @@ async def get_sales(current_user: dict = Depends(get_current_user)):
     
     return sales
 
+@api_router.get("/clientes/buscar")
+async def search_clients(
+    q: str,
+    current_user: dict = Depends(get_current_user)
+):
+    """Buscar clientes por nombre o documento"""
+    if not q or len(q) < 2:
+        return []
+    
+    # Buscar en ventas por nombre o documento
+    sales = await db.sales.find({
+        "$or": [
+            {"nombre_cliente": {"$regex": q, "$options": "i"}},
+            {"documento_cliente": {"$regex": q, "$options": "i"}}
+        ]
+    }, {"_id": 0}).to_list(100)
+    
+    # Eliminar duplicados por documento y obtener datos únicos de clientes
+    clientes_dict = {}
+    for sale in sales:
+        doc = sale['documento_cliente']
+        if doc not in clientes_dict:
+            clientes_dict[doc] = {
+                "nombre_cliente": sale['nombre_cliente'],
+                "documento_cliente": sale['documento_cliente'],
+                "direccion_cliente": sale['direccion_cliente'],
+                "celular_cliente": sale['celular_cliente']
+            }
+    
+    return list(clientes_dict.values())
+
 @api_router.get("/sales/pending", response_model=List[Sale])
 async def get_pending_sales(current_user: dict = Depends(get_current_user)):
     # Users with despacho permission or admin can see pending sales
