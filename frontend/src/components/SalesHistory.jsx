@@ -455,18 +455,27 @@ export default function SalesHistory() {
   return (
     <div className="min-h-screen bg-white">
       <div className="border-b-4 border-black bg-white">
-        <div className="max-w-7xl mx-auto px-8 py-6 flex items-center gap-4">
+        <div className="max-w-7xl mx-auto px-8 py-6 flex items-center justify-between">
+          <div className="flex items-center gap-4">
+            <Button
+              data-testid="back-btn"
+              onClick={() => navigate('/')}
+              variant="outline"
+              className="border-2 border-black rounded-none hover:bg-black hover:text-white"
+            >
+              <ArrowLeft className="w-4 h-4" />
+            </Button>
+            <h1 className="text-3xl font-bold text-black" style={{ fontFamily: 'Space Grotesk, sans-serif' }}>
+              Historial de Ventas (Últimos 10 días)
+            </h1>
+          </div>
           <Button
-            data-testid="back-btn"
-            onClick={() => navigate('/')}
-            variant="outline"
-            className="border-2 border-black rounded-none hover:bg-black hover:text-white"
+            onClick={exportToExcel}
+            className="bg-green-600 text-white hover:bg-green-700 rounded-none border-2 border-black h-12 px-6"
           >
-            <ArrowLeft className="w-4 h-4" />
+            <Download className="w-5 h-5 mr-2" />
+            📊 Descargar Excel Completo
           </Button>
-          <h1 className="text-3xl font-bold text-black" style={{ fontFamily: 'Space Grotesk, sans-serif' }}>
-            Historial de Ventas
-          </h1>
         </div>
       </div>
 
