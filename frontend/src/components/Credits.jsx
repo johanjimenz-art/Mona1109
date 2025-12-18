@@ -281,25 +281,52 @@ export default function Credits() {
 
         {/* Credits List */}
         <div className="bg-white border-4 border-black p-6">
-          <h2 className="text-2xl font-bold mb-6" style={{ fontFamily: 'Space Grotesk, sans-serif' }}>
-            Todos los Créditos
-          </h2>
+          <div className="flex items-center justify-between mb-6">
+            <h2 className="text-2xl font-bold" style={{ fontFamily: 'Space Grotesk, sans-serif' }}>
+              Gestión de Créditos
+            </h2>
+            
+            {/* Search Bar */}
+            <div className="w-96">
+              <Input
+                placeholder="🔍 Buscar por nombre, documento o factura..."
+                value={searchTerm}
+                onChange={(e) => setSearchTerm(e.target.value)}
+                className="border-2 border-black rounded-none"
+              />
+            </div>
+          </div>
 
-          <Tabs defaultValue="all" className="w-full">
-            <TabsList className="border-2 border-black rounded-none mb-6">
-              <TabsTrigger value="all" className="data-[state=active]:bg-black data-[state=active]:text-white">
-                Todos
-              </TabsTrigger>
-              <TabsTrigger value="pendiente" className="data-[state=active]:bg-yellow-500 data-[state=active]:text-white">
-                Pendientes
-              </TabsTrigger>
-              <TabsTrigger value="vencido" className="data-[state=active]:bg-red-500 data-[state=active]:text-white">
-                Vencidos
-              </TabsTrigger>
-              <TabsTrigger value="pagado" className="data-[state=active]:bg-green-500 data-[state=active]:text-white">
-                Pagados
-              </TabsTrigger>
-            </TabsList>
+          {searchTerm.trim() !== '' ? (
+            // Mostrar resultados de búsqueda
+            <div>
+              <h3 className="text-lg font-bold mb-4">
+                Resultados de búsqueda ({filteredCredits.length})
+              </h3>
+              <div className="space-y-4">
+                {filteredCredits.length === 0 ? (
+                  <p className="text-gray-500 text-center py-8">No se encontraron créditos</p>
+                ) : (
+                  filteredCredits.map((credit) => (
+                    <CreditCard key={credit.id} credit={credit} />
+                  ))
+                )}
+              </div>
+            </div>
+          ) : (
+            // Mostrar pestañas normales
+            <Tabs defaultValue="pendiente" className="w-full">
+              <TabsList className="border-2 border-black rounded-none mb-6">
+                <TabsTrigger value="pendiente" className="data-[state=active]:bg-green-600 data-[state=active]:text-white">
+                  💚 Créditos Vigentes
+                </TabsTrigger>
+                <TabsTrigger value="vencido" className="data-[state=active]:bg-red-500 data-[state=active]:text-white">
+                  🔴 Créditos Vencidos
+                </TabsTrigger>
+                <TabsTrigger value="pagado" className="data-[state=active]:bg-blue-500 data-[state=active]:text-white">
+                  ✅ Créditos Liquidados
+                </TabsTrigger>
+              </TabsList>
 
             {['all', 'pendiente', 'vencido', 'pagado'].map((tab) => (
               <TabsContent key={tab} value={tab}>
