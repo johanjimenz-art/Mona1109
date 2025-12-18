@@ -821,13 +821,65 @@ async def get_recent_sales(current_user: dict = Depends(get_current_user)):
 
 @api_router.get("/sales/export-excel")
 async def export_sales_to_excel(current_user: dict = Depends(get_current_user)):
-    """Export ALL sales to Excel format (no date limit)"""
+    """Export ALL sales to Excel with proper formatting"""
     try:
-        # Get ALL sales without date filter
+        from openpyxl import Workbook
+        from openpyxl.styles import Font, Alignment, PatternFill, Border, Side
+        from openpyxl.utils import get_column_letter
+        from io import BytesIO
+        
+        # Get ALL sales
         sales = await db.sales.find({}, {"_id": 0}).sort("created_at", -1).to_list(10000)
         
-        # Prepare data for Excel
-        excel_data = []
+        # Create workbook
+        wb = Workbook()
+        ws = wb.active
+        ws.title = "Historial Ventas"
+        
+        # Define headers with organized columns
+        headers = [
+            "FECHA COMPRA", "HORA", "No. FACTURA",
+            "CLIENTE", "DOCUMENTO", "TELÉFONO", "DIRECCIÓN",
+            "REFERENCIA", "DESCRIPCIÓN", "TALLA", "COLOR", "CANTIDAD", "PRECIO UNITARIO",
+            "SUBTOTAL", "DESCUENTO", "TOTAL VENTA",
+            "TIPO VENTA", "ABONO INICIAL", "SALDO PENDIENTE", "ESTADO CRÉDITO",
+            "ESTADO DESPACHO", "ATENDIDO POR", "OBSERVACIONES"
+        ]
+        
+        # Style for headers
+        header_font = Font(bold=True, size=11, color="FFFFFF")
+        header_fill = PatternFill(start_color="000000", end_color="000000", fill_type="solid")
+        header_alignment = Alignment(horizontal="center", vertical="center", wrap_text=True)
+        border = Border(
+            left=Side(style='thin'),
+            right=Side(style='thin'),
+            top=Side(style='thin'),
+            bottom=Side(style='thin')
+        )
+        
+        # Write headers
+        for col_num, header in enumerate(headers, 1):
+            cell = ws.cell(row=1, column=col_num, value=header)
+            cell.font = header_font
+            cell.fill = header_fill
+            cell.alignment = header_alignment
+            cell.border = border
+        
+        # Set column widths
+        column_widths = {
+            'A': 12, 'B': 8, 'C': 18,  # Fecha, Hora, Factura
+            'D': 25, 'E': 13, 'F': 12, 'G': 30,  # Cliente info
+            'H': 12, 'I': 30, 'J': 8, 'K': 12, 'L': 10, 'M': 13,  # Producto info
+            'N': 12, 'O': 12, 'P': 13,  # Precios
+            'Q': 12, 'R': 13, 'S': 15, 'T': 15,  # Crédito
+            'U': 15, 'V': 15, 'W': 35  # Estado y observaciones
+        }
+        
+        for col, width in column_widths.items():
+            ws.column_dimensions[col].width = width
+        
+        # Write data
+        row_num = 2
         for sale in sales:
             # Parse date
             if isinstance(sale.get('created_at'), str):
@@ -835,63 +887,77 @@ async def export_sales_to_excel(current_user: dict = Depends(get_current_user)):
             else:
                 sale_date = sale.get('created_at', datetime.now())
             
-            # Format date for Colombia
-            fecha_formateada = sale_date.strftime('%d/%m/%Y %H:%M')
+            fecha = sale_date.strftime('%d/%m/%Y')
+            hora = sale_date.strftime('%H:%M')
             
-            # Get credit info if exists
+            # Get credit info
             credit_info = await db.credit_sales.find_one({"sale_id": sale['id']}, {"_id": 0})
+            tipo_venta = "CRÉDITO" if credit_info else "CONTADO"
             
-            # Base row data
-            row = {
-                "Fecha": fecha_formateada,
-                "No. Factura": sale.get('numero_factura', 'N/A'),
-                "Cliente": sale.get('nombre_cliente', ''),
-                "Documento": sale.get('documento_cliente', ''),
-                "Teléfono": sale.get('celular_cliente', ''),
-                "Dirección": sale.get('direccion_cliente', ''),
-                "Subtotal": sale.get('subtotal', sale.get('total', 0)),
-                "Descuento": sale.get('descuento_total', 0),
-                "Total": sale.get('total', 0),
-                "Estado Despacho": sale.get('estado_despacho', 'pendiente').upper(),
-                "Tipo Venta": "CRÉDITO" if credit_info else "CONTADO",
-                "Observaciones": sale.get('observaciones', ''),
-                "Atendido Por": sale.get('created_by', '')
-            }
-            
-            # Add credit specific fields if applicable
-            if credit_info:
-                row["Abono Inicial"] = credit_info.get('abono_inicial', 0)
-                row["Saldo Pendiente"] = credit_info.get('saldo_pendiente', 0)
-                row["Estado Crédito"] = credit_info.get('estado', '').upper()
-                if credit_info.get('fecha_pago'):
-                    fecha_pago = datetime.fromisoformat(credit_info['fecha_pago'])
-                    row["Fecha Pago Acordada"] = fecha_pago.strftime('%d/%m/%Y')
-                else:
-                    row["Fecha Pago Acordada"] = ''
-            else:
-                row["Abono Inicial"] = 0
-                row["Saldo Pendiente"] = 0
-                row["Estado Crédito"] = "N/A"
-                row["Fecha Pago Acordada"] = ""
-            
-            # Add products detail
-            productos_detalle = []
-            for item in sale.get('items', []):
-                productos_detalle.append(
-                    f"{item.get('referencia', '')} - {item.get('descripcion', '')} "
-                    f"(Talla: {item.get('talla', '')}, Cant: {item.get('cantidad', 0)})"
-                )
-            row["Productos"] = " | ".join(productos_detalle)
-            
-            excel_data.append(row)
+            # Process each item in the sale
+            items = sale.get('items', [])
+            for item in items:
+                row_data = [
+                    fecha,
+                    hora,
+                    sale.get('numero_factura', 'N/A'),
+                    sale.get('nombre_cliente', ''),
+                    sale.get('documento_cliente', ''),
+                    sale.get('celular_cliente', ''),
+                    sale.get('direccion_cliente', ''),
+                    item.get('referencia', ''),
+                    item.get('descripcion', ''),
+                    item.get('talla', ''),
+                    item.get('color', 'N/A'),
+                    item.get('cantidad', 0),
+                    item.get('precio_venta', 0),
+                    item.get('subtotal', 0),
+                    sale.get('descuento_total', 0) if items.index(item) == 0 else 0,
+                    sale.get('total', 0) if items.index(item) == 0 else 0,
+                    tipo_venta,
+                    credit_info.get('abono_inicial', 0) if credit_info and items.index(item) == 0 else (0 if items.index(item) == 0 else ''),
+                    credit_info.get('saldo_pendiente', 0) if credit_info and items.index(item) == 0 else (0 if items.index(item) == 0 else ''),
+                    credit_info.get('estado', '').upper() if credit_info and items.index(item) == 0 else ('' if items.index(item) > 0 else 'N/A'),
+                    sale.get('estado_despacho', 'pendiente').upper() if items.index(item) == 0 else '',
+                    sale.get('created_by', '') if items.index(item) == 0 else '',
+                    sale.get('observaciones', '') if items.index(item) == 0 else ''
+                ]
+                
+                # Write row
+                for col_num, value in enumerate(row_data, 1):
+                    cell = ws.cell(row=row_num, column=col_num, value=value)
+                    cell.border = border
+                    cell.alignment = Alignment(vertical="center")
+                    
+                    # Format currency columns
+                    if col_num in [13, 14, 15, 16, 18, 19]:  # Precio columns
+                        if isinstance(value, (int, float)) and value != 0:
+                            cell.number_format = '"$"#,##0'
+                
+                row_num += 1
         
-        return {
-            "data": excel_data,
-            "total_ventas": len(excel_data),
-            "fecha_generacion": now_colombia().isoformat()
-        }
+        # Freeze first row
+        ws.freeze_panes = 'A2'
+        
+        # Save to BytesIO
+        output = BytesIO()
+        wb.save(output)
+        output.seek(0)
+        
+        # Return as streaming response
+        from fastapi.responses import StreamingResponse
+        
+        fecha_actual = now_colombia().strftime('%Y-%m-%d')
+        filename = f"Historial_Ventas_Completo_{fecha_actual}.xlsx"
+        
+        return StreamingResponse(
+            output,
+            media_type="application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",
+            headers={"Content-Disposition": f"attachment; filename={filename}"}
+        )
         
     except Exception as e:
+        logger.error(f"Error exporting Excel: {str(e)}")
         raise HTTPException(status_code=500, detail=f"Error al exportar: {str(e)}")
 
 @api_router.get("/sales/pending", response_model=List[Sale])
