@@ -62,7 +62,7 @@ async def test_client_search():
     }, {"_id": 0}).to_list(100)
     print(f"Found {len(fake_sales)} clients for '{fake_query}' (should be 0)")
     
-    client.close()
+    await client.close()
     print("\n✅ Client search test completed successfully!")
 
 if __name__ == "__main__":
