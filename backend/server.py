@@ -1188,7 +1188,8 @@ async def get_stats(current_user: dict = Depends(get_current_user)):
     stats = {
         "total_units_in_stock": total_units_in_stock,
         "today_units_sold": today_units_sold,
-        "total_stock_value": total_stock_value
+        "total_stock_value": total_stock_value,
+        "total_stock_value_fabricacion": total_stock_value_fabricacion
     }
     
     # Count credits
