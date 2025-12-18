@@ -225,40 +225,48 @@ export default function SalesHistory() {
       doc.setFontSize(8);
       
       sale.items.forEach((item, index) => {
+        // Get values with fallbacks for different data structures
+        const descripcion = item.descripcion || item.nombre || 'Producto';
+        const precioUnitario = item.precio_venta || item.precio_unitario || 0;
+        const descuentoPorcentaje = item.descuento_porcentaje || 0;
+        
         // Product reference and description
         doc.setFont('helvetica', 'bold');
-        doc.text(item.referencia, margin, yPosition);
+        doc.text(item.referencia || '', margin, yPosition);
         yPosition += 4;
         
         doc.setFont('helvetica', 'normal');
-        doc.text(item.descripcion.substring(0, 30), margin + 2, yPosition, { maxWidth: contentWidth - 2 });
+        doc.text(descripcion.substring(0, 30), margin + 2, yPosition, { maxWidth: contentWidth - 2 });
         yPosition += 4;
         
         // Talla and cantidad
-        doc.text(`Talla: ${item.talla}`, margin + 2, yPosition);
-        doc.text(`Cant: ${item.cantidad}`, pageWidth - margin - 20, yPosition);
+        doc.text(`Talla: ${item.talla || 'N/A'}`, margin + 2, yPosition);
+        doc.text(`Cant: ${item.cantidad || 1}`, pageWidth - margin - 20, yPosition);
         yPosition += 4;
         
         // Price per unit
-        doc.text(`Precio unit: $${item.precio_venta.toLocaleString()}`, margin + 2, yPosition);
+        doc.text(`Precio unit: $${precioUnitario.toLocaleString()}`, margin + 2, yPosition);
         yPosition += 4;
         
         // Full price (price * quantity)
-        const precioTotal = item.precio_venta * item.cantidad;
+        const precioTotal = precioUnitario * (item.cantidad || 1);
         doc.text(`Precio total: $${precioTotal.toLocaleString()}`, margin + 2, yPosition);
         yPosition += 4;
         
         // Discount if applied
         if (item.descuento > 0) {
           doc.setTextColor(200, 0, 0);
-          doc.text(`Descuento: -$${item.descuento.toLocaleString()} (${item.descuento_porcentaje.toFixed(1)}%)`, margin + 2, yPosition);
+          const descuentoText = descuentoPorcentaje > 0 
+            ? `Descuento: -$${item.descuento.toLocaleString()} (${descuentoPorcentaje.toFixed(1)}%)`
+            : `Descuento: -$${item.descuento.toLocaleString()}`;
+          doc.text(descuentoText, margin + 2, yPosition);
           doc.setTextColor(0, 0, 0);
           yPosition += 4;
         }
         
         // Subtotal after discount
         doc.setFont('helvetica', 'bold');
-        doc.text(`Subtotal: $${item.subtotal.toLocaleString()}`, margin + 2, yPosition);
+        doc.text(`Subtotal: $${(item.subtotal || 0).toLocaleString()}`, margin + 2, yPosition);
         doc.setFont('helvetica', 'normal');
         yPosition += 6;
         
