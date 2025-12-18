@@ -13,8 +13,8 @@ from dotenv import load_dotenv
 load_dotenv('/app/backend/.env')
 
 async def test_client_search():
-    client = AsyncIOMotorClient(os.environ['MONGO_URL'])
-    db = client[os.environ['DB_NAME']]
+    mongo_client = AsyncIOMotorClient(os.environ['MONGO_URL'])
+    db = mongo_client[os.environ['DB_NAME']]
     
     print("Testing client search functionality...")
     
