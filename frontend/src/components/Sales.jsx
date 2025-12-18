@@ -346,6 +346,15 @@ export default function Sales() {
     fetchProducts();
   }, []);
 
+  // Cleanup timeout on unmount
+  useEffect(() => {
+    return () => {
+      if (searchTimeout) {
+        clearTimeout(searchTimeout);
+      }
+    };
+  }, [searchTimeout]);
+
   useEffect(() => {
     // Update available tallas when referencia changes
     if (searchData.referencia) {
