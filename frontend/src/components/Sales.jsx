@@ -602,6 +602,7 @@ export default function Sales() {
           items: cart,
           subtotal: subtotalBeforeDiscount,
           descuento_total: totalDiscount,
+          costo_domicilio: parseFloat(costoDomicilio) || 0,
           total: total,
           aplicado_por: totalDiscount > 0 ? username : null,
           observaciones: observaciones || null
