@@ -6,8 +6,8 @@
 
 ## Current Test Session
 
-### Module Under Test: Inventory Location System
-- **Component**: `/app/frontend/src/components/Inventory.jsx`
+### Module Under Test: Sales Domicilio (Shipping Cost) Feature
+- **Component**: `/app/frontend/src/components/Sales.jsx`
 - **Date**: 2025-12-19
 - **Status**: TESTING COMPLETED
 
@@ -16,17 +16,19 @@
 - Password: Monin1109
 
 ### Test Cases to Verify
-1. Login and navigate to /inventory
-2. Verify the table shows new columns: "🏪 Estudio" and "📦 Bodega"
-3. Expand product to see location details (Stock Estudio, Stock Bodega, Transfer buttons)
-4. Test Transfer Dialog functionality
-5. Verify Stock Low Alerts at bottom of page
-6. Test Stock Transfer functionality (if possible)
+1. Login and navigate to /sales
+2. Verify the "🚚 Domicilio" field is visible in the cart section
+3. Add product to cart (if possible)
+4. Test domicilio cost input and calculation
+5. Verify total updates to include domicilio cost
+6. Verify "Costo Domicilio: +$X,XXX" appears in blue text
+7. Complete a sale with domicilio cost
+8. Verify invoice download includes domicilio cost
 
 ### Incorporate User Feedback
-- User requested new Inventory Location System with stock tracking between Estudio and Bodega
-- System should allow transferring stock between locations
-- Low stock alerts should be displayed for products with ≤2 units in Estudio
+- User requested new Domicilio (shipping cost) feature in Sales module
+- System should allow adding shipping costs to sales
+- Domicilio cost should be included in total calculation and invoice generation
 
 ## Test Results Summary
 
