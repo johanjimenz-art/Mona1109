@@ -55,6 +55,9 @@ export default function Sales() {
     fecha_pago: '',
     observaciones: ''
   });
+  
+  // Costo de domicilio
+  const [costoDomicilio, setCostoDomicilio] = useState(0);
 
   // Get user permissions
   const permissions = JSON.parse(localStorage.getItem('permissions') || '{}');
