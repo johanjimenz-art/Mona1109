@@ -117,6 +117,8 @@ class ProductCreate(BaseModel):
     talla: str
     precio_venta: float
     cantidad_stock: int
+    stock_estudio: int = 0
+    stock_bodega: int = 0
 
 class ProductUpdate(BaseModel):
     descripcion: Optional[str] = None
