@@ -543,7 +543,8 @@ export default function Sales() {
 
 
   const calculateTotal = () => {
-    return cart.reduce((sum, item) => sum + item.subtotal, 0);
+    const subtotal = cart.reduce((sum, item) => sum + item.subtotal, 0);
+    return subtotal + (parseFloat(costoDomicilio) || 0);
   };
 
 
