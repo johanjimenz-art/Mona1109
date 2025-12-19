@@ -34,12 +34,25 @@ export default function Inventory() {
     costo_fabricacion: '',
     talla: '',
     precio_venta: '',
-    cantidad_stock: ''
+    cantidad_stock: '',
+    stock_estudio: '',
+    stock_bodega: ''
   });
+  
+  // Estados para transferencias
+  const [showTransferDialog, setShowTransferDialog] = useState(false);
+  const [transferProduct, setTransferProduct] = useState(null);
+  const [transferData, setTransferData] = useState({
+    cantidad: 1,
+    origen: 'bodega',
+    destino: 'estudio'
+  });
+  const [stockAlerts, setStockAlerts] = useState([]);
 
   useEffect(() => {
     fetchProducts();
     fetchGroupedProducts();
+    fetchStockAlerts();
   }, []);
 
   const fetchProducts = async () => {
