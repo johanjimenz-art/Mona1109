@@ -526,6 +526,16 @@ export default function Inventory() {
                           {group.stock_total} unidades
                         </span>
                       </td>
+                      <td className="px-6 py-4">
+                        <span className={`font-bold ${(group.stock_estudio || 0) <= 2 ? 'text-orange-600' : 'text-green-600'}`}>
+                          {group.stock_estudio || 0}
+                        </span>
+                      </td>
+                      <td className="px-6 py-4">
+                        <span className="font-bold text-blue-600">
+                          {group.stock_bodega || 0}
+                        </span>
+                      </td>
                     </tr>
                     
                     {/* Expandir tallas */}
