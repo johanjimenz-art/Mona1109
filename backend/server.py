@@ -101,7 +101,9 @@ class Product(BaseModel):
     costo_fabricacion: Optional[float] = None
     talla: str
     precio_venta: float
-    cantidad_stock: int
+    cantidad_stock: int  # Stock total (suma de ambas ubicaciones)
+    stock_estudio: int = 0  # Stock en Estudio ON-OF
+    stock_bodega: int = 0  # Stock en Bodega
     imagen_url: Optional[str] = None
     aprobado: bool = False
     created_by: Optional[str] = None  # Hacer opcional para productos viejos
