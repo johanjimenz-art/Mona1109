@@ -485,6 +485,8 @@ export default function Inventory() {
                   {isAdmin && <th className="px-6 py-4 text-left font-bold">Costo Fab.</th>}
                   <th className="px-6 py-4 text-left font-bold">Precio Venta</th>
                   <th className="px-6 py-4 text-left font-bold">Stock Total</th>
+                  <th className="px-6 py-4 text-left font-bold">🏪 Estudio</th>
+                  <th className="px-6 py-4 text-left font-bold">📦 Bodega</th>
                 </tr>
               </thead>
               <tbody>
