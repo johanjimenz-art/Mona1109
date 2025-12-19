@@ -128,7 +128,16 @@ class ProductUpdate(BaseModel):
     talla: Optional[str] = None
     precio_venta: Optional[float] = None
     cantidad_stock: Optional[int] = None
+    stock_estudio: Optional[int] = None
+    stock_bodega: Optional[int] = None
     aprobado: Optional[bool] = None
+
+class StockTransfer(BaseModel):
+    """Modelo para transferencia de stock entre ubicaciones"""
+    product_id: str
+    cantidad: int
+    origen: str  # 'estudio' o 'bodega'
+    destino: str  # 'estudio' o 'bodega'
 
 class SaleItem(BaseModel):
     product_id: str
