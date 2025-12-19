@@ -181,6 +181,7 @@ class SaleCreate(BaseModel):
     observaciones: Optional[str] = None
     subtotal: Optional[float] = None
     descuento_total: Optional[float] = None
+    costo_domicilio: Optional[float] = 0.0
     aplicado_por: Optional[str] = None
 
 class SaleUpdateStatus(BaseModel):
