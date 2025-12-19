@@ -80,6 +80,54 @@ export default function Inventory() {
     }
   };
 
+  const fetchStockAlerts = async () => {
+    try {
+      const token = localStorage.getItem('token');
+      const response = await axios.get(`${API}/products/stock-alerts`, {
+        headers: { Authorization: `Bearer ${token}` }
+      });
+      setStockAlerts(response.data);
+    } catch (error) {
+      console.error('Error al cargar alertas de stock:', error);
+    }
+  };
+
+  const handleTransfer = async () => {
+    if (!transferProduct) return;
+    
+    try {
+      const token = localStorage.getItem('token');
+      await axios.post(`${API}/products/transfer`, {
+        product_id: transferProduct.id,
+        cantidad: parseInt(transferData.cantidad),
+        origen: transferData.origen,
+        destino: transferData.destino
+      }, {
+        headers: { Authorization: `Bearer ${token}` }
+      });
+      
+      toast.success(`Transferencia exitosa: ${transferData.cantidad} unidades`);
+      setShowTransferDialog(false);
+      setTransferProduct(null);
+      setTransferData({ cantidad: 1, origen: 'bodega', destino: 'estudio' });
+      fetchProducts();
+      fetchGroupedProducts();
+      fetchStockAlerts();
+    } catch (error) {
+      toast.error(error.response?.data?.detail || 'Error en la transferencia');
+    }
+  };
+
+  const openTransferDialog = (product) => {
+    setTransferProduct(product);
+    setTransferData({
+      cantidad: 1,
+      origen: 'bodega',
+      destino: 'estudio'
+    });
+    setShowTransferDialog(true);
+  };
+
   // Filtrar productos cuando cambia el término de búsqueda
   useEffect(() => {
     if (searchTerm.trim() === '') {
