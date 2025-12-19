@@ -1008,7 +1008,33 @@ export default function Sales() {
                     </div>
                   </>
                 )}
-                <div className="flex justify-between items-center">
+                
+                {/* Costo de Domicilio */}
+                <div className="flex justify-between items-center gap-4 mb-3 py-2 border-t border-gray-300">
+                  <div className="flex items-center gap-2">
+                    <span className="text-sm font-medium">🚚 Domicilio:</span>
+                  </div>
+                  <div className="flex items-center gap-2">
+                    <span className="text-sm">$</span>
+                    <Input
+                      type="number"
+                      min="0"
+                      step="100"
+                      value={costoDomicilio}
+                      onChange={(e) => setCostoDomicilio(e.target.value)}
+                      className="w-24 h-8 rounded-none border-2 border-black text-right"
+                      placeholder="0"
+                    />
+                  </div>
+                </div>
+                {parseFloat(costoDomicilio) > 0 && (
+                  <div className="flex justify-between items-center text-sm mb-2">
+                    <span className="text-blue-600">Costo Domicilio:</span>
+                    <span className="text-blue-600">+${parseFloat(costoDomicilio).toLocaleString()}</span>
+                  </div>
+                )}
+                
+                <div className="flex justify-between items-center border-t-2 border-black pt-2">
                   <span className="text-xl font-bold">Total:</span>
                   <span className="text-3xl font-bold" data-testid="cart-total">${calculateTotal().toLocaleString()}</span>
                 </div>
