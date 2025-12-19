@@ -541,25 +541,54 @@ export default function Inventory() {
                     {/* Expandir tallas */}
                     {expandedRef === group.referencia && (
                       <tr>
-                        <td colSpan={isAdmin ? 8 : 7} className="p-0">
+                        <td colSpan={isAdmin ? 10 : 9} className="p-0">
                           <div className="bg-blue-50 border-t-2 border-b-2 border-blue-200">
                             <div className="p-4">
                               <h4 className="font-bold text-sm text-blue-900 mb-3">📏 Desglose por Tallas:</h4>
                               <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-3">
                                 {group.tallas.map((talla, tallaIndex) => {
                                   const product = products.find(p => p.id === talla.id);
+                                  const stockEstudio = product?.stock_estudio || 0;
+                                  const stockBodega = product?.stock_bodega || 0;
+                                  const alertaEstudio = stockEstudio <= 2 && stockBodega > 0;
+                                  
                                   return (
-                                    <div key={talla.id} className="bg-white border-2 border-black p-4">
+                                    <div key={talla.id} className={`bg-white border-2 p-4 ${alertaEstudio ? 'border-orange-500' : 'border-black'}`}>
                                       <div className="flex justify-between items-start mb-2">
                                         <div>
                                           <span className="font-bold text-xl">Talla {talla.talla}</span>
                                           {!talla.aprobado && (
                                             <span className="ml-2 text-xs bg-yellow-200 border border-yellow-600 px-2 py-1">Pendiente</span>
                                           )}
+                                          {alertaEstudio && (
+                                            <span className="ml-2 text-xs bg-orange-200 border border-orange-600 px-2 py-1 flex items-center gap-1 inline-flex">
+                                              <AlertTriangle className="w-3 h-3" /> Stock bajo
+                                            </span>
+                                          )}
                                         </div>
                                         <span className={`text-2xl font-bold ${talla.cantidad_stock < 3 ? 'text-red-600' : 'text-green-600'}`}>
                                           {talla.cantidad_stock}
                                         </span>
+                                      </div>
+                                      
+                                      {/* Detalle por ubicación */}
+                                      <div className="grid grid-cols-2 gap-2 mb-3 text-sm">
+                                        <div className={`p-2 rounded ${stockEstudio <= 2 ? 'bg-orange-100' : 'bg-green-100'}`}>
+                                          <div className="flex items-center gap-1">
+                                            <Store className="w-4 h-4" />
+                                            <span className="font-medium">Estudio:</span>
+                                          </div>
+                                          <span className={`text-lg font-bold ${stockEstudio <= 2 ? 'text-orange-600' : 'text-green-600'}`}>
+                                            {stockEstudio}
+                                          </span>
+                                        </div>
+                                        <div className="p-2 bg-blue-100 rounded">
+                                          <div className="flex items-center gap-1">
+                                            <Warehouse className="w-4 h-4" />
+                                            <span className="font-medium">Bodega:</span>
+                                          </div>
+                                          <span className="text-lg font-bold text-blue-600">{stockBodega}</span>
+                                        </div>
                                       </div>
                                       {canModify && product && (
                                         <div className="flex gap-2 mt-3">
