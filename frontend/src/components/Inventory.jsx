@@ -661,7 +661,141 @@ export default function Inventory() {
             </p>
           </div>
         )}
+
+        {/* Alertas de Stock Bajo en Estudio */}
+        {stockAlerts.length > 0 && (
+          <div className="mt-6 p-4 border-4 border-orange-500 bg-orange-50">
+            <div className="flex items-center gap-2 mb-3">
+              <AlertTriangle className="w-6 h-6 text-orange-600" />
+              <h3 className="text-lg font-bold text-orange-900">
+                ⚠️ Stock Bajo en Estudio ({stockAlerts.length} productos)
+              </h3>
+            </div>
+            <p className="text-sm text-orange-800 mb-3">
+              Los siguientes productos tienen ≤ 2 unidades en el Estudio y hay stock disponible en Bodega para transferir:
+            </p>
+            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-2">
+              {stockAlerts.map((alert) => (
+                <div key={alert.id} className="bg-white border-2 border-orange-400 p-3 flex justify-between items-center">
+                  <div>
+                    <p className="font-bold text-sm">{alert.referencia} - {alert.talla}</p>
+                    <p className="text-xs text-gray-600">{alert.descripcion}</p>
+                    <p className="text-xs">
+                      🏪 Estudio: <span className="text-orange-600 font-bold">{alert.stock_estudio}</span> | 
+                      📦 Bodega: <span className="text-blue-600 font-bold">{alert.stock_bodega}</span>
+                    </p>
+                  </div>
+                  <Button
+                    size="sm"
+                    onClick={() => {
+                      const product = products.find(p => p.id === alert.id);
+                      if (product) openTransferDialog(product);
+                    }}
+                    className="bg-orange-500 hover:bg-orange-600 text-white rounded-none"
+                  >
+                    <ArrowRightLeft className="w-4 h-4" />
+                  </Button>
+                </div>
+              ))}
+            </div>
+          </div>
+        )}
       </div>
+
+      {/* Diálogo de Transferencia */}
+      <Dialog open={showTransferDialog} onOpenChange={setShowTransferDialog}>
+        <DialogContent className="border-4 border-black rounded-none">
+          <DialogHeader>
+            <DialogTitle className="flex items-center gap-2">
+              <ArrowRightLeft className="w-5 h-5" />
+              Transferir Stock
+            </DialogTitle>
+          </DialogHeader>
+          
+          {transferProduct && (
+            <div className="space-y-4">
+              <div className="bg-gray-100 p-3 border-2 border-black">
+                <p className="font-bold">{transferProduct.referencia}</p>
+                <p className="text-sm">{transferProduct.descripcion} - Talla {transferProduct.talla}</p>
+                <div className="flex gap-4 mt-2">
+                  <span className="text-sm">🏪 Estudio: <strong className="text-green-600">{transferProduct.stock_estudio || 0}</strong></span>
+                  <span className="text-sm">📦 Bodega: <strong className="text-blue-600">{transferProduct.stock_bodega || 0}</strong></span>
+                </div>
+              </div>
+
+              <div className="grid grid-cols-2 gap-4">
+                <div>
+                  <Label className="font-bold">Origen</Label>
+                  <select
+                    value={transferData.origen}
+                    onChange={(e) => setTransferData({
+                      ...transferData,
+                      origen: e.target.value,
+                      destino: e.target.value === 'bodega' ? 'estudio' : 'bodega'
+                    })}
+                    className="w-full p-2 border-2 border-black rounded-none"
+                  >
+                    <option value="bodega">📦 Bodega</option>
+                    <option value="estudio">🏪 Estudio</option>
+                  </select>
+                </div>
+                <div>
+                  <Label className="font-bold">Destino</Label>
+                  <select
+                    value={transferData.destino}
+                    onChange={(e) => setTransferData({
+                      ...transferData,
+                      destino: e.target.value,
+                      origen: e.target.value === 'bodega' ? 'estudio' : 'bodega'
+                    })}
+                    className="w-full p-2 border-2 border-black rounded-none"
+                  >
+                    <option value="estudio">🏪 Estudio</option>
+                    <option value="bodega">📦 Bodega</option>
+                  </select>
+                </div>
+              </div>
+
+              <div>
+                <Label className="font-bold">Cantidad a Transferir</Label>
+                <Input
+                  type="number"
+                  min="1"
+                  max={transferData.origen === 'bodega' 
+                    ? (transferProduct.stock_bodega || 0) 
+                    : (transferProduct.stock_estudio || 0)}
+                  value={transferData.cantidad}
+                  onChange={(e) => setTransferData({...transferData, cantidad: parseInt(e.target.value) || 1})}
+                  className="border-2 border-black rounded-none"
+                />
+                <p className="text-xs text-gray-500 mt-1">
+                  Disponible en {transferData.origen === 'bodega' ? 'Bodega' : 'Estudio'}: {' '}
+                  {transferData.origen === 'bodega' 
+                    ? (transferProduct.stock_bodega || 0) 
+                    : (transferProduct.stock_estudio || 0)} unidades
+                </p>
+              </div>
+
+              <div className="flex gap-2">
+                <Button
+                  onClick={handleTransfer}
+                  className="flex-1 bg-blue-600 hover:bg-blue-700 text-white rounded-none h-12"
+                >
+                  <ArrowRightLeft className="w-4 h-4 mr-2" />
+                  Confirmar Transferencia
+                </Button>
+                <Button
+                  variant="outline"
+                  onClick={() => setShowTransferDialog(false)}
+                  className="border-2 border-black rounded-none h-12"
+                >
+                  Cancelar
+                </Button>
+              </div>
+            </div>
+          )}
+        </DialogContent>
+      </Dialog>
     </div>
   );
 }
