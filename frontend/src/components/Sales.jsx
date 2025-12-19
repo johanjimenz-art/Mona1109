@@ -219,27 +219,43 @@ export default function Sales() {
       doc.setFont('helvetica', 'normal');
       doc.setFontSize(9);
       
-      if (sale.descuento_total > 0) {
-        doc.text('Subtotal:', margin, yPosition);
-        doc.text(`$${(sale.subtotal || sale.total).toLocaleString()}`, pageWidth - margin, yPosition, { align: 'right' });
+      // Calcular subtotal de productos (sin domicilio)
+      const subtotalProductos = (sale.subtotal || sale.total) - (sale.descuento_total || 0);
+      const costoDomicilio = sale.costo_domicilio || 0;
+      
+      // Siempre mostrar subtotal de productos si hay domicilio o descuento
+      if (sale.descuento_total > 0 || costoDomicilio > 0) {
+        doc.text('Subtotal productos:', margin, yPosition);
+        doc.text(`$${subtotalProductos.toLocaleString()}`, pageWidth - margin, yPosition, { align: 'right' });
         yPosition += 5;
-        
+      }
+      
+      if (sale.descuento_total > 0) {
         doc.setTextColor(0, 150, 0);
-        doc.text('Descuento total:', margin, yPosition);
+        doc.text('Descuento aplicado:', margin, yPosition);
         doc.text(`-$${sale.descuento_total.toLocaleString()}`, pageWidth - margin, yPosition, { align: 'right' });
         doc.setTextColor(0, 0, 0);
-        yPosition += 6;
+        yPosition += 5;
       }
       
-      // Costo de domicilio si existe
-      if (sale.costo_domicilio > 0) {
+      // Costo de domicilio discriminado
+      if (costoDomicilio > 0) {
         doc.setTextColor(0, 100, 200);
         doc.text('Domicilio:', margin, yPosition);
-        doc.text(`+$${sale.costo_domicilio.toLocaleString()}`, pageWidth - margin, yPosition, { align: 'right' });
+        doc.text(`+$${costoDomicilio.toLocaleString()}`, pageWidth - margin, yPosition, { align: 'right' });
         doc.setTextColor(0, 0, 0);
-        yPosition += 6;
+        yPosition += 5;
       }
       
+      // Línea separadora antes del total
+      if (sale.descuento_total > 0 || costoDomicilio > 0) {
+        doc.setDrawColor(0);
+        doc.setLineWidth(0.2);
+        doc.line(margin + 30, yPosition, pageWidth - margin, yPosition);
+        yPosition += 3;
+      }
+      
+      // TOTAL FINAL (productos + domicilio)
       doc.setFont('helvetica', 'bold');
       doc.setFontSize(11);
       doc.text('TOTAL:', margin, yPosition);
