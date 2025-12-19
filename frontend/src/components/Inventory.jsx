@@ -590,8 +590,23 @@ export default function Inventory() {
                                           <span className="text-lg font-bold text-blue-600">{stockBodega}</span>
                                         </div>
                                       </div>
+                                      {/* Botón de transferencia - visible para todos */}
+                                      {(stockBodega > 0 || stockEstudio > 0) && (
+                                        <Button
+                                          onClick={(e) => {
+                                            e.stopPropagation();
+                                            openTransferDialog(product);
+                                          }}
+                                          size="sm"
+                                          className={`w-full mb-2 rounded-none ${alertaEstudio ? 'bg-orange-500 hover:bg-orange-600' : 'bg-blue-600 hover:bg-blue-700'} text-white`}
+                                        >
+                                          <ArrowRightLeft className="w-3 h-3 mr-1" />
+                                          Transferir Stock
+                                        </Button>
+                                      )}
+                                      
                                       {canModify && product && (
-                                        <div className="flex gap-2 mt-3">
+                                        <div className="flex gap-2">
                                           <Button
                                             data-testid={`edit-size-btn-${index}-${tallaIndex}`}
                                             onClick={(e) => {
