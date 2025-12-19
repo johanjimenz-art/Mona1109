@@ -660,6 +660,94 @@ async def delete_product(product_id: str, current_user: dict = Depends(get_admin
     
     return {"message": "Product deleted successfully"}
 
+
+@api_router.post("/products/transfer")
+async def transfer_stock(transfer: StockTransfer, current_user: dict = Depends(get_current_user)):
+    """Transferir stock entre ubicaciones (Estudio <-> Bodega)"""
+    product = await db.products.find_one({"id": transfer.product_id})
+    
+    if not product:
+        raise HTTPException(status_code=404, detail="Producto no encontrado")
+    
+    # Obtener stock actual de cada ubicación
+    stock_estudio = product.get('stock_estudio', 0)
+    stock_bodega = product.get('stock_bodega', 0)
+    
+    # Validar origen y destino
+    if transfer.origen not in ['estudio', 'bodega'] or transfer.destino not in ['estudio', 'bodega']:
+        raise HTTPException(status_code=400, detail="Ubicación inválida. Use 'estudio' o 'bodega'")
+    
+    if transfer.origen == transfer.destino:
+        raise HTTPException(status_code=400, detail="Origen y destino deben ser diferentes")
+    
+    # Validar stock disponible en origen
+    if transfer.origen == 'estudio':
+        if stock_estudio < transfer.cantidad:
+            raise HTTPException(status_code=400, detail=f"Stock insuficiente en Estudio. Disponible: {stock_estudio}")
+        new_stock_estudio = stock_estudio - transfer.cantidad
+        new_stock_bodega = stock_bodega + transfer.cantidad
+    else:  # origen == 'bodega'
+        if stock_bodega < transfer.cantidad:
+            raise HTTPException(status_code=400, detail=f"Stock insuficiente en Bodega. Disponible: {stock_bodega}")
+        new_stock_bodega = stock_bodega - transfer.cantidad
+        new_stock_estudio = stock_estudio + transfer.cantidad
+    
+    # Actualizar stock
+    await db.products.update_one(
+        {"id": transfer.product_id},
+        {"$set": {
+            "stock_estudio": new_stock_estudio,
+            "stock_bodega": new_stock_bodega
+        }}
+    )
+    
+    origen_label = "Estudio ON-OF" if transfer.origen == 'estudio' else "Bodega"
+    destino_label = "Estudio ON-OF" if transfer.destino == 'estudio' else "Bodega"
+    
+    return {
+        "message": f"Transferencia exitosa: {transfer.cantidad} unidades de {origen_label} a {destino_label}",
+        "stock_estudio": new_stock_estudio,
+        "stock_bodega": new_stock_bodega
+    }
+
+
+@api_router.get("/products/stock-alerts")
+async def get_stock_alerts(current_user: dict = Depends(get_current_user)):
+    """Obtener productos con stock bajo en Estudio (≤ 2 unidades)"""
+    # Buscar productos aprobados con stock_estudio <= 2
+    products = await db.products.find(
+        {
+            "aprobado": True,
+            "$or": [
+                {"stock_estudio": {"$lte": 2}},
+                {"stock_estudio": {"$exists": False}}  # Productos sin el campo
+            ]
+        },
+        {"_id": 0}
+    ).to_list(1000)
+    
+    # Filtrar solo los que tienen stock en bodega disponible para transferir
+    alerts = []
+    for p in products:
+        stock_estudio = p.get('stock_estudio', 0)
+        stock_bodega = p.get('stock_bodega', 0)
+        
+        # Solo alertar si hay stock en bodega para transferir
+        if stock_bodega > 0 and stock_estudio <= 2:
+            alerts.append({
+                "id": p['id'],
+                "referencia": p['referencia'],
+                "descripcion": p['descripcion'],
+                "talla": p['talla'],
+                "color": p['color'],
+                "stock_estudio": stock_estudio,
+                "stock_bodega": stock_bodega,
+                "imagen_url": p.get('imagen_url')
+            })
+    
+    return alerts
+
+
 # ============ Sales Routes ============
 
 async def create_notification(tipo: str, mensaje: str, sale_id: str):
