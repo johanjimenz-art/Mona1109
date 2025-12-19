@@ -163,6 +163,7 @@ class Sale(BaseModel):
     items: List[SaleItem]
     subtotal: float = 0.0  # Subtotal antes de descuentos
     descuento_total: float = 0.0  # Total de descuentos aplicados
+    costo_domicilio: float = 0.0  # Costo del domicilio/envío
     total: float
     estado_despacho: str = "pendiente"  # pendiente, en_camino, despachado
     observaciones: Optional[str] = None  # Campo para observaciones
