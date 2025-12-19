@@ -231,6 +231,15 @@ export default function Sales() {
         yPosition += 6;
       }
       
+      // Costo de domicilio si existe
+      if (sale.costo_domicilio > 0) {
+        doc.setTextColor(0, 100, 200);
+        doc.text('Domicilio:', margin, yPosition);
+        doc.text(`+$${sale.costo_domicilio.toLocaleString()}`, pageWidth - margin, yPosition, { align: 'right' });
+        doc.setTextColor(0, 0, 0);
+        yPosition += 6;
+      }
+      
       doc.setFont('helvetica', 'bold');
       doc.setFontSize(11);
       doc.text('TOTAL:', margin, yPosition);
