@@ -782,7 +782,7 @@ async def create_sale(sale_data: SaleCreate, current_user: dict = Depends(get_cu
     # Generate invoice number
     numero_factura = await generate_invoice_number()
     
-    # Update inventory for each item
+    # Update inventory for each item - descontar del ESTUDIO primero
     for item in sale_data.items:
         product = await db.products.find_one({"id": item.product_id})
         
@@ -792,17 +792,34 @@ async def create_sale(sale_data: SaleCreate, current_user: dict = Depends(get_cu
         if not product.get('aprobado', False):
             raise HTTPException(status_code=400, detail=f"Product {item.referencia} is not approved")
         
+        # Verificar stock total
         if product['cantidad_stock'] < item.cantidad:
             raise HTTPException(
                 status_code=400, 
                 detail=f"Insufficient stock for {item.referencia}. Available: {product['cantidad_stock']}, Requested: {item.cantidad}"
             )
         
-        # Reduce stock
-        new_stock = product['cantidad_stock'] - item.cantidad
+        # Obtener stock por ubicación
+        stock_estudio = product.get('stock_estudio', product['cantidad_stock'])
+        stock_bodega = product.get('stock_bodega', 0)
+        
+        # Verificar stock en Estudio
+        if stock_estudio < item.cantidad:
+            raise HTTPException(
+                status_code=400, 
+                detail=f"Stock insuficiente en Estudio para {item.referencia}. Disponible: {stock_estudio}, Solicitado: {item.cantidad}. Transfiera desde Bodega."
+            )
+        
+        # Reduce stock del Estudio
+        new_stock_estudio = stock_estudio - item.cantidad
+        new_stock_total = new_stock_estudio + stock_bodega
+        
         await db.products.update_one(
             {"id": item.product_id},
-            {"$set": {"cantidad_stock": new_stock}}
+            {"$set": {
+                "cantidad_stock": new_stock_total,
+                "stock_estudio": new_stock_estudio
+            }}
         )
     
     # Create sale
