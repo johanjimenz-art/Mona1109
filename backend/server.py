@@ -840,6 +840,7 @@ async def create_sale(sale_data: SaleCreate, current_user: dict = Depends(get_cu
         items=[item.model_dump() for item in sale_data.items],
         subtotal=sale_data.subtotal if hasattr(sale_data, 'subtotal') and sale_data.subtotal else total,
         descuento_total=sale_data.descuento_total if hasattr(sale_data, 'descuento_total') and sale_data.descuento_total else 0,
+        costo_domicilio=sale_data.costo_domicilio if hasattr(sale_data, 'costo_domicilio') else 0,
         total=total,
         observaciones=sale_data.observaciones if hasattr(sale_data, 'observaciones') else None,
         aplicado_por=sale_data.aplicado_por if hasattr(sale_data, 'aplicado_por') else None,
