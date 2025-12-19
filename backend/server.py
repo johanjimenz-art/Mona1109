@@ -585,16 +585,22 @@ async def get_products_grouped(current_user: dict = Depends(get_current_user)):
                 "costo_fabricacion": product.get('costo_fabricacion'),
                 "imagen_url": product.get('imagen_url'),
                 "tallas": [],
-                "stock_total": 0
+                "stock_total": 0,
+                "stock_estudio": 0,
+                "stock_bodega": 0
             }
         
         grouped[ref]["tallas"].append({
             "id": product['id'],
             "talla": product['talla'],
             "cantidad_stock": product['cantidad_stock'],
+            "stock_estudio": product.get('stock_estudio', 0),
+            "stock_bodega": product.get('stock_bodega', 0),
             "aprobado": product.get('aprobado', False)
         })
         grouped[ref]["stock_total"] += product['cantidad_stock']
+        grouped[ref]["stock_estudio"] += product.get('stock_estudio', 0)
+        grouped[ref]["stock_bodega"] += product.get('stock_bodega', 0)
     
     return list(grouped.values())
 
