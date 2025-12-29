@@ -1689,6 +1689,107 @@ async def get_overdue_payment_alerts(current_user: dict = Depends(get_current_us
     return credits
 
 
+# ============ Cambios Endpoints ============
+
+class CambioCreate(BaseModel):
+    sale_id: str
+    numero_factura: str
+    cliente: str
+    documento_cliente: str
+    producto_original: dict
+    producto_nuevo: dict
+    diferencia_precio: float
+    con_etiqueta: bool
+    buen_estado: bool
+    observaciones: Optional[str] = None
+    realizado_por: str
+
+@api_router.post("/cambios")
+async def create_cambio(
+    cambio_data: CambioCreate,
+    current_user: dict = Depends(get_current_user)
+):
+    """Procesar un cambio de producto"""
+    try:
+        # Crear registro del cambio
+        cambio = {
+            "id": str(uuid.uuid4()),
+            "sale_id": cambio_data.sale_id,
+            "numero_factura": cambio_data.numero_factura,
+            "cliente": cambio_data.cliente,
+            "documento_cliente": cambio_data.documento_cliente,
+            "producto_original": cambio_data.producto_original,
+            "producto_nuevo": cambio_data.producto_nuevo,
+            "diferencia_precio": cambio_data.diferencia_precio,
+            "con_etiqueta": cambio_data.con_etiqueta,
+            "buen_estado": cambio_data.buen_estado,
+            "observaciones": cambio_data.observaciones,
+            "realizado_por": cambio_data.realizado_por,
+            "created_at": now_colombia().isoformat(),
+            "created_by": current_user["username"]
+        }
+        
+        await db.cambios.insert_one(cambio)
+        
+        # Actualizar inventario: devolver producto original y descontar nuevo
+        # Producto original vuelve al inventario (al Estudio)
+        original_product_id = cambio_data.producto_original.get("product_id")
+        if original_product_id:
+            # Buscar producto por ID
+            await db.products.update_one(
+                {"id": original_product_id},
+                {"$inc": {"cantidad_stock": 1, "stock_estudio": 1}}
+            )
+        else:
+            # Si no tiene product_id, buscar por referencia y talla
+            await db.products.update_one(
+                {
+                    "referencia": cambio_data.producto_original.get("referencia"),
+                    "talla": cambio_data.producto_original.get("talla")
+                },
+                {"$inc": {"cantidad_stock": 1, "stock_estudio": 1}}
+            )
+        
+        # Producto nuevo sale del inventario (del Estudio)
+        producto_nuevo = await db.products.find_one({"id": cambio_data.producto_nuevo["product_id"]})
+        if not producto_nuevo:
+            raise HTTPException(status_code=404, detail="Producto nuevo no encontrado")
+        
+        stock_estudio = producto_nuevo.get("stock_estudio", 0)
+        if stock_estudio < 1:
+            raise HTTPException(status_code=400, detail="Producto nuevo sin stock en Estudio. Transfiera desde Bodega.")
+        
+        await db.products.update_one(
+            {"id": cambio_data.producto_nuevo["product_id"]},
+            {"$inc": {"cantidad_stock": -1, "stock_estudio": -1}}
+        )
+        
+        # Crear notificación si hay diferencia de precio
+        if cambio_data.diferencia_precio != 0:
+            notification = {
+                "id": str(uuid.uuid4()),
+                "tipo": "cambio_diferencia",
+                "titulo": f"Cambio con diferencia de precio",
+                "mensaje": f"Cliente {cambio_data.cliente} - Diferencia: ${abs(cambio_data.diferencia_precio):,.0f}",
+                "leida": False,
+                "created_at": now_colombia().isoformat()
+            }
+            await db.notifications.insert_one(notification)
+        
+        return {"message": "Cambio procesado exitosamente", "cambio_id": cambio["id"]}
+        
+    except HTTPException:
+        raise
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=str(e))
+
+@api_router.get("/cambios")
+async def get_cambios(current_user: dict = Depends(get_current_user)):
+    """Obtener historial de cambios"""
+    cambios = await db.cambios.find({}, {"_id": 0}).to_list(1000)
+    return cambios
+
+
 # Include the router in the main app
 app.include_router(api_router)
 
