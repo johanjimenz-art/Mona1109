@@ -146,11 +146,18 @@ export default function Inventory() {
     const token = localStorage.getItem('token');
 
     try {
+      // Calcular stock total como suma de estudio + bodega
+      const stockEstudio = parseInt(formData.stock_estudio) || 0;
+      const stockBodega = parseInt(formData.stock_bodega) || 0;
+      const stockTotal = stockEstudio + stockBodega;
+      
       const data = {
         ...formData,
         costo_fabricacion: formData.costo_fabricacion ? parseFloat(formData.costo_fabricacion) : null,
         precio_venta: parseFloat(formData.precio_venta),
-        cantidad_stock: parseInt(formData.cantidad_stock)
+        cantidad_stock: stockTotal,
+        stock_estudio: stockEstudio,
+        stock_bodega: stockBodega
       };
 
       let productId;
@@ -183,10 +190,13 @@ export default function Inventory() {
         costo_fabricacion: '',
         talla: '',
         precio_venta: '',
-        cantidad_stock: ''
+        cantidad_stock: '',
+        stock_estudio: '',
+        stock_bodega: ''
       });
       fetchProducts();
       fetchGroupedProducts();
+      fetchStockAlerts();
     } catch (error) {
       toast.error(error.response?.data?.detail || 'Error al guardar producto');
     }
