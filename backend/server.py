@@ -487,8 +487,14 @@ async def create_product(
     product_data: ProductCreate, 
     current_user: dict = Depends(get_admin_user)  # SOLO ADMIN
 ):
+    # Si no se especificó stock_estudio, asignar todo el stock al Estudio por defecto
+    data = product_data.model_dump()
+    if data.get('stock_estudio', 0) == 0 and data.get('stock_bodega', 0) == 0:
+        data['stock_estudio'] = data['cantidad_stock']
+        data['stock_bodega'] = 0
+    
     product = Product(
-        **product_data.model_dump(),
+        **data,
         created_by=current_user["username"],
         aprobado=True  # Admin products are auto-approved
     )
