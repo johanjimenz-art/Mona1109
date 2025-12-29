@@ -140,9 +140,9 @@ class StockTransfer(BaseModel):
     destino: str  # 'estudio' o 'bodega'
 
 class SaleItem(BaseModel):
-    product_id: str
+    product_id: Optional[str] = None  # Opcional para ventas importadas
     referencia: str
-    descripcion: str
+    descripcion: Optional[str] = None  # Opcional para ventas importadas
     talla: str
     color: str
     precio_venta: float
