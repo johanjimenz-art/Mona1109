@@ -325,7 +325,9 @@ export default function Inventory() {
                 costo_fabricacion: '',
                 talla: '',
                 precio_venta: '',
-                cantidad_stock: ''
+                cantidad_stock: '',
+                stock_estudio: '',
+                stock_bodega: ''
               });
             }
           }}>
