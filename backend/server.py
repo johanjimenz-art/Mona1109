@@ -645,6 +645,30 @@ async def update_product(product_id: str, product_data: ProductUpdate, current_u
     if not update_dict:
         raise HTTPException(status_code=400, detail="No fields to update")
     
+    # Si se actualiza cantidad_stock pero no se especifican ubicaciones,
+    # calcular la diferencia y agregarla al Estudio
+    if 'cantidad_stock' in update_dict:
+        current_product = await db.products.find_one({"id": product_id}, {"_id": 0})
+        if current_product:
+            old_total = current_product.get('cantidad_stock', 0)
+            new_total = update_dict['cantidad_stock']
+            old_estudio = current_product.get('stock_estudio', 0)
+            old_bodega = current_product.get('stock_bodega', 0)
+            
+            # Si no se están actualizando las ubicaciones específicamente
+            if 'stock_estudio' not in update_dict and 'stock_bodega' not in update_dict:
+                diferencia = new_total - old_total
+                # Agregar la diferencia al Estudio (puede ser positiva o negativa)
+                new_estudio = max(0, old_estudio + diferencia)
+                # Ajustar bodega si es necesario
+                if new_estudio + old_bodega != new_total:
+                    new_bodega = max(0, new_total - new_estudio)
+                else:
+                    new_bodega = old_bodega
+                
+                update_dict['stock_estudio'] = new_estudio
+                update_dict['stock_bodega'] = new_bodega
+    
     result = await db.products.update_one({"id": product_id}, {"$set": update_dict})
     
     if result.matched_count == 0:
