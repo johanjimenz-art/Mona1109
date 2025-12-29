@@ -423,18 +423,45 @@ export default function Inventory() {
                       className="rounded-none border-2 border-black"
                     />
                   </div>
-                  <div>
-                    <Label htmlFor="cantidad_stock" className="text-black font-medium mb-2 block">Cantidad Stock</Label>
-                    <Input
-                      id="cantidad_stock"
-                      data-testid="cantidad-input"
-                      name="cantidad_stock"
-                      type="number"
-                      value={formData.cantidad_stock}
-                      onChange={handleChange}
-                      required
-                      className="rounded-none border-2 border-black"
-                    />
+                  <div className="col-span-2">
+                    <Label className="text-black font-medium mb-2 block">📦 Stock por Ubicación</Label>
+                    <div className="grid grid-cols-2 gap-4">
+                      <div className="p-3 border-2 border-green-500 bg-green-50">
+                        <Label htmlFor="stock_estudio" className="text-green-700 font-medium mb-1 block flex items-center gap-1">
+                          <Store className="w-4 h-4" /> Estudio ON-OF
+                        </Label>
+                        <Input
+                          id="stock_estudio"
+                          data-testid="stock-estudio-input"
+                          name="stock_estudio"
+                          type="number"
+                          min="0"
+                          value={formData.stock_estudio}
+                          onChange={handleChange}
+                          placeholder="0"
+                          className="rounded-none border-2 border-green-500"
+                        />
+                      </div>
+                      <div className="p-3 border-2 border-blue-500 bg-blue-50">
+                        <Label htmlFor="stock_bodega" className="text-blue-700 font-medium mb-1 block flex items-center gap-1">
+                          <Warehouse className="w-4 h-4" /> Bodega
+                        </Label>
+                        <Input
+                          id="stock_bodega"
+                          data-testid="stock-bodega-input"
+                          name="stock_bodega"
+                          type="number"
+                          min="0"
+                          value={formData.stock_bodega}
+                          onChange={handleChange}
+                          placeholder="0"
+                          className="rounded-none border-2 border-blue-500"
+                        />
+                      </div>
+                    </div>
+                    <p className="text-sm text-gray-500 mt-2">
+                      Stock Total: <strong>{(parseInt(formData.stock_estudio) || 0) + (parseInt(formData.stock_bodega) || 0)}</strong> unidades
+                    </p>
                   </div>
                 </div>
 
