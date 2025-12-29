@@ -1743,20 +1743,36 @@ async def create_cambio(
         await db.cambios.insert_one(cambio)
         
         # Actualizar inventario: devolver producto original y descontar nuevo
-        # Producto original vuelve al inventario
-        await db.products.update_one(
-            {"id": cambio_data.producto_original["product_id"]},
-            {"$inc": {"cantidad_stock": 1}}
-        )
+        # Producto original vuelve al inventario (al Estudio)
+        original_product_id = cambio_data.producto_original.get("product_id")
+        if original_product_id:
+            # Buscar producto por ID
+            await db.products.update_one(
+                {"id": original_product_id},
+                {"$inc": {"cantidad_stock": 1, "stock_estudio": 1}}
+            )
+        else:
+            # Si no tiene product_id, buscar por referencia y talla
+            await db.products.update_one(
+                {
+                    "referencia": cambio_data.producto_original.get("referencia"),
+                    "talla": cambio_data.producto_original.get("talla")
+                },
+                {"$inc": {"cantidad_stock": 1, "stock_estudio": 1}}
+            )
         
-        # Producto nuevo sale del inventario
+        # Producto nuevo sale del inventario (del Estudio)
         producto_nuevo = await db.products.find_one({"id": cambio_data.producto_nuevo["product_id"]})
-        if not producto_nuevo or producto_nuevo["cantidad_stock"] < 1:
-            raise HTTPException(status_code=400, detail="Producto nuevo sin stock")
+        if not producto_nuevo:
+            raise HTTPException(status_code=404, detail="Producto nuevo no encontrado")
+        
+        stock_estudio = producto_nuevo.get("stock_estudio", 0)
+        if stock_estudio < 1:
+            raise HTTPException(status_code=400, detail="Producto nuevo sin stock en Estudio. Transfiera desde Bodega.")
         
         await db.products.update_one(
             {"id": cambio_data.producto_nuevo["product_id"]},
-            {"$inc": {"cantidad_stock": -1}}
+            {"$inc": {"cantidad_stock": -1, "stock_estudio": -1}}
         )
         
         # Crear notificación si hay diferencia de precio
@@ -1773,6 +1789,8 @@ async def create_cambio(
         
         return {"message": "Cambio procesado exitosamente", "cambio_id": cambio["id"]}
         
+    except HTTPException:
+        raise
     except Exception as e:
         raise HTTPException(status_code=500, detail=str(e))
 
