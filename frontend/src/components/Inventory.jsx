@@ -251,7 +251,9 @@ export default function Inventory() {
       costo_fabricacion: product.costo_fabricacion?.toString() || '',
       talla: product.talla,
       precio_venta: product.precio_venta.toString(),
-      cantidad_stock: product.cantidad_stock.toString()
+      cantidad_stock: product.cantidad_stock.toString(),
+      stock_estudio: (product.stock_estudio || 0).toString(),
+      stock_bodega: (product.stock_bodega || 0).toString()
     });
     setIsDialogOpen(true);
   };
