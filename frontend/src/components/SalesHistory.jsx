@@ -289,21 +289,27 @@ export default function SalesHistory() {
       doc.setFont('helvetica', 'normal');
       doc.setFontSize(9);
       
-      // Calcular subtotal de productos (sin domicilio)
-      const subtotalProductos = (sale.subtotal || sale.total) - (sale.descuento_total || 0);
+      // Calcular valores
       const costoDomicilio = sale.costo_domicilio || 0;
+      const descuentoTotal = sale.descuento_total || 0;
+      
+      // Calcular subtotal de productos (total - domicilio)
+      const subtotalProductos = (sale.total || 0) - costoDomicilio;
+      
+      // Calcular el total final correcto
+      const totalFinal = subtotalProductos + costoDomicilio;
       
       // Siempre mostrar subtotal de productos si hay domicilio o descuento
-      if (sale.descuento_total > 0 || costoDomicilio > 0) {
+      if (descuentoTotal > 0 || costoDomicilio > 0) {
         doc.text('Subtotal productos:', margin, yPosition);
         doc.text(`$${subtotalProductos.toLocaleString()}`, pageWidth - margin, yPosition, { align: 'right' });
         yPosition += 5;
       }
       
-      if (sale.descuento_total > 0) {
+      if (descuentoTotal > 0) {
         doc.setTextColor(0, 150, 0);
         doc.text('Descuento aplicado:', margin, yPosition);
-        doc.text(`-$${sale.descuento_total.toLocaleString()}`, pageWidth - margin, yPosition, { align: 'right' });
+        doc.text(`-$${descuentoTotal.toLocaleString()}`, pageWidth - margin, yPosition, { align: 'right' });
         doc.setTextColor(0, 0, 0);
         yPosition += 5;
       }
@@ -318,7 +324,7 @@ export default function SalesHistory() {
       }
       
       // Línea separadora antes del total
-      if (sale.descuento_total > 0 || costoDomicilio > 0) {
+      if (descuentoTotal > 0 || costoDomicilio > 0) {
         doc.setDrawColor(0);
         doc.setLineWidth(0.2);
         doc.line(margin + 30, yPosition, pageWidth - margin, yPosition);
@@ -329,7 +335,7 @@ export default function SalesHistory() {
       doc.setFont('helvetica', 'bold');
       doc.setFontSize(11);
       doc.text('TOTAL:', margin, yPosition);
-      doc.text(`$${sale.total.toLocaleString()}`, pageWidth - margin, yPosition, { align: 'right' });
+      doc.text(`$${totalFinal.toLocaleString()}`, pageWidth - margin, yPosition, { align: 'right' });
       yPosition += 8;
 
       // Credit information if exists
