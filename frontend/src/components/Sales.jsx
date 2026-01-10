@@ -635,6 +635,7 @@ export default function Sales() {
           subtotal: subtotalBeforeDiscount,
           descuento_total: totalDiscount,
           costo_domicilio: parseFloat(costoDomicilio) || 0,
+          costo_estampado: parseFloat(costoEstampado) || 0,
           total: total,
           aplicado_por: totalDiscount > 0 ? username : null,
           observaciones: observaciones || null
