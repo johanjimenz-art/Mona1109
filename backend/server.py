@@ -164,6 +164,7 @@ class Sale(BaseModel):
     subtotal: float = 0.0  # Subtotal antes de descuentos
     descuento_total: float = 0.0  # Total de descuentos aplicados
     costo_domicilio: float = 0.0  # Costo del domicilio/envío
+    costo_estampado: float = 0.0  # Costo del estampado
     total: float
     estado_despacho: str = "pendiente"  # pendiente, en_camino, despachado
     observaciones: Optional[str] = None  # Campo para observaciones
@@ -182,6 +183,7 @@ class SaleCreate(BaseModel):
     subtotal: Optional[float] = None
     descuento_total: Optional[float] = None
     costo_domicilio: Optional[float] = 0.0
+    costo_estampado: Optional[float] = 0.0
     aplicado_por: Optional[str] = None
 
 class SaleUpdateStatus(BaseModel):
