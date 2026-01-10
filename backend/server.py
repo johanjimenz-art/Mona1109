@@ -819,9 +819,10 @@ async def generate_invoice_number():
 async def create_sale(sale_data: SaleCreate, current_user: dict = Depends(get_current_user)):
     # Calcular total de productos
     subtotal_productos = sum(item.subtotal for item in sale_data.items)
-    # Agregar costo de domicilio al total
+    # Agregar costo de domicilio y estampado al total
     costo_domicilio = sale_data.costo_domicilio if hasattr(sale_data, 'costo_domicilio') and sale_data.costo_domicilio else 0
-    total = subtotal_productos + costo_domicilio
+    costo_estampado = sale_data.costo_estampado if hasattr(sale_data, 'costo_estampado') and sale_data.costo_estampado else 0
+    total = subtotal_productos + costo_domicilio + costo_estampado
     
     # Generate invoice number
     numero_factura = await generate_invoice_number()
