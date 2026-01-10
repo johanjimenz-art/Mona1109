@@ -576,7 +576,7 @@ export default function Sales() {
 
   const calculateTotal = () => {
     const subtotal = cart.reduce((sum, item) => sum + item.subtotal, 0);
-    return subtotal + (parseFloat(costoDomicilio) || 0);
+    return subtotal + (parseFloat(costoDomicilio) || 0) + (parseFloat(costoEstampado) || 0);
   };
 
 
