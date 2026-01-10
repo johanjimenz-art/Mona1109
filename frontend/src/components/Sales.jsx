@@ -1065,6 +1065,31 @@ export default function Sales() {
                     <span className="text-blue-600">+${parseFloat(costoDomicilio).toLocaleString()}</span>
                   </div>
                 )}
+
+                {/* Costo de Estampado */}
+                <div className="flex justify-between items-center gap-4 mb-3 py-2 border-t border-gray-300">
+                  <div className="flex items-center gap-2">
+                    <span className="text-sm font-medium">🎨 Estampado:</span>
+                  </div>
+                  <div className="flex items-center gap-2">
+                    <span className="text-sm">$</span>
+                    <Input
+                      type="number"
+                      min="0"
+                      step="100"
+                      value={costoEstampado}
+                      onChange={(e) => setCostoEstampado(e.target.value)}
+                      className="w-24 h-8 rounded-none border-2 border-purple-600 text-right"
+                      placeholder="0"
+                    />
+                  </div>
+                </div>
+                {parseFloat(costoEstampado) > 0 && (
+                  <div className="flex justify-between items-center text-sm mb-2">
+                    <span className="text-purple-600">Costo Estampado:</span>
+                    <span className="text-purple-600">+${parseFloat(costoEstampado).toLocaleString()}</span>
+                  </div>
+                )}
                 
                 <div className="flex justify-between items-center border-t-2 border-black pt-2">
                   <span className="text-xl font-bold">Total:</span>
