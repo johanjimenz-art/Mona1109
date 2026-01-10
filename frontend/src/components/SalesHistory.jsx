@@ -291,16 +291,17 @@ export default function SalesHistory() {
       
       // Calcular valores
       const costoDomicilio = sale.costo_domicilio || 0;
+      const costoEstampado = sale.costo_estampado || 0;
       const descuentoTotal = sale.descuento_total || 0;
       
-      // Calcular subtotal de productos (total - domicilio)
-      const subtotalProductos = (sale.total || 0) - costoDomicilio;
+      // Calcular subtotal de productos (total - domicilio - estampado)
+      const subtotalProductos = (sale.total || 0) - costoDomicilio - costoEstampado;
       
       // Calcular el total final correcto
-      const totalFinal = subtotalProductos + costoDomicilio;
+      const totalFinal = subtotalProductos + costoDomicilio + costoEstampado;
       
-      // Siempre mostrar subtotal de productos si hay domicilio o descuento
-      if (descuentoTotal > 0 || costoDomicilio > 0) {
+      // Siempre mostrar subtotal de productos si hay domicilio, estampado o descuento
+      if (descuentoTotal > 0 || costoDomicilio > 0 || costoEstampado > 0) {
         doc.text('Subtotal productos:', margin, yPosition);
         doc.text(`$${subtotalProductos.toLocaleString()}`, pageWidth - margin, yPosition, { align: 'right' });
         yPosition += 5;
@@ -323,15 +324,24 @@ export default function SalesHistory() {
         yPosition += 5;
       }
       
+      // Costo de estampado discriminado
+      if (costoEstampado > 0) {
+        doc.setTextColor(128, 0, 128); // Purple
+        doc.text('Estampado:', margin, yPosition);
+        doc.text(`+$${costoEstampado.toLocaleString()}`, pageWidth - margin, yPosition, { align: 'right' });
+        doc.setTextColor(0, 0, 0);
+        yPosition += 5;
+      }
+      
       // Línea separadora antes del total
-      if (descuentoTotal > 0 || costoDomicilio > 0) {
+      if (descuentoTotal > 0 || costoDomicilio > 0 || costoEstampado > 0) {
         doc.setDrawColor(0);
         doc.setLineWidth(0.2);
         doc.line(margin + 30, yPosition, pageWidth - margin, yPosition);
         yPosition += 3;
       }
       
-      // TOTAL FINAL (productos + domicilio)
+      // TOTAL FINAL (productos + domicilio + estampado)
       doc.setFont('helvetica', 'bold');
       doc.setFontSize(11);
       doc.text('TOTAL:', margin, yPosition);
