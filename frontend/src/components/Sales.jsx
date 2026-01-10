@@ -56,8 +56,9 @@ export default function Sales() {
     observaciones: ''
   });
   
-  // Costo de domicilio
+  // Costo de domicilio y estampado
   const [costoDomicilio, setCostoDomicilio] = useState(0);
+  const [costoEstampado, setCostoEstampado] = useState(0);
 
   // Get user permissions
   const permissions = JSON.parse(localStorage.getItem('permissions') || '{}');
