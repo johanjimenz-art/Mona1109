@@ -59,7 +59,7 @@
 
 ## 🚀 Pasos para Configurar
 
-1. **Abrir la aplicación:** https://credittrack-1.preview.emergentagent.com/
+1. **Abrir la aplicación:** https://pos-system-56.preview.emergentagent.com/
 2. **Crear usuario Admin:**
    - Usuario: SEBASTIAN MONA
    - Contraseña: (la que prefieras)

@@ -105,7 +105,7 @@ Aplicación completa de gestión de inventario y ventas para ON-OF con las sigui
 ## 🔑 CREDENCIALES Y ACCESO
 
 **URL de la aplicación:**
-https://credittrack-1.preview.emergentagent.com/
+https://pos-system-56.preview.emergentagent.com/
 
 **Credenciales Admin:**
 - Usuario: `SEBASTIAN MONA`
