@@ -73,80 +73,82 @@ function App() {
   }
 
   return (
-    <div className="App">
-      <BrowserRouter>
-        <Routes>
-          <Route path="/login" element={<Login setIsAuthenticated={setIsAuthenticated} />} />
-          <Route
-            path="/"
-            element={
-              <ProtectedRoute>
-                <Dashboard />
-              </ProtectedRoute>
-            }
-          />
-          <Route
-            path="/inventory"
-            element={
-              <ProtectedRoute>
-                <Inventory />
-              </ProtectedRoute>
-            }
-          />
-          <Route
-            path="/sales"
-            element={
-              <ProtectedRoute>
-                <Sales />
-              </ProtectedRoute>
-            }
-          />
-          <Route
-            path="/dispatch"
-            element={
-              <ProtectedRoute>
-                <Dispatch />
-              </ProtectedRoute>
-            }
-          />
-          <Route
-            path="/sales-history"
-            element={
-              <ProtectedRoute>
-                <SalesHistory />
-              </ProtectedRoute>
-            }
-          />
-          <Route
-            path="/users"
-            element={
-              <AdminRoute>
-                <UserManagement />
-              </AdminRoute>
-            }
-          />
+    <Fragment>
+      <Toaster />
+      <div className="App">
+        <BrowserRouter>
+          <Routes>
+            <Route path="/login" element={<Login setIsAuthenticated={setIsAuthenticated} />} />
+            <Route
+              path="/"
+              element={
+                <ProtectedRoute>
+                  <Dashboard />
+                </ProtectedRoute>
+              }
+            />
+            <Route
+              path="/inventory"
+              element={
+                <ProtectedRoute>
+                  <Inventory />
+                </ProtectedRoute>
+              }
+            />
+            <Route
+              path="/sales"
+              element={
+                <ProtectedRoute>
+                  <Sales />
+                </ProtectedRoute>
+              }
+            />
+            <Route
+              path="/dispatch"
+              element={
+                <ProtectedRoute>
+                  <Dispatch />
+                </ProtectedRoute>
+              }
+            />
+            <Route
+              path="/sales-history"
+              element={
+                <ProtectedRoute>
+                  <SalesHistory />
+                </ProtectedRoute>
+              }
+            />
+            <Route
+              path="/users"
+              element={
+                <AdminRoute>
+                  <UserManagement />
+                </AdminRoute>
+              }
+            />
 
-          <Route
-            path="/credits"
-            element={
-              <ProtectedRoute>
-                <Credits />
-              </ProtectedRoute>
-            }
-          />
-          <Route
-            path="/cambios"
-            element={
-              <ProtectedRoute>
-                <Cambios />
-              </ProtectedRoute>
-            }
-          />
+            <Route
+              path="/credits"
+              element={
+                <ProtectedRoute>
+                  <Credits />
+                </ProtectedRoute>
+              }
+            />
+            <Route
+              path="/cambios"
+              element={
+                <ProtectedRoute>
+                  <Cambios />
+                </ProtectedRoute>
+              }
+            />
 
-        </Routes>
-      </BrowserRouter>
-      <Toaster position="top-right" />
-    </div>
+          </Routes>
+        </BrowserRouter>
+      </div>
+    </Fragment>
   );
 }
 
