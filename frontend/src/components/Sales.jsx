@@ -478,11 +478,6 @@ export default function Sales() {
     );
   };
 
-  const getProductImage = (referencia) => {
-    const product = products.find(p => p.referencia === referencia && p.imagen_url);
-    return product?.imagen_url;
-  };
-
 
   const addToCart = async () => {
     if (!searchData.referencia || !searchData.talla) {
