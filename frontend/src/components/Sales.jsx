@@ -843,61 +843,40 @@ export default function Sales() {
               <div className="space-y-4">
                 <div>
                   <Label htmlFor="referencia" className="text-black font-medium mb-2 block">Referencia</Label>
-                  <Select 
-                    value={searchData.referencia} 
-                    onValueChange={(value) => setSearchData({ ...searchData, referencia: value })}
+                  <select
+                    id="referencia"
+                    data-testid="referencia-select"
+                    value={searchData.referencia}
+                    onChange={(e) => setSearchData({ ...searchData, referencia: e.target.value })}
+                    className="w-full h-10 px-3 border-2 border-black bg-white text-sm focus:outline-none focus:ring-2 focus:ring-black"
                   >
-                    <SelectTrigger className="rounded-none border-2 border-black h-10" data-testid="referencia-select">
-                      <SelectValue placeholder="Selecciona una referencia" />
-                    </SelectTrigger>
-                    <SelectContent className="max-h-60 border-2 border-black rounded-none">
-                      {uniqueReferencias.map((ref) => {
-                        const productInfo = products.find(p => p.referencia === ref);
-                        const imageUrl = getProductImage(ref);
-                        return (
-                          <SelectItem key={ref} value={ref} className="py-2">
-                            <div className="flex items-center gap-2">
-                              {imageUrl ? (
-                                <img 
-                                  src={`${BACKEND_URL}${imageUrl}`}
-                                  alt={ref}
-                                  className="w-8 h-8 object-cover border border-black"
-                                />
-                              ) : (
-                                <div className="w-8 h-8 border border-black flex items-center justify-center bg-gray-200">
-                                  <ImageIcon className="w-4 h-4 text-gray-400" />
-                                </div>
-                              )}
-                              <div className="text-sm">
-                                <p className="font-medium">{ref}</p>
-                                {productInfo && (
-                                  <p className="text-xs text-gray-600">{productInfo.descripcion}</p>
-                                )}
-                              </div>
-                            </div>
-                          </SelectItem>
-                        );
-                      })}
-                    </SelectContent>
-                  </Select>
+                    <option value="">Selecciona una referencia</option>
+                    {uniqueReferencias.map((ref) => {
+                      const productInfo = products.find(p => p.referencia === ref);
+                      return (
+                        <option key={ref} value={ref}>
+                          {ref} - {productInfo?.descripcion || ''}
+                        </option>
+                      );
+                    })}
+                  </select>
                 </div>
 
                 <div>
                   <Label htmlFor="talla" className="text-black font-medium mb-2 block">Talla</Label>
-                  <Select 
-                    value={searchData.talla} 
-                    onValueChange={(value) => setSearchData({ ...searchData, talla: value })}
+                  <select
+                    id="talla"
+                    data-testid="talla-select"
+                    value={searchData.talla}
+                    onChange={(e) => setSearchData({ ...searchData, talla: e.target.value })}
                     disabled={!searchData.referencia}
+                    className="w-full h-10 px-3 border-2 border-black bg-white text-sm focus:outline-none focus:ring-2 focus:ring-black disabled:bg-gray-100 disabled:cursor-not-allowed"
                   >
-                    <SelectTrigger className="rounded-none border-2 border-black h-10" data-testid="talla-select">
-                      <SelectValue placeholder="Selecciona talla" />
-                    </SelectTrigger>
-                    <SelectContent className="border-2 border-black rounded-none">
-                      {availableTallas.map((talla) => (
-                        <SelectItem key={talla} value={talla}>{talla}</SelectItem>
-                      ))}
-                    </SelectContent>
-                  </Select>
+                    <option value="">Selecciona talla</option>
+                    {availableTallas.map((talla) => (
+                      <option key={talla} value={talla}>{talla}</option>
+                    ))}
+                  </select>
                 </div>
 
                 <div>
