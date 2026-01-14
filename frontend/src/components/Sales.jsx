@@ -6,13 +6,6 @@ import { Input } from './ui/input';
 import { Label } from './ui/label';
 import { ArrowLeft, Plus, Trash2, ShoppingCart, Image as ImageIcon, ChevronDown } from 'lucide-react';
 import { toast } from 'sonner';
-import {
-  Select,
-  SelectContent,
-  SelectItem,
-  SelectTrigger,
-  SelectValue,
-} from './ui/select';
 import jsPDF from 'jspdf';
 import { formatInTimeZone } from 'date-fns-tz';
 import { es } from 'date-fns/locale';
