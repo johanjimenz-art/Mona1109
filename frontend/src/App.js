@@ -11,7 +11,7 @@ import SalesHistory from './components/SalesHistory';
 import UserManagement from './components/UserManagement';
 import Credits from './components/Credits';
 import Cambios from './components/Cambios';
-import { ToastProvider, useToast, setGlobalToast } from './components/ui/simple-toast';
+import { Toaster } from './components/ui/sonner';
 import './App.css';
 
 const BACKEND_URL = process.env.REACT_APP_BACKEND_URL;
@@ -28,15 +28,6 @@ const AdminRoute = ({ children }) => {
   const token = localStorage.getItem('token');
   const role = localStorage.getItem('role');
   return token && role === 'admin' ? children : <Navigate to="/" replace />;
-};
-
-// Componente que inicializa el toast global
-const ToastInitializer = () => {
-  const toast = useToast();
-  useEffect(() => {
-    setGlobalToast(toast);
-  }, [toast]);
-  return null;
 };
 
 function App() {
@@ -78,89 +69,82 @@ function App() {
   }
 
   if (needsSetup) {
-    return (
-      <ToastProvider>
-        <ToastInitializer />
-        <SetupAdmin onSetupComplete={() => { setNeedsSetup(false); setIsAuthenticated(true); }} />
-      </ToastProvider>
-    );
+    return <SetupAdmin onSetupComplete={() => { setNeedsSetup(false); setIsAuthenticated(true); }} />;
   }
 
   return (
-    <ToastProvider>
-      <ToastInitializer />
-      <div className="App">
-        <BrowserRouter>
-          <Routes>
-            <Route path="/login" element={<Login setIsAuthenticated={setIsAuthenticated} />} />
-            <Route
-              path="/"
-              element={
-                <ProtectedRoute>
-                  <Dashboard />
-                </ProtectedRoute>
-              }
-            />
-            <Route
-              path="/inventory"
-              element={
-                <ProtectedRoute>
-                  <Inventory />
-                </ProtectedRoute>
-              }
-            />
-            <Route
-              path="/sales"
-              element={
-                <ProtectedRoute>
-                  <Sales />
-                </ProtectedRoute>
-              }
-            />
-            <Route
-              path="/dispatch"
-              element={
-                <ProtectedRoute>
-                  <Dispatch />
-                </ProtectedRoute>
-              }
-            />
-            <Route
-              path="/sales-history"
-              element={
-                <ProtectedRoute>
-                  <SalesHistory />
-                </ProtectedRoute>
-              }
-            />
-            <Route
-              path="/users"
-              element={
-                <AdminRoute>
-                  <UserManagement />
-                </AdminRoute>
-              }
-            />
-            <Route
-              path="/credits"
-              element={
-                <ProtectedRoute>
-                  <Credits />
-                </ProtectedRoute>
-              }
-            />
-            <Route
-              path="/cambios"
-              element={
-                <ProtectedRoute>
-                  <Cambios />
-                </ProtectedRoute>
-              }
-            />
-          </Routes>
-        </BrowserRouter>
-      </div>
-    </ToastProvider>
+    <div className="App">
+      <Toaster position="top-right" richColors />
+      <BrowserRouter>
+        <Routes>
+          <Route path="/login" element={<Login setIsAuthenticated={setIsAuthenticated} />} />
+          <Route
+            path="/"
+            element={
+              <ProtectedRoute>
+                <Dashboard />
+              </ProtectedRoute>
+            }
+          />
+          <Route
+            path="/inventory"
+            element={
+              <ProtectedRoute>
+                <Inventory />
+              </ProtectedRoute>
+            }
+          />
+          <Route
+            path="/sales"
+            element={
+              <ProtectedRoute>
+                <Sales />
+              </ProtectedRoute>
+            }
+          />
+          <Route
+            path="/dispatch"
+            element={
+              <ProtectedRoute>
+                <Dispatch />
+              </ProtectedRoute>
+            }
+          />
+          <Route
+            path="/sales-history"
+            element={
+              <ProtectedRoute>
+                <SalesHistory />
+              </ProtectedRoute>
+            }
+          />
+          <Route
+            path="/users"
+            element={
+              <AdminRoute>
+                <UserManagement />
+              </AdminRoute>
+            }
+          />
+          <Route
+            path="/credits"
+            element={
+              <ProtectedRoute>
+                <Credits />
+              </ProtectedRoute>
+            }
+          />
+          <Route
+            path="/cambios"
+            element={
+              <ProtectedRoute>
+                <Cambios />
+              </ProtectedRoute>
+            }
+          />
+        </Routes>
+      </BrowserRouter>
+    </div>
   );
 }
 
