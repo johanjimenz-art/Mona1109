@@ -1,4 +1,4 @@
-import { useState, useEffect, Fragment } from 'react';
+import { useState, useEffect } from 'react';
 import { BrowserRouter, Routes, Route, Navigate } from 'react-router-dom';
 import axios from 'axios';
 import SetupAdmin from './components/SetupAdmin';
@@ -11,7 +11,7 @@ import SalesHistory from './components/SalesHistory';
 import UserManagement from './components/UserManagement';
 import Credits from './components/Credits';
 import Cambios from './components/Cambios';
-import { Toaster } from './components/ui/sonner';
+import { ToastProvider, useToast, setGlobalToast } from './components/ui/simple-toast';
 import './App.css';
 
 const BACKEND_URL = process.env.REACT_APP_BACKEND_URL;
@@ -28,6 +28,15 @@ const AdminRoute = ({ children }) => {
   const token = localStorage.getItem('token');
   const role = localStorage.getItem('role');
   return token && role === 'admin' ? children : <Navigate to="/" replace />;
+};
+
+// Componente que inicializa el toast global
+const ToastInitializer = () => {
+  const toast = useToast();
+  useEffect(() => {
+    setGlobalToast(toast);
+  }, [toast]);
+  return null;
 };
 
 function App() {
@@ -69,12 +78,17 @@ function App() {
   }
 
   if (needsSetup) {
-    return <SetupAdmin onSetupComplete={() => { setNeedsSetup(false); setIsAuthenticated(true); }} />;
+    return (
+      <ToastProvider>
+        <ToastInitializer />
+        <SetupAdmin onSetupComplete={() => { setNeedsSetup(false); setIsAuthenticated(true); }} />
+      </ToastProvider>
+    );
   }
 
   return (
-    <Fragment>
-      <Toaster />
+    <ToastProvider>
+      <ToastInitializer />
       <div className="App">
         <BrowserRouter>
           <Routes>
@@ -127,7 +141,6 @@ function App() {
                 </AdminRoute>
               }
             />
-
             <Route
               path="/credits"
               element={
@@ -144,11 +157,10 @@ function App() {
                 </ProtectedRoute>
               }
             />
-
           </Routes>
         </BrowserRouter>
       </div>
-    </Fragment>
+    </ToastProvider>
   );
 }
 
