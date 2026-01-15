@@ -4,7 +4,7 @@ import axios from 'axios';
 import { Button } from './ui/button';
 import { Input } from './ui/input';
 import { Label } from './ui/label';
-import { toast } from 'sonner';
+import { toast } from '../lib/toast';
 import { Lock } from 'lucide-react';
 import {
   Dialog,

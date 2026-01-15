@@ -6,7 +6,7 @@ import { Input } from './ui/input';
 import { Label } from './ui/label';
 import { Card, CardContent, CardHeader, CardTitle } from './ui/card';
 import { ArrowLeft, Search, RefreshCw, CheckCircle, XCircle, AlertCircle, Image as ImageIcon } from 'lucide-react';
-import { toast } from 'sonner';
+import { toast } from '../lib/toast';
 import {
   Select,
   SelectContent,

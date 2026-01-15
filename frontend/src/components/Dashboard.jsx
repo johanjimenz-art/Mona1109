@@ -3,7 +3,7 @@ import { useNavigate } from 'react-router-dom';
 import axios from 'axios';
 import { Button } from './ui/button';
 import { Package, ShoppingCart, History, LogOut, TrendingUp, Users, Bell, CreditCard, RefreshCw } from 'lucide-react';
-import { toast } from 'sonner';
+import { toast } from '../lib/toast';
 import {
   DropdownMenu,
   DropdownMenuContent,
