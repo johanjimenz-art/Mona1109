@@ -11,7 +11,6 @@ import SalesHistory from './components/SalesHistory';
 import UserManagement from './components/UserManagement';
 import Credits from './components/Credits';
 import Cambios from './components/Cambios';
-import { Toaster } from './components/ui/sonner';
 import './App.css';
 
 const BACKEND_URL = process.env.REACT_APP_BACKEND_URL;
@@ -74,74 +73,17 @@ function App() {
 
   return (
     <div className="App">
-      <Toaster position="top-right" richColors />
       <BrowserRouter>
         <Routes>
           <Route path="/login" element={<Login setIsAuthenticated={setIsAuthenticated} />} />
-          <Route
-            path="/"
-            element={
-              <ProtectedRoute>
-                <Dashboard />
-              </ProtectedRoute>
-            }
-          />
-          <Route
-            path="/inventory"
-            element={
-              <ProtectedRoute>
-                <Inventory />
-              </ProtectedRoute>
-            }
-          />
-          <Route
-            path="/sales"
-            element={
-              <ProtectedRoute>
-                <Sales />
-              </ProtectedRoute>
-            }
-          />
-          <Route
-            path="/dispatch"
-            element={
-              <ProtectedRoute>
-                <Dispatch />
-              </ProtectedRoute>
-            }
-          />
-          <Route
-            path="/sales-history"
-            element={
-              <ProtectedRoute>
-                <SalesHistory />
-              </ProtectedRoute>
-            }
-          />
-          <Route
-            path="/users"
-            element={
-              <AdminRoute>
-                <UserManagement />
-              </AdminRoute>
-            }
-          />
-          <Route
-            path="/credits"
-            element={
-              <ProtectedRoute>
-                <Credits />
-              </ProtectedRoute>
-            }
-          />
-          <Route
-            path="/cambios"
-            element={
-              <ProtectedRoute>
-                <Cambios />
-              </ProtectedRoute>
-            }
-          />
+          <Route path="/" element={<ProtectedRoute><Dashboard /></ProtectedRoute>} />
+          <Route path="/inventory" element={<ProtectedRoute><Inventory /></ProtectedRoute>} />
+          <Route path="/sales" element={<ProtectedRoute><Sales /></ProtectedRoute>} />
+          <Route path="/dispatch" element={<ProtectedRoute><Dispatch /></ProtectedRoute>} />
+          <Route path="/sales-history" element={<ProtectedRoute><SalesHistory /></ProtectedRoute>} />
+          <Route path="/users" element={<AdminRoute><UserManagement /></AdminRoute>} />
+          <Route path="/credits" element={<ProtectedRoute><Credits /></ProtectedRoute>} />
+          <Route path="/cambios" element={<ProtectedRoute><Cambios /></ProtectedRoute>} />
         </Routes>
       </BrowserRouter>
     </div>
