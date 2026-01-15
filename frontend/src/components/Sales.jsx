@@ -5,7 +5,7 @@ import { Button } from './ui/button';
 import { Input } from './ui/input';
 import { Label } from './ui/label';
 import { ArrowLeft, Plus, Trash2, ShoppingCart, Image as ImageIcon, ChevronDown } from 'lucide-react';
-import { toast } from './ui/simple-toast';
+import { toast } from 'sonner';
 import jsPDF from 'jspdf';
 import { formatInTimeZone } from 'date-fns-tz';
 import { es } from 'date-fns/locale';
